@@ -199,10 +199,10 @@ export class AIMiddleware extends SessionMiddleware {
             { role: 'user', content: userContent },
         ]
 
-        // Trim if conversation is too long: keep system + last 40 messages
-        if (messages.length > 50) {
+        // Trim if conversation is too long: keep system + last 80 messages
+        if (messages.length > 90) {
             const system = messages.shift()!
-            const recent = messages.slice(-40)
+            const recent = messages.slice(-80)
             messages.length = 0
             messages.push(system, ...recent)
         }
@@ -257,7 +257,11 @@ export class AIMiddleware extends SessionMiddleware {
                 this.state = State.NORMAL
                 this.atLineStart = true
                 this.abortController = null
-                this.outputToSession.next(Buffer.from('\r'))
+                // NOTE: Do NOT send \r to session here.
+                // displayUsage() runs after loop.run() returns — sending \r here
+                // triggers shell prompt rendering that races with usage output,
+                // causing cursor position desync ("jumping" bug).
+                // The \r is sent in startAgent() after all terminal output is done.
             },
 
             onError: (err) => {
@@ -267,23 +271,42 @@ export class AIMiddleware extends SessionMiddleware {
                 this.state = State.NORMAL
                 this.atLineStart = true
                 this.abortController = null
-                this.outputToSession.next(Buffer.from('\r'))
+                // Same as onDone — defer \r to after all terminal output.
             },
         }, this.abortController.signal)
 
-        const result = await loop.run(messages)
+        try {
+            const result = await loop.run(messages)
 
-        // Update persistent conversation history
-        this.conversationHistory.push({ role: 'user', content: userContent })
-        this.conversationHistory.push(...result.messages)
+            // Update persistent conversation history
+            this.conversationHistory.push({ role: 'user', content: userContent })
+            this.conversationHistory.push(...result.messages)
 
-        // Trim history to prevent unbounded growth
-        if (this.conversationHistory.length > 40) {
-            this.conversationHistory = this.conversationHistory.slice(-40)
+            // Trim history to prevent unbounded growth
+            if (this.conversationHistory.length > 80) {
+                this.conversationHistory = this.conversationHistory.slice(-80)
+            }
+
+            // Display token usage — maps to gemini-cli's StatsDisplay.tsx
+            this.displayUsage(result.usage)
+        } catch (err) {
+            // onError callback already printed the error to terminal;
+            // if loop.run() itself throws, print it here as a fallback.
+            // Use cast because TS narrows state to AGENT_STREAMING but callbacks mutate it.
+            if ((this.state as State) !== State.NORMAL) {
+                this.outputToTerminal.next(Buffer.from(
+                    '\r\n' + colors.red(`  Error: ${err}`) + '\r\n',
+                ))
+                this.state = State.NORMAL
+                this.atLineStart = true
+                this.abortController = null
+            }
+        } finally {
+            // Always trigger shell prompt AFTER all terminal output is complete.
+            // This avoids the cursor desync bug where the shell renders its prompt
+            // (using absolute cursor positioning) while we're still writing output.
+            this.outputToSession.next(Buffer.from('\r'))
         }
-
-        // Display token usage — maps to gemini-cli's StatsDisplay.tsx
-        this.displayUsage(result.usage)
     }
 
     /**
@@ -352,22 +375,67 @@ export class AIMiddleware extends SessionMiddleware {
         this.config.save()
     }
 
+    /**
+     * Build system prompt — adapted from gemini-cli's modular prompt composition
+     * (packages/core/src/prompts/snippets.ts)
+     *
+     * Sections: Preamble, Core Mandates, Primary Workflows, Operational Guidelines, Git
+     */
     private buildSystemPrompt (): string {
         const context = this.collector.toPromptString()
-        return [
-            'You are an AI assistant embedded in the Tabby terminal.',
-            'You can run shell commands and read files to help the user complete tasks.',
-            'You have persistent memory within this terminal session — you can reference previous conversations.',
-            '',
-            'Guidelines:',
-            '- When you need to investigate or take action, USE the tools instead of just suggesting commands.',
-            '- Explain what you are about to do before using a tool.',
-            '- After getting tool results, analyze them and decide if more actions are needed.',
-            '- Be concise in explanations.',
-            '- If a command fails, try to diagnose and fix the issue.',
-            '- Terminal activity between conversations shows what the user did — use it as context.',
-            '',
-            context,
-        ].join('\n')
+        return `You are ATerm AI, an interactive CLI agent embedded in the ATerm terminal, specializing in software engineering tasks. Your primary goal is to help users safely and effectively.
+
+# Core Mandates
+
+## Security & System Integrity
+- Never log, print, or commit secrets, API keys, or sensitive credentials. Protect .env files, .git, and system configuration folders.
+- Do not stage or commit changes unless specifically requested by the user.
+
+## Engineering Standards
+- Rigorously adhere to existing workspace conventions, architectural patterns, and style (naming, formatting, typing).
+- NEVER assume a library/framework is available. Verify its usage within the project before employing it.
+- After making code changes, search for and update related tests.
+- Explain what you are about to do before executing tool calls. Silence is only acceptable for repetitive low-level discovery operations.
+- After completing a code modification, do not provide summaries unless asked.
+- Do not revert changes unless asked or they caused an error.
+- Do not take significant actions beyond the clear scope of the request without confirming with the user.
+
+# Primary Workflows
+
+## Development Lifecycle
+Operate using a **Research -> Strategy -> Execution** lifecycle. For the Execution phase, resolve each sub-task through an iterative **Plan -> Act -> Validate** cycle.
+
+1. **Research:** Systematically map the codebase and validate assumptions. Use grep_search and glob tools extensively (in parallel if independent) to understand file structures, existing code patterns, and conventions. Use read_file to validate all assumptions. Prioritize empirical reproduction of reported issues.
+2. **Strategy:** Formulate a grounded plan based on your research. For complex tasks, break them down into smaller, manageable subtasks. Share a concise summary of your strategy.
+3. **Execution:** For each sub-task:
+   - **Plan:** Define the specific implementation approach and the testing strategy to verify the change.
+   - **Act:** Apply targeted, surgical changes strictly related to the sub-task. Ensure changes are idiomatically complete and follow all workspace standards. Avoid unrelated refactoring or cleanup. Before making manual code changes, check if an ecosystem tool (like eslint --fix, prettier --write, go fmt, cargo fmt) is available.
+   - **Validate:** Run tests and workspace standards to confirm the success of the change and ensure no regressions. Execute the project-specific build, linting and type-checking commands. A task is only complete when behavioral correctness has been verified.
+
+Validation is the only path to finality. Never assume success or settle for unverified changes.
+
+# Operational Guidelines
+
+## Tone and Style
+- Act as a senior software engineer and collaborative peer programmer.
+- Be concise and direct. Aim for fewer than 3 lines of text output per response whenever practical.
+- Avoid conversational filler, preambles, or postambles. No chitchat.
+- Use GitHub-flavored Markdown for formatting.
+- Use tools for actions, text output only for communication.
+- If unable to fulfill a request, state so briefly. Offer alternatives if appropriate.
+
+## Tool Usage
+- Execute multiple independent tool calls in parallel when feasible (e.g., searching the codebase with multiple grep/glob calls).
+- Use run_shell_command for shell commands. Explain modifying commands first.
+- If a tool call is declined, respect the decision immediately. Do not re-attempt. Offer an alternative path if possible.
+
+## Git Repository
+- NEVER stage or commit changes unless explicitly instructed.
+- When asked to commit, gather information first: git status, git diff HEAD, git log -n 3.
+- Propose a draft commit message. Prefer clear, concise messages focused on "why".
+- Never push to remote without being explicitly asked.
+
+# Terminal Context
+${context}`
     }
 }

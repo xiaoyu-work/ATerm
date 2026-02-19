@@ -196,11 +196,50 @@ export interface AgentResult {
     usage: TokensSummary
 }
 
+/** Read-only tools that can be executed in parallel without user approval */
+const READ_ONLY_TOOLS = new Set(['list_directory', 'glob', 'grep_search'])
+
+/**
+ * Simple loop detector — mirrors gemini-cli's LoopDetectionService
+ * (packages/core/src/services/loopDetectionService.ts)
+ *
+ * Detects when identical tool call sequences repeat.
+ */
+class LoopDetector {
+    private recentToolSignatures: string[] = []
+    private readonly threshold = 4 // gemini-cli uses 5, we use 4 for faster detection
+
+    /** Record a set of tool calls for this turn. Returns true if a loop is detected. */
+    recordTurn (toolCalls: ToolCallRequest[]): boolean {
+        if (toolCalls.length === 0) return false
+
+        // Create a signature from tool names + arguments
+        const sig = toolCalls.map(tc => `${tc.function.name}:${tc.function.arguments}`).join('|')
+        this.recentToolSignatures.push(sig)
+
+        // Keep only the last N signatures
+        if (this.recentToolSignatures.length > this.threshold * 2) {
+            this.recentToolSignatures = this.recentToolSignatures.slice(-this.threshold * 2)
+        }
+
+        // Check if the last `threshold` signatures are identical
+        if (this.recentToolSignatures.length >= this.threshold) {
+            const last = this.recentToolSignatures.slice(-this.threshold)
+            if (last.every(s => s === last[0])) {
+                return true
+            }
+        }
+        return false
+    }
+}
+
 export class AgentLoop {
     private messages: ChatMessage[] = []
-    private maxTurns = 20
+    /** Max turns — mirrors gemini-cli's MAX_TURNS (100) in client.ts */
+    private maxTurns = 100
     /** Accumulated token usage across all turns — maps to gemini-cli's ModelMetrics.tokens */
     private usage: TokensSummary = { promptTokens: 0, completionTokens: 0, cachedTokens: 0, totalTokens: 0 }
+    private loopDetector = new LoopDetector()
 
     constructor (
         private ai: AIService,
@@ -225,11 +264,12 @@ export class AgentLoop {
             for (let turn = 0; turn < this.maxTurns; turn++) {
                 if (this.signal.aborted) break
 
-                // Trim messages to prevent unbounded growth.
-                // Keep the system message at [0] and the last 40 messages.
-                if (this.messages.length > 50) {
+                // Trim messages to prevent context window overflow.
+                // Keep the system message at [0] and the last 80 messages.
+                // (gemini-cli uses token-based compression; we use message count as a simpler proxy)
+                if (this.messages.length > 90) {
                     const systemMsg = this.messages[0]
-                    this.messages = [systemMsg, ...this.messages.slice(-40)]
+                    this.messages = [systemMsg, ...this.messages.slice(-80)]
                 }
 
                 // === processGeminiStreamEvents() ===
@@ -258,8 +298,6 @@ export class AgentLoop {
                             break
 
                         case EventType.Usage: {
-                            // Accumulate token usage — maps to gemini-cli's
-                            // uiTelemetry.ts:processApiResponse() accumulation
                             const u = event.value as TokensSummary
                             this.usage.promptTokens += u.promptTokens
                             this.usage.completionTokens += u.completionTokens
@@ -286,6 +324,14 @@ export class AgentLoop {
                 // No tool calls → agent is done
                 if (toolCallRequests.length === 0) break
 
+                // === Loop detection — mirrors gemini-cli's LoopDetectionService ===
+                if (this.loopDetector.recordTurn(toolCallRequests)) {
+                    this.callbacks.onContent(
+                        '\r\n(Loop detected — the same tool calls are repeating. Stopping to avoid wasting tokens.)\r\n',
+                    )
+                    break
+                }
+
                 // === handleCompletedTools() ===
                 // Add assistant message with tool_calls to history
                 this.messages.push({
@@ -298,14 +344,30 @@ export class AgentLoop {
                     })),
                 })
 
-                // === scheduleToolCalls() — execute each tool ===
-                for (const call of toolCallRequests) {
+                // === scheduleToolCalls() ===
+                // Partition into read-only (parallelizable) and write (sequential) tool calls
+                // Mirrors gemini-cli's CoreToolScheduler parallel execution
+                const readOnlyCalls = toolCallRequests.filter(tc => READ_ONLY_TOOLS.has(tc.function.name))
+                const writeCalls = toolCallRequests.filter(tc => !READ_ONLY_TOOLS.has(tc.function.name))
+
+                // Execute read-only tools in parallel
+                if (readOnlyCalls.length > 0 && !this.signal.aborted) {
+                    const results = await Promise.all(
+                        readOnlyCalls.map(call => this.executeTool(call).then(result => ({ call, result }))),
+                    )
+                    for (const { call, result } of results) {
+                        this.messages.push({
+                            role: 'tool',
+                            content: result,
+                            tool_call_id: call.id,
+                        })
+                    }
+                }
+
+                // Execute write/shell tools sequentially (they need user approval)
+                for (const call of writeCalls) {
                     if (this.signal.aborted) break
-
                     const result = await this.executeTool(call)
-
-                    // Add tool result to history as functionResponse
-                    // (mirrors gemini-cli's responseParts → submitQuery(continuation))
                     this.messages.push({
                         role: 'tool',
                         content: result,

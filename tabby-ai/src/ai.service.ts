@@ -222,7 +222,7 @@ export class AIService {
                         tools,
                         stream: true,
                         stream_options: { include_usage: true },
-                        max_tokens: 4096,
+                        max_tokens: 16384,
                         temperature: 0.7,
                     }),
                 })
