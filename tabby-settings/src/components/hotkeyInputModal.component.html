@@ -1,0 +1,15 @@
+
+<div class="modal-header">
+  <h5 translate>Press the key now</h5>
+</div>
+<div class="modal-body">
+  <div class="input">
+    <div class="stroke" *ngFor="let stroke of value" [@animateKey]="true" [@.disabled]="!config.store.accessibility.animations">{{stroke}}</div>
+  </div>
+  <div class="timeout">
+    <div [style.width]="timeoutProgress + &quot;%&quot;"></div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primary" (click)="close()" translate>Cancel</button>
+</div>

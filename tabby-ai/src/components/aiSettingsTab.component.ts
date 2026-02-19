@@ -14,7 +14,7 @@ const PROVIDER_LABELS: Record<string, string> = {
 }
 
 @Component({
-    templateUrl: './aiSettingsTab.component.pug',
+    templateUrl: './aiSettingsTab.component.html',
 })
 export class AISettingsTabComponent implements OnInit, OnDestroy {
     @HostBinding('class.content-box') true

@@ -7,7 +7,7 @@ import { TelnetProfilesService } from '../profiles'
 
 /** @hidden */
 @Component({
-    templateUrl: './telnetProfileSettings.component.pug',
+    templateUrl: './telnetProfileSettings.component.html',
 })
 export class TelnetProfileSettingsComponent implements ProfileSettingsComponent<TelnetProfile, TelnetProfilesService> {
     profile: FullyDefined<TelnetProfile>

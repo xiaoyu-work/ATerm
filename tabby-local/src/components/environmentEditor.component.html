@@ -1,0 +1,17 @@
+
+<div class="mb-2 d-flex align-items-center" *ngFor="let pair of vars">
+  <div class="input-group">
+    <input class="form-control w-25 text-monospace" [(ngModel)]="pair.key" (blur)="emitUpdate()" placeholder="Variable name">
+    <div class="input-group-text">=</div>
+    <input class="form-control w-50 text-monospace" [(ngModel)]="pair.value" (blur)="emitUpdate()" placeholder="Value">
+    <button class="btn btn-secondary" (click)="removeEnvironmentVar(pair.key)"><i class="fas fa-fw fa-trash"></i></button>
+  </div>
+</div>
+<div class="d-flex">
+  <button class="btn btn-secondary" (click)="addEnvironmentVar()"><i class="fas fa-plus me-2"></i><span translate>Add</span></button>
+  <div class="ms-auto"></div>
+  <div class="text-muted" translate>Substitutions allowed.</div>
+  <div class="d-flex ms-1" *ngIf="shouldShowExample()">
+    <div class="text-muted" translate>Example:</div><a class="ms-1" (click)="addExample()" href="#">extend PATH</a>
+  </div>
+</div>

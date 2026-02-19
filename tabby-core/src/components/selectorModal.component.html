@@ -1,0 +1,15 @@
+
+<div class="modal-body">
+  <input class="form-control form-control-lg" type="text" [(ngModel)]="filter" autofocus [placeholder]="name" (ngModelChange)="onFilterChange()">
+  <div class="list-group list-group-light" *ngIf="filteredOptions.length">
+    <ng-container *ngFor="let option of filteredOptions; let i = index">
+      <label class="group-header" *ngIf="hasGroups &amp;&amp; option.group !== filteredOptions[i - 1]?.group">{{option.group}}</label><a class="list-group-item list-group-item-action d-flex align-items-center" #item (click)="selectOption(option)" [class.active]="selectedIndex == i">
+        <profile-icon [icon]="option.icon" [color]="option.color"></profile-icon>
+        <div class="title me-2">{{getOptionText(option)}}</div>
+        <div class="description no-wrap text-muted" *ngIf="option.description !== getOptionText(option)">{{option.description}}</div>
+        <div class="ms-auto"></div>
+        <div class="no-wrap badge text-bg-secondary ms-2" *ngIf="selectedIndex == i &amp;&amp; canEditSelected()"><span>BACKSPACE</span><i class="fas fa-pencil ms-1"></i></div>
+        <div class="no-wrap badge text-bg-secondary ms-2" *ngIf="selectedIndex == i"><span>ENTER</span><i class="fas fa-arrow-right ms-1"></i></div></a>
+    </ng-container>
+  </div>
+</div>

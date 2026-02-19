@@ -12,7 +12,7 @@ _('Search color schemes')
 /** @hidden */
 @Component({
     selector: 'color-scheme-settings-for-mode',
-    templateUrl: './colorSchemeSettingsForMode.component.pug',
+    templateUrl: './colorSchemeSettingsForMode.component.html',
     styleUrls: ['./colorSchemeSettingsForMode.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

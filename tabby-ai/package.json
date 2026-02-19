@@ -22,7 +22,7 @@
   },
   "peerDependencies": {
     "tabby-core": "*",
-    "tabby-terminal": "*",
-    "tabby-settings": "*"
+    "tabby-settings": "*",
+    "tabby-terminal": "*"
   }
 }

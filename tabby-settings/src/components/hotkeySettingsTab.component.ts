@@ -14,7 +14,7 @@ _('Search hotkeys')
 /** @hidden */
 @Component({
     selector: 'hotkey-settings-tab',
-    templateUrl: './hotkeySettingsTab.component.pug',
+    templateUrl: './hotkeySettingsTab.component.html',
 })
 export class HotkeySettingsTabComponent {
     hotkeyFilter = ''

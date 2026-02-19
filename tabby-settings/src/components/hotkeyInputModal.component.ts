@@ -8,7 +8,7 @@ const INPUT_TIMEOUT = 1000
 /** @hidden */
 @Component({
     selector: 'hotkey-input-modal',
-    templateUrl: './hotkeyInputModal.component.pug',
+    templateUrl: './hotkeyInputModal.component.html',
     styleUrls: ['./hotkeyInputModal.component.scss'],
     animations: [
         trigger('animateKey', [

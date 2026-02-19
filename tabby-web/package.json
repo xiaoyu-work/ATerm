@@ -18,7 +18,7 @@
   "author": "Tabby Developers",
   "license": "MIT",
   "peerDependencies": {
-    "@angular/core": "^15"
+    "@angular/core": "^19"
   },
   "devDependencies": {
     "@vaadin/vaadin-context-menu": "^5.0.0",

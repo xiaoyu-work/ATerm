@@ -1,0 +1,8 @@
+
+<div class="modal-body">
+  <input class="form-control" [type]="password ? &quot;password&quot; : &quot;text&quot;" autofocus [(ngModel)]="value" #input [placeholder]="prompt" (keyup.enter)="ok()" (keyup.esc)="cancel()">
+  <div class="d-flex align-items-start mt-2">
+    <checkbox *ngIf="showRememberCheckbox" [(ngModel)]="remember" text="Remember"></checkbox>
+    <button class="btn btn-primary ms-auto" (click)="ok()">OK</button>
+  </div>
+</div>

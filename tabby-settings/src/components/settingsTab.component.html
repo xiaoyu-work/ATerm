@@ -1,0 +1,135 @@
+
+<div class="content">
+  <ul class="nav-pills" ngbNav #nav="ngbNav" [activeId]="activeTab" orientation="vertical">
+    <li ngbNavItem="application"><a ngbNavLink><i class="fas fa-fw fa-window-maximize me-2"></i><span translate>Application</span></a>
+      <ng-template ngbNavContent>
+        <div class="content-box">
+          <div class="row">
+            <div class="col-12 col-md-6">
+              <div class="logo-area">
+                <div class="tabby-logo mt-3"></div>
+                <h1 class="tabby-title">Tabby<sup>α</sup></h1>
+                <div class="text-muted">{{homeBase.appVersion}}</div>
+                <button class="btn btn-secondary mt-3 mb-2" *ngIf="!updateAvailable &amp;&amp; hostApp.platform !== Platform.Web" (click)="checkForUpdates()" [disabled]="checkingForUpdate"><i class="fas fa-sync" [class.fa-spin]="checkingForUpdate"></i><span translate>Check for updates</span></button>
+                <button class="btn btn-info mt-3 mb-2" *ngIf="updateAvailable" (click)="updater.update()"><i class="fas fa-sync"></i><span translate>Update</span></button>
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="list-group list-group-light mb-5">
+                <button class="list-group-item list-group-item-action link-card" (click)="homeBase.reportBug()"><i class="fas fa-fw fa-bug"></i>
+                  <div>
+                    <div translate>Report a problem</div><small class="text-muted" translate>Generate a pre-filled GitHub issue</small>
+                  </div>
+                </button>
+                <button class="list-group-item list-group-item-action link-card" (click)="homeBase.openDiscord()"><i class="fab fa-fw fa-discord"></i>
+                  <div>
+                    <div translate>Community</div><small class="text-muted" translate>On Discord</small>
+                  </div>
+                </button>
+                <button class="list-group-item list-group-item-action link-card" (click)="homeBase.openGitHub()"><i class="fab fa-fw fa-github"></i>
+                  <div>
+                    <div>GitHub</div><small class="text-muted" translate>Source code</small>
+                  </div>
+                </button>
+                <button class="list-group-item list-group-item-action link-card" (click)="showReleaseNotes()"><i class="fas fa-fw fa-book"></i>
+                  <div>
+                    <div translate>What's new</div><small class="text-muted" translate>Show release notes</small>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+          <h3 translate>Application settings</h3>
+          <div class="form-line">
+            <div class="header">
+              <div class="title" translate>Language</div><a class="description" (click)="homeBase.openTranslations()"><span translate>Help translate Tabby</span><i class="fas fa-external-link-square-alt ms-1"></i></a>
+            </div>
+            <select class="form-control" [(ngModel)]="config.store.language" (ngModelChange)="saveConfiguration(true)">
+              <option [ngValue]="null" translate>Automatic</option>
+              <option [value]="lang.code" *ngFor="let lang of allLanguages">{{lang.name}}</option>
+            </select>
+          </div>
+          <div class="form-line" *ngIf="platform.isShellIntegrationSupported()">
+            <div class="header">
+              <div class="title" translate>Shell integration</div>
+              <div class="description" translate>Allows quickly opening a terminal in the selected folder</div>
+            </div>
+            <toggle [ngModel]="isShellIntegrationInstalled" (ngModelChange)="toggleShellIntegration()"></toggle>
+          </div>
+          <div class="form-line" *ngIf="hostApp.platform !== Platform.Web">
+            <div class="header">
+              <div class="title" translate>Enable analytics</div>
+              <div class="description" translate>We're only tracking your Tabby and OS versions.</div>
+            </div>
+            <toggle [(ngModel)]="config.store.enableAnalytics" (ngModelChange)="saveConfiguration(true)"></toggle>
+          </div>
+          <div class="form-line" *ngIf="hostApp.platform !== Platform.Web">
+            <div class="header">
+              <div class="title" translate>Automatic Updates</div>
+              <div class="description" translate>Enable automatic installation of updates when they become available.</div>
+            </div>
+            <toggle [(ngModel)]="config.store.enableAutomaticUpdates" (ngModelChange)="saveConfiguration()"></toggle>
+          </div>
+          <div class="form-line" *ngIf="hostApp.platform !== Platform.Web">
+            <div class="header">
+              <div class="title" translate>Debugging</div>
+            </div>
+            <button class="btn btn-secondary" (click)="hostWindow.openDevTools()"><i class="fas fa-bug"></i><span translate>Open DevTools</span></button>
+          </div>
+          <h3 translate>Accessibility</h3>
+          <div class="form-line">
+            <div class="header">
+              <div class="title" translate>Enable animations</div>
+            </div>
+            <toggle [(ngModel)]="config.store.accessibility.animations" (ngModelChange)="saveConfiguration()"></toggle>
+          </div>
+          <div class="form-line">
+            <div class="header">
+              <div class="title" translate>Minimum contrast ratio</div>
+            </div>
+            <input class="form-control" type="number" min="1" max="21" step="0.5" [(ngModel)]="config.store.terminal.minimumContrastRatio" (ngModelChange)="config.save()">
+          </div>
+        </div>
+      </ng-template>
+    </li>
+    <ng-container *ngFor="let provider of settingsProviders">
+      <li *ngIf="provider.prioritized" [ngbNavItem]="provider.id"><a class="d-flex align-items-center" ngbNavLink><i class="fas fa-fw me-2 fa-{{provider.icon}}"></i><span>{{provider.title|translate}}</span></a>
+        <ng-template ngbNavContent>
+          <settings-tab-body [provider]="provider"></settings-tab-body>
+        </ng-template>
+      </li>
+    </ng-container>
+    <div class="mb-3"></div>
+    <ng-container *ngFor="let provider of settingsProviders">
+      <li *ngIf="!provider.prioritized" [ngbNavItem]="provider.id"><a class="d-flex align-items-center" ngbNavLink><i class="fas fa-fw me-2 fa-{{provider.icon || &quot;puzzle-piece&quot;}}"></i><span>{{provider.title|translate}}</span></a>
+        <ng-template ngbNavContent>
+          <settings-tab-body [provider]="provider"></settings-tab-body>
+        </ng-template>
+      </li>
+    </ng-container>
+    <li ngbNavItem="config-file"><a class="d-flex align-items-center" ngbNavLink><i class="fas fa-fw fa-code me-2"></i><span translate>Config file</span></a>
+      <ng-template class="test" ngbNavContent>
+        <div class="d-flex flex-column w-100 h-100">
+          <div class="h-100 d-flex">
+            <div class="w-100 d-flex flex-column">
+              <h3 translate>Config file</h3>
+              <textarea class="form-control h-100" [(ngModel)]="configFile"></textarea>
+            </div>
+            <div class="w-100 d-flex flex-column" *ngIf="showConfigDefaults">
+              <h3 translate>Defaults</h3>
+              <textarea class="form-control h-100" [(ngModel)]="configDefaults" readonly></textarea>
+            </div>
+          </div>
+          <div class="mt-3 d-flex">
+            <button class="btn btn-primary" (click)="saveConfigFile()" *ngIf="isConfigFileValid()"><i class="fas fa-check me-2"></i><span translate>Save and apply</span></button>
+            <button class="btn btn-primary" disabled *ngIf="!isConfigFileValid()"><i class="fas fa-exclamation-triangle me-2"></i><span translate>Invalid syntax</span></button>
+            <button class="btn btn-secondary ms-auto" (click)="showConfigDefaults = !showConfigDefaults" translate>Show defaults</button>
+            <button class="btn btn-secondary ms-3" *ngIf="platform.getConfigPath()" (click)="showConfigFile()"><i class="fas fa-external-link-square-alt me-2"></i><span translate>Show config file</span></button>
+          </div>
+        </div>
+      </ng-template>
+    </li>
+  </ul>
+  <div [ngbNavOutlet]="nav"></div>
+</div>
+<button class="btn btn-warning btn-block" *ngIf="config.restartRequested" (click)="restartApp()" translate>Restart the app to apply changes</button>

@@ -1,0 +1,27 @@
+
+<ul class="nav-tabs" ngbNav #nav="ngbNav">
+  <li ngbNavItem><a ngbNavLink translate>General</a>
+    <ng-template ngbNavContent>
+      <div class="mb-3">
+        <label translate>Host</label>
+        <input class="form-control" type="text" [(ngModel)]="profile.options.host">
+      </div>
+      <div class="mb-3">
+        <label translate>Port</label>
+        <input class="form-control" type="number" placeholder="22" [(ngModel)]="profile.options.port">
+      </div>
+      <stream-processing-settings [options]="profile.options"></stream-processing-settings>
+    </ng-template>
+  </li>
+  <li ngbNavItem><a ngbNavLink translate>Login scripts</a>
+    <ng-template ngbNavContent>
+      <login-scripts-settings [options]="profile.options"></login-scripts-settings>
+    </ng-template>
+  </li>
+  <li ngbNavItem><a ngbNavLink translate>Input</a>
+    <ng-template ngbNavContent>
+      <input-processing-settings [options]="profile.options.input"></input-processing-settings>
+    </ng-template>
+  </li>
+</ul>
+<div [ngbNavOutlet]="nav"></div>

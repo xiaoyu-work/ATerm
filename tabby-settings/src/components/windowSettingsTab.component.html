@@ -1,0 +1,229 @@
+
+<h3 class="mb-3" translate>Window</h3>
+<div class="form-line" *ngIf="themes.length &gt; 1">
+  <div class="header">
+    <div class="title" translate>Theme</div>
+  </div>
+  <select class="form-control" [(ngModel)]="config.store.appearance.theme" (ngModelChange)="saveConfiguration()">
+    <option *ngFor="let theme of themes" [ngValue]="theme.name">{{theme.name|translate}}</option>
+  </select>
+</div>
+<div class="form-line">
+  <div class="header">
+    <div class="title" translate>Spaciness</div>
+    <div class="description" translate>Controls the amount of space between elements</div>
+  </div>
+  <input type="range" [(ngModel)]="config.store.appearance.spaciness" (mouseup)="saveConfiguration()" min="0.6" max="1.4" step="0.1">
+</div>
+<div class="form-line" *ngIf="hostApp.platform === Platform.Web">
+  <div class="header">
+    <div class="title" translate>Ask before closing the browser tab</div>
+    <div class="description" translate>Prevents accidental closing</div>
+  </div>
+  <toggle [(ngModel)]="config.store.web.preventAccidentalTabClosure" (ngModelChange)="saveConfiguration()"></toggle>
+</div>
+<div class="form-line" *ngIf="platform.supportsWindowControls">
+  <div class="header">
+    <div class="title" *ngIf="hostApp.platform !== Platform.macOS" translate>Acrylic background</div>
+    <div class="title" *ngIf="hostApp.platform === Platform.macOS" translate>Vibrancy</div>
+    <div class="description" translate>Gives the window a blurred transparent background</div>
+  </div>
+  <toggle [(ngModel)]="config.store.appearance.vibrancy" (ngModelChange)="saveConfiguration()"></toggle>
+</div>
+<div class="form-line" *ngIf="config.store.appearance.vibrancy &amp;&amp; isFluentVibrancySupported &amp;&amp; config.store.hacks.enableFluentBackground">
+  <div class="header">
+    <div class="title" translate>Background type</div>
+  </div>
+  <div class="btn-group">
+    <input class="btn-check" type="radio" name="vibracy" [(ngModel)]="config.store.appearance.vibrancyType" (ngModelChange)="saveConfiguration()" id="vibrancyTypeBlur" [value]="&quot;blur&quot;">
+    <label class="btn btn-secondary" for="vibrancyTypeBlur"><span translate>Blur</span></label>
+    <input class="btn-check" type="radio" name="vibracy" [(ngModel)]="config.store.appearance.vibrancyType" (ngModelChange)="saveConfiguration()" id="vibrancyTypeFluent" [value]="&quot;fluent&quot;">
+    <label class="btn btn-secondary" for="vibrancyTypeFluent"><span>Fluent</span></label>
+  </div>
+</div>
+<div class="form-line" *ngIf="platform.supportsWindowControls">
+  <div class="header">
+    <div class="title" translate>Opacity</div>
+  </div>
+  <input type="range" [(ngModel)]="config.store.appearance.opacity" (ngModelChange)="saveConfiguration(); (hostApp.platform === Platform.Linux &amp;&amp; config.requestRestart())" min="0.4" max="1" step="0.01">
+</div>
+<div class="form-line" *ngIf="platform.supportsWindowControls">
+  <div class="header">
+    <div class="title" translate>Window frame</div>
+    <div class="description" translate>Whether a custom window or an OS native window should be used</div>
+  </div>
+  <div class="btn-group">
+    <input class="btn-check" type="radio" name="frame" [(ngModel)]="config.store.appearance.frame" (ngModelChange)="saveConfiguration(true)" id="frameNative" [value]="&quot;native&quot;">
+    <label class="btn btn-secondary" for="frameNative"><span translate>Native</span></label>
+    <input class="btn-check" type="radio" name="frame" [(ngModel)]="config.store.appearance.frame" (ngModelChange)="saveConfiguration(true)" id="frameThin" [value]="&quot;thin&quot;">
+    <label class="btn btn-secondary" for="frameThin"><span translate>Thin</span></label>
+    <input class="btn-check" type="radio" name="frame" [(ngModel)]="config.store.appearance.frame" (ngModelChange)="saveConfiguration(true)" id="frameFull" [value]="&quot;full&quot;">
+    <label class="btn btn-secondary" for="frameFull"><span translate>Full</span></label>
+  </div>
+</div>
+<div class="form-line" *ngIf="hostApp.platform !== Platform.Web &amp;&amp; hostApp.platform !== Platform.Linux">
+  <div class="header">
+    <div class="title" translate>Hide tray icon</div>
+    <div class="description" translate>Hide Tabby from tray or menu bar.</div>
+  </div>
+  <toggle [(ngModel)]="config.store.hideTray" (ngModelChange)="saveConfiguration(true)"></toggle>
+</div>
+<h3 class="mt-4" translate>Docking</h3>
+<div class="form-line" *ngIf="docking">
+  <div class="header">
+    <div class="title" translate>Dock the terminal</div>
+    <div class="description" translate>Snaps the window to a side of the screen</div>
+  </div>
+  <div class="btn-group">
+    <input class="btn-check" type="radio" name="docking" [(ngModel)]="config.store.appearance.dock" (ngModelChange)="saveConfiguration(); docking.dock()" id="dockingOff" [value]="&quot;off&quot;">
+    <label class="btn btn-secondary" for="dockingOff"><span translate>Off</span></label>
+    <input class="btn-check" type="radio" name="docking" [(ngModel)]="config.store.appearance.dock" (ngModelChange)="saveConfiguration(); docking.dock()" id="dockingTop" [value]="&quot;top&quot;">
+    <label class="btn btn-secondary" for="dockingTop"><span translate>Top</span></label>
+    <input class="btn-check" type="radio" name="docking" [(ngModel)]="config.store.appearance.dock" (ngModelChange)="saveConfiguration(); docking.dock()" id="dockingLeft" [value]="&quot;left&quot;">
+    <label class="btn btn-secondary" for="dockingLeft"><span translate>Left</span></label>
+    <input class="btn-check" type="radio" name="docking" [(ngModel)]="config.store.appearance.dock" (ngModelChange)="saveConfiguration(); docking.dock()" id="dockingRight" [value]="&quot;right&quot;">
+    <label class="btn btn-secondary" for="dockingRight"><span translate>Right</span></label>
+    <input class="btn-check" type="radio" name="docking" [(ngModel)]="config.store.appearance.dock" (ngModelChange)="saveConfiguration(); docking.dock()" id="dockingBottom" [value]="&quot;bottom&quot;">
+    <label class="btn btn-secondary" for="dockingBottom"><span translate>Bottom</span></label>
+  </div>
+</div>
+<div class="ms-5 form-line" *ngIf="docking &amp;&amp; config.store.appearance.dock != &quot;off&quot;">
+  <div class="header">
+    <div class="title" translate>Display on</div>
+    <div class="description" translate>Snaps the window to a side of the screen</div>
+  </div>
+  <div>
+    <input class="btn-check" type="radio" name="dockScreen" [(ngModel)]="config.store.appearance.dockScreen" (ngModelChange)="saveConfiguration(); docking.dock()" id="dockScreenCurrent" value="current">
+    <label class="btn btn-secondary" id="dockScreenCurrent"><span translate>Current</span></label>
+    <input class="btn-check" *ngFor="let screen of screens" type="radio" name="dockScreen" [(ngModel)]="config.store.appearance.dockScreen" (ngModelChange)="saveConfiguration(); docking.dock()" id="dockScreen{{screen.id}}" [value]="screen.id">
+    <label class="btn btn-secondary" *ngFor="let screen of screens" for="dockScreen{{screen.id}}">{{screen.name}}</label>
+  </div>
+</div>
+<div class="ms-5 form-line" *ngIf="docking &amp;&amp; config.store.appearance.dock != &quot;off&quot;">
+  <div class="header">
+    <div class="title" translate>Dock always on top</div>
+    <div class="description" translate>Keep docked terminal always on top</div>
+  </div>
+  <toggle [(ngModel)]="config.store.appearance.dockAlwaysOnTop" (ngModelChange)="saveConfiguration(); docking.dock()"></toggle>
+</div>
+<div class="ms-5 form-line" *ngIf="docking &amp;&amp; config.store.appearance.dock != &quot;off&quot;">
+  <div class="header">
+    <div class="title" translate>Docked terminal size</div>
+    <div class="description" translate>Window dimension away from the edge</div>
+  </div>
+  <input type="range" [(ngModel)]="config.store.appearance.dockFill" (mouseup)="saveConfiguration(); docking.dock()" min="0.05" max="1" step="0.01">
+</div>
+<div class="ms-5 form-line" *ngIf="docking &amp;&amp; config.store.appearance.dock != &quot;off&quot;">
+  <div class="header">
+    <div class="title" translate>Docked terminal space</div>
+    <div class="description" translate>Window dimension along the edge</div>
+  </div>
+  <input type="range" [(ngModel)]="config.store.appearance.dockSpace" (mouseup)="saveConfiguration(); docking.dock()" min="0.2" max="1" step="0.01">
+</div>
+<div class="ms-5 form-line" *ngIf="docking &amp;&amp; config.store.appearance.dock != &quot;off&quot;">
+  <div class="header">
+    <div class="title" translate>Hide window on focus loss</div>
+    <div class="description" translate>Hides the docked terminal when you click away.</div>
+  </div>
+  <toggle [(ngModel)]="config.store.appearance.dockHideOnBlur" (ngModelChange)="saveConfiguration(); "></toggle>
+</div>
+<h3 class="mt-4" translate>Tabs</h3>
+<div class="form-line">
+  <div class="header">
+    <div class="title" translate>Tabs location</div>
+  </div>
+  <div class="btn-group">
+    <input class="btn-check" type="radio" name="tabsLocation" [(ngModel)]="config.store.appearance.tabsLocation" (ngModelChange)="saveConfiguration()" id="tabsLocationTop" [value]="&quot;top&quot;">
+    <label class="btn btn-secondary" for="tabsLocationTop"><span translate>Top</span></label>
+    <input class="btn-check" type="radio" name="tabsLocation" [(ngModel)]="config.store.appearance.tabsLocation" (ngModelChange)="saveConfiguration()" id="tabsLocationBottom" [value]="&quot;bottom&quot;">
+    <label class="btn btn-secondary" for="tabsLocationBottom"><span translate>Bottom</span></label>
+    <input class="btn-check" type="radio" name="tabsLocation" [(ngModel)]="config.store.appearance.tabsLocation" (ngModelChange)="saveConfiguration()" id="tabsLocationLeft" [value]="&quot;left&quot;">
+    <label class="btn btn-secondary" for="tabsLocationLeft"><span translate>Left</span></label>
+    <input class="btn-check" type="radio" name="tabsLocation" [(ngModel)]="config.store.appearance.tabsLocation" (ngModelChange)="saveConfiguration()" id="tabsLocationRight" [value]="&quot;right&quot;">
+    <label class="btn btn-secondary" for="tabsLocationRight"><span translate>Right</span></label>
+  </div>
+</div>
+<div class="form-line">
+  <div class="header">
+    <div class="title" translate>Tabs width</div>
+  </div>
+  <div class="btn-group">
+    <input class="btn-check" type="radio" name="flexTabs" [(ngModel)]="config.store.appearance.flexTabs" (ngModelChange)="saveConfiguration()" id="flexTabsTrue" [value]="true">
+    <label class="btn btn-secondary" for="flexTabsTrue"><span translate translateComment="[Dynamic] tab width">id.tab-width.dynamic</span></label>
+    <input class="btn-check" type="radio" name="flexTabs" [(ngModel)]="config.store.appearance.flexTabs" (ngModelChange)="saveConfiguration()" id="flexTabsFalse" [value]="false">
+    <label class="btn btn-secondary" for="flexTabsFalse"><span translate>Fixed</span></label>
+  </div>
+</div>
+<div class="form-line">
+  <div class="header">
+    <div class="title" translate>Show tabs in fullscreen mode</div>
+  </div>
+  <toggle [(ngModel)]="config.store.appearance.tabsInFullscreen" (ngModelChange)="config.save();"></toggle>
+</div>
+<div class="form-line">
+  <div class="header">
+    <div class="title" translate>Hide tab index</div>
+  </div>
+  <toggle [(ngModel)]="config.store.terminal.hideTabIndex" (ngModelChange)="config.save();"></toggle>
+</div>
+<div class="form-line">
+  <div class="header">
+    <div class="title" translate>Show profile icon on tab</div>
+  </div>
+  <toggle [(ngModel)]="config.store.terminal.showTabProfileIcon" (ngModelChange)="config.save();"></toggle>
+</div>
+<div class="form-line">
+  <div class="header">
+    <div class="title" translate>Hide tab options button</div>
+  </div>
+  <toggle [(ngModel)]="config.store.terminal.hideTabOptionsButton" (ngModelChange)="config.save();"></toggle>
+</div>
+<div class="form-line">
+  <div class="header">
+    <div class="title" translate>Hide tab close button</div>
+  </div>
+  <toggle [(ngModel)]="config.store.terminal.hideCloseButton" (ngModelChange)="config.save();"></toggle>
+</div>
+<div class="form-line">
+  <div class="header">
+    <div class="title" translate>Close the window after closing the last tab</div>
+  </div>
+  <toggle [(ngModel)]="config.store.appearance.lastTabClosesWindow" (ngModelChange)="config.save();"></toggle>
+</div>
+<h3 class="mt-4" translate>Panes</h3>
+<div class="form-line">
+  <div class="header">
+    <div class="title" translate>Pane resize step</div>
+    <div class="description" translate>For keyboard shortcuts</div>
+  </div>
+  <input type="range" [(ngModel)]="config.store.terminal.paneResizeStep" (ngModelChange)="saveConfiguration();" min="0.1" max="0.9" step="0.05">
+</div>
+<div class="form-line">
+  <div class="header">
+    <div class="title" translate>Focus follows mouse</div>
+    <div class="description" translate>Moving the mouse over an inactive pane will cause it to activate</div>
+  </div>
+  <toggle [(ngModel)]="config.store.terminal.focusFollowsMouse" (ngModelChange)="config.save(); config.requestRestart()"></toggle>
+</div>
+<h3 class="mt-4" translate>Hacks</h3>
+<div class="form-line" *ngIf="hostApp.platform !== Platform.Web">
+  <div class="header">
+    <div class="title" translate>Disable GPU acceleration</div>
+    <div class="description" translate>Tick this if you're experiencing aliasing, ghosting or other visual issues</div>
+  </div>
+  <toggle [(ngModel)]="config.store.hacks.disableGPU" (ngModelChange)="config.save(); config.requestRestart()"></toggle>
+</div>
+<div class="form-line" *ngIf="hostApp.platform === Platform.Windows &amp;&amp; isFluentVibrancySupported">
+  <div class="header">
+    <div class="title" translate>Enable fluent background option</div>
+    <div class="description" translate>Experimental Windows 10 background style known to cause issues</div>
+  </div>
+  <toggle [(ngModel)]="config.store.hacks.enableFluentBackground" (ngModelChange)="config.save()"></toggle>
+</div>
+<div class="form-line" *ngIf="hostApp.platform === Platform.Windows &amp;&amp; isFluentVibrancySupported">
+  <div class="header">
+    <div class="title" translate>Disable fluent background while dragging</div>
+    <div class="description" translate>Fluent background sometimes causes drag lag</div>
+  </div>
+  <toggle [(ngModel)]="config.store.hacks.disableVibrancyWhileDragging" (ngModelChange)="config.save(); config.requestRestart()"></toggle>
+</div>

@@ -1,0 +1,5 @@
+
+<div class="content" cdkDropList cdkAutoDropGroup="app-tabs"><i class="fas fa-grip-vertical drag-handle" *ngIf="shouldShowDragHandle" cdkDrag [cdkDragData]="tab" (cdkDragStarted)="onTabDragStart()" (cdkDragEnded)="onTabDragEnd()"></i>
+  <ng-content></ng-content>
+  <button class="btn btn-sm btn-link" *ngIf="tab.enableToolbar" (click)="tab.togglePinToolbar()" (mouseenter)="tab.showToolbar()" (mouseleave)="tab.hideToolbar()"><i class="fas fa-thumbtack"></i><span *ngIf="tab.pinToolbar" translate>Unpin</span><span *ngIf="!tab.pinToolbar" translate>Pin</span></button>
+</div>

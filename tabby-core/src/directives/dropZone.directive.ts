@@ -20,7 +20,7 @@ export class DropZoneDirective implements AfterViewInit {
             if (!this.dropHint) {
                 this.dropHint = document.createElement('div')
                 this.dropHint.className = 'drop-zone-hint'
-                this.dropHint.innerHTML = require('./dropZone.directive.pug')
+                this.dropHint.innerHTML = require('./dropZone.directive.html')
                 this.el.nativeElement.appendChild(this.dropHint)
                 setTimeout(() => {
                     this.dropHint!.classList.add('visible')

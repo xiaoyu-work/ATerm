@@ -1,0 +1,2 @@
+<i class="icon fa-fw {{icon}}" [style.color]="color" *ngIf="!isHTML"></i>
+<div class="icon" [fastHtmlBind]="icon" *ngIf="isHTML &amp;&amp; icon"></div>

@@ -1,0 +1,16 @@
+
+<div>
+  <!--TODO ([sortablejs]='scripts')-->
+  <div class="input-group flex-grow-1" *ngFor="let script of scripts">
+    <input class="form-control" type="text" placeholder="Expect" [(ngModel)]="script.expect">
+    <input class="form-control" type="text" placeholder="Send" [(ngModel)]="script.send">
+    <div class="input-group-text p-0 border-0">
+      <div class="hover-reveal" ngbDropdown>
+        <button class="btn btn-link btn-sm" ngbDropdownToggle><i class="fas fa-fw fa-cog"></i></button>
+        <div class="dropdown-menu-right" ngbDropdownMenu><a class="dropdown-item" href="#" (click)="script.isRegex = false" [class.active]="!script.isRegex"><i class="fas fa-fw" [class.fa-check]="!script.isRegex"></i><span translate>Exact match</span></a><a class="dropdown-item" href="#" (click)="script.isRegex = true" [class.active]="script.isRegex"><i class="fas fa-fw" [class.fa-check]="script.isRegex"></i><span translate>Regex</span></a><a class="dropdown-item" href="#" (click)="script.optional = !script.optional" [class.active]="script.optional"><i class="fas fa-fw" [class.fa-check]="script.optional"></i><span translate>Optional</span></a></div>
+      </div>
+      <button class="btn btn-link btn-sm hover-reveal" (click)="deleteScript(script)"><i class="fas fa-fw fa-trash-alt"></i></button>
+    </div>
+  </div>
+</div>
+<button class="btn btn-secondary mt-2" (click)="addScript()"><i class="fas fa-plus"></i><span translate>New item</span></button>

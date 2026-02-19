@@ -1,0 +1,26 @@
+
+<div class="head">
+  <div class="bg-dark p-3 mb-4" *ngIf="model != undefined">
+    <div class="d-flex align-items-center"><span>{{model.name}}</span>
+      <div class="me-auto"></div><a class="btn-link" (click)="selectScheme(undefined); $event.preventDefault()" href="#" translate>Clear</a>
+    </div>
+    <color-scheme-preview [scheme]="model"></color-scheme-preview>
+  </div>
+  <div class="input-group mb-3">
+    <div class="input-group-text"><i class="fas fa-fw fa-search"></i></div>
+    <input class="form-control" type="search" [placeholder]="&quot;Search color schemes&quot;|translate" [(ngModel)]="filter">
+  </div>
+</div>
+<div class="body">
+  <div class="list-group list-group-light mb-3">
+    <ng-container *ngFor="let scheme of allColorSchemes">
+      <div class="list-group-item list-group-item-action" [hidden]="filter &amp;&amp; !scheme.name.toLowerCase().includes(filter.toLowerCase())" (click)="selectScheme(scheme)">
+        <div class="d-flex w-100 align-items-center"><i class="fas fa-fw" [class.fa-check]="model?.name === scheme.name"></i>
+          <div class="ms-2"></div>
+          <div class="me-auto">{{scheme.name}}</div>
+        </div>
+        <color-scheme-preview [scheme]="scheme"></color-scheme-preview>
+      </div>
+    </ng-container>
+  </div>
+</div>

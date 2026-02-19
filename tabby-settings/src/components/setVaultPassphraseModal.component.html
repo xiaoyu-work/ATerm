@@ -1,0 +1,13 @@
+
+<h3 class="modal-header m-0 pb-0" translate>Set master passphrase</h3>
+<div class="modal-body">
+  <div class="mb-2" translate>You can change it later, but it's unrecoverable if forgotten.</div>
+  <div class="input-group">
+    <input class="form-control form-control-lg" [type]="showPassphrase ? &quot;text&quot; : &quot;password&quot;" autofocus [(ngModel)]="passphrase" #input placeholder="Master passphrase" (keyup.enter)="ok()" (keyup.esc)="cancel()">
+    <button class="btn btn-secondary" (click)="showPassphrase = !showPassphrase"><i class="fas fa-eye"></i></button>
+  </div>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primary" (click)="ok()" translate>Set passphrase</button>
+  <button class="btn btn-danger" (click)="cancel()" translate>Cancel</button>
+</div>

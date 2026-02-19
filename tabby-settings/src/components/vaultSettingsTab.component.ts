@@ -9,7 +9,7 @@ import { ShowSecretModalComponent } from './showSecretModal.component'
 /** @hidden */
 @Component({
     selector: 'vault-settings-tab',
-    templateUrl: './vaultSettingsTab.component.pug',
+    templateUrl: './vaultSettingsTab.component.html',
 })
 export class VaultSettingsTabComponent extends BaseComponent {
     vaultContents: Vault|null = null

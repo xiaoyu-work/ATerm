@@ -12,7 +12,7 @@ import { SSHProfilesService } from '../profiles'
 
 /** @hidden */
 @Component({
-    templateUrl: './sshProfileSettings.component.pug',
+    templateUrl: './sshProfileSettings.component.html',
 })
 export class SSHProfileSettingsComponent implements ProfileSettingsComponent<SSHProfile, SSHProfilesService> {
     Platform = Platform

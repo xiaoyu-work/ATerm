@@ -1,0 +1,61 @@
+
+<div class="head">
+  <div class="d-flex align-items-center" *ngIf="!editing"><strong class="me-2" translate>Current color scheme</strong><span>{{getCurrentSchemeName()}}</span>
+    <div class="me-auto"></div>
+    <div class="btn-toolbar">
+      <button class="btn btn-secondary" (click)="editScheme()"><i class="fas fa-pen"></i><span translate>Edit</span></button>
+      <div class="me-1"></div>
+      <button class="btn btn-danger" (click)="deleteScheme(config.store.terminal[this.configKey])" *ngIf="currentCustomScheme"><i class="fas fa-trash"></i><span translate>Delete</span></button>
+    </div>
+  </div>
+  <div *ngIf="editing">
+    <div class="mb-3">
+      <label translate>Name</label>
+      <input class="form-control" type="text" [(ngModel)]="config.store.terminal[this.configKey].name">
+    </div>
+    <div class="mb-3">
+      <color-picker [(model)]="config.store.terminal[this.configKey].foreground" (modelChange)="config.save()" title="FG" hint="Foreground"></color-picker>
+      <color-picker [(model)]="config.store.terminal[this.configKey].background" (modelChange)="config.save()" title="BG" hint="Background"></color-picker>
+      <color-picker [(model)]="config.store.terminal[this.configKey].cursor" (modelChange)="config.save()" title="CU" hint="Cursor color"></color-picker>
+      <color-picker [(model)]="config.store.terminal[this.configKey].cursorAccent" (modelChange)="config.save()" title="CA" hint="Block cursor foreground"></color-picker>
+      <color-picker [(model)]="config.store.terminal[this.configKey].selection" (modelChange)="config.save()" title="SB" hint="Selection background"></color-picker>
+      <color-picker [(model)]="config.store.terminal[this.configKey].selectionForeground" (modelChange)="config.save()" title="SF" hint="Selection foreground"></color-picker>
+      <color-picker *ngFor="let _ of config.store.terminal[this.configKey].colors; let idx = index; trackBy: colorsTrackBy" [(model)]="config.store.terminal[this.configKey].colors[idx]" (modelChange)="config.save()" [title]="idx.toString()" hint="ANSI color {{idx}}"></color-picker>
+    </div>
+  </div>
+  <color-scheme-preview [scheme]="config.store.terminal[this.configKey]"></color-scheme-preview>
+  <div class="btn-toolbar d-flex mt-2" *ngIf="editing">
+    <div class="me-auto"></div>
+    <button class="btn btn-primary" (click)="saveScheme()"><i class="fas fa-check"></i><span translate>Save</span></button>
+    <div class="me-1"></div>
+    <button class="btn btn-secondary" (click)="cancelEditing()"><i class="fas fa-times"></i><span translate>Cancel</span></button>
+  </div>
+  <hr class="mt-3 mb-4">
+  <div class="input-group mb-3">
+    <div class="input-group-text"><i class="fas fa-fw fa-search"></i></div>
+    <input class="form-control" type="search" [placeholder]="&quot;Search color schemes&quot;|translate" [(ngModel)]="filter">
+  </div>
+</div>
+<div class="body">
+  <div class="list-group list-group-light mb-3">
+    <ng-container *ngFor="let scheme of allColorSchemes">
+      <div class="list-group-item list-group-item-action" [hidden]="filter &amp;&amp; !scheme.name.toLowerCase().includes(filter.toLowerCase())" (click)="selectScheme(scheme)" [class.active]="(currentCustomScheme || currentStockScheme) === scheme">
+        <div class="d-flex w-100 align-items-center"><i class="fas fa-fw" [class.fa-check]="(currentCustomScheme || currentStockScheme) === scheme"></i>
+          <div class="ms-2"></div>
+          <div class="me-auto"><span>{{scheme.name}}</span>
+            <div class="badge text-bg-info ms-2" *ngIf="customColorSchemes.includes(scheme)" translate>Custom</div>
+          </div>
+          <div>
+            <div class="d-flex">
+              <div class="swatch" *ngFor="let index of colorIndexes.slice(0, 8)" [style.background-color]="scheme.colors[index]"></div>
+            </div>
+            <div class="d-flex">
+              <div class="swatch" *ngFor="let index of colorIndexes.slice(8, 16)" [style.background-color]="scheme.colors[index]"></div>
+            </div>
+          </div>
+        </div>
+        <color-scheme-preview [scheme]="scheme"></color-scheme-preview>
+      </div>
+    </ng-container>
+  </div>
+</div>

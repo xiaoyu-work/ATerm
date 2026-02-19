@@ -5,7 +5,7 @@ import { ConfigProxy, ProfileGroup, Profile, ProfileProvider, PlatformService, T
 
 /** @hidden */
 @Component({
-    templateUrl: './editProfileGroupModal.component.pug',
+    templateUrl: './editProfileGroupModal.component.html',
 })
 export class EditProfileGroupModalComponent<G extends ProfileGroup> {
     @Input() group: G & ConfigProxy<G>

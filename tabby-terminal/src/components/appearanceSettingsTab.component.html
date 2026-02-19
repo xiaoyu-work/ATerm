@@ -1,0 +1,94 @@
+
+<h3 class="mb-3" translate>Appearance</h3>
+<div class="form-line">
+  <div class="header">
+    <div class="title" translate>Font</div>
+  </div>
+  <div class="input-group w-75">
+    <input class="form-control" type="text" [ngbTypeahead]="fontAutocomplete" [(ngModel)]="config.store.terminal.font" (ngModelChange)="config.save()">
+    <input class="form-control font-size-input" type="number" max="48" [(ngModel)]="config.store.terminal.fontSize" (ngModelChange)="fixFontSize(); config.save()">
+  </div>
+</div>
+<div class="row">
+  <div class="col-12 col-md-6">
+    <div class="form-line">
+      <div class="header">
+        <div class="title" translate>Enable font ligatures</div>
+      </div>
+      <toggle [(ngModel)]="config.store.terminal.ligatures" (ngModelChange)="config.save()"></toggle>
+    </div>
+    <div class="form-line">
+      <div class="header">
+        <div class="title" translate>Normal font weight</div>
+      </div>
+      <input class="form-control" type="number" min="100" max="900" step="100" [(ngModel)]="config.store.terminal.fontWeight" (ngModelChange)="config.save()">
+    </div>
+    <div class="form-line">
+      <div class="header">
+        <div class="title" translate>Bold font weight</div>
+      </div>
+      <input class="form-control" type="number" min="100" max="900" step="100" [(ngModel)]="config.store.terminal.fontWeightBold" (ngModelChange)="config.save()">
+    </div>
+  </div>
+  <div class="col-12 col-md-6">
+    <color-scheme-preview [scheme]="config.store.terminal.colorScheme" [fontPreview]="true"></color-scheme-preview>
+  </div>
+</div>
+<div class="content-box">
+  <div class="form-line" *ngIf="!themes.findCurrentTheme().followsColorScheme">
+    <div class="header">
+      <div class="title" translate>Terminal background</div>
+    </div>
+    <div class="btn-group" role="group">
+      <input class="btn-check" type="radio" name="background" [(ngModel)]="config.store.terminal.background" (ngModelChange)="config.save()" id="backgroundTheme" [value]="&quot;theme&quot;">
+      <label class="btn btn-secondary" for="backgroundTheme"><span translate>From theme</span></label>
+      <input class="btn-check" type="radio" name="background" [(ngModel)]="config.store.terminal.background" (ngModelChange)="config.save()" id="backgroundColorScheme" [value]="&quot;colorScheme&quot;">
+      <label class="btn btn-secondary" for="backgroundColorScheme"><span translate>From color scheme</span></label>
+    </div>
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Cursor shape</div>
+    </div>
+    <div class="btn-group" role="group">
+      <input class="btn-check" type="radio" name="cursor" [(ngModel)]="config.store.terminal.cursor" (ngModelChange)="config.save()" id="cursorBlock" [value]="&quot;block&quot;">
+      <label class="btn btn-secondary" for="cursorBlock">█</label>
+      <input class="btn-check" type="radio" name="cursor" [(ngModel)]="config.store.terminal.cursor" (ngModelChange)="config.save()" id="cursorBeam" [value]="&quot;beam&quot;">
+      <label class="btn btn-secondary" for="cursorBeam">|</label>
+      <input class="btn-check" type="radio" name="cursor" [(ngModel)]="config.store.terminal.cursor" (ngModelChange)="config.save()" id="cursorUnderline" [value]="&quot;underline&quot;">
+      <label class="btn btn-secondary" for="cursorUnderline">▁</label>
+    </div>
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Blink cursor</div>
+    </div>
+    <toggle [(ngModel)]="config.store.terminal.cursorBlink" (ngModelChange)="config.save()"></toggle>
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Minimum contrast ratio</div>
+    </div>
+    <input class="form-control" type="number" min="1" max="21" step="0.5" [(ngModel)]="config.store.terminal.minimumContrastRatio" (ngModelChange)="config.save()">
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Fallback font</div>
+      <div class="description" translate>A second font family used to display characters missing in the main font</div>
+    </div>
+    <input class="form-control" type="text" [ngbTypeahead]="fontAutocomplete" [(ngModel)]="config.store.terminal.fallbackFont" (ngModelChange)="config.save()">
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Line padding</div>
+      <div class="description" translate>Additional space between lines</div>
+    </div>
+    <input class="form-control" type="number" [(ngModel)]="config.store.terminal.linePadding" (ngModelChange)="config.save()">
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Custom CSS</div>
+    </div>
+  </div>
+  <textarea class="form-control mb-5" [(ngModel)]="config.store.appearance.css" (ngModelChange)="saveConfiguration()"></textarea>
+</div>

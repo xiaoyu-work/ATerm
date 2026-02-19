@@ -1,0 +1,9 @@
+
+<div class="form-line">
+  <div class="header">
+    <div class="title" translate>Backspace key mode</div>
+  </div>
+  <select class="form-control" [(ngModel)]="options.backspace">
+    <option *ngFor="let mode of backspaceModes" [value]="mode.key">{{mode.name|translate}}</option>
+  </select>
+</div>

@@ -1,0 +1,15 @@
+
+<h3 class="mb-3" translate>Shell</h3>
+<div class="form-line" *ngIf="isConPTYAvailable">
+  <div class="header">
+    <div class="title" translate>Use ConPTY</div>
+    <div class="description" translate>Enables the experimental Windows ConPTY API</div>
+  </div>
+  <toggle [(ngModel)]="config.store.terminal.useConPTY" (ngModelChange)="config.save()"></toggle>
+</div>
+<div class="alert alert-info d-flex align-items-center" *ngIf="config.store.terminal.useConPTY &amp;&amp; isConPTYAvailable &amp;&amp; !isConPTYStable">
+  <div class="me-auto" translate>Windows 10 build 18309 or above is recommended for ConPTY</div>
+</div>
+<div class="alert alert-info d-flex align-items-center" *ngIf="config.store.terminal.profile.startsWith(&quot;WSL&quot;) &amp;&amp; (!config.store.terminal.useConPTY)">
+  <div class="me-auto" translate>WSL terminal only supports TrueColor with ConPTY</div>
+</div>

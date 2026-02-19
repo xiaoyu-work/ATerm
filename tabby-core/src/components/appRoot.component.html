@@ -1,0 +1,33 @@
+
+<title-bar *ngIf="ready &amp;&amp; !hostWindow.isFullscreen &amp;&amp; config.store.appearance.dock == &quot;off&quot; &amp;&amp; isTitleBarNeeded()" (dblclick)="toggleMaximize()" [hideControls]="hostApp.platform !== Platform.Linux &amp;&amp; !hostWindow.isFullscreen" [class.inset]="hostApp.platform == Platform.macOS &amp;&amp; !hostWindow.isFullscreen"></title-bar>
+<div class="content" *ngIf="ready" [class.tabs-on-top]="config.store.appearance.tabsLocation == &quot;top&quot; || config.store.appearance.tabsLocation == &quot;left&quot; || config.store.appearance.tabsLocation == &quot;right&quot;" [class.tabs-on-left]="hasVerticalTabs() &amp;&amp; config.store.appearance.tabsLocation == &quot;left&quot;" [class.tabs-titlebar-enabled]="isTitleBarNeeded()" [class.tabs-on-right]="hasVerticalTabs() &amp;&amp; config.store.appearance.tabsLocation == &quot;right&quot;">
+  <div class="tab-bar" *ngIf="!hostWindow.isFullscreen || config.store.appearance.tabsInFullscreen" [class.tab-bar-no-controls-overlay]="hostApp.platform == Platform.macOS" (dblclick)="!isTitleBarNeeded() &amp;&amp; toggleMaximize()">
+    <div class="inset background" *ngIf="hostApp.platform == Platform.macOS         &amp;&amp; !hostWindow.isFullscreen         &amp;&amp; config.store.appearance.frame == &quot;thin&quot;         &amp;&amp; (config.store.appearance.tabsLocation == &quot;top&quot; || config.store.appearance.tabsLocation == &quot;left&quot;)"></div>
+    <div class="tabs" cdkDropList [cdkDropListOrientation]="(config.store.appearance.tabsLocation == &quot;top&quot; || config.store.appearance.tabsLocation == &quot;bottom&quot;) ? &quot;horizontal&quot; : &quot;vertical&quot;" (cdkDropListDropped)="onTabsReordered($event)" cdkAutoDropGroup="app-tabs">
+      <tab-header *ngFor="let tab of app.tabs; let idx = index" [index]="idx" [tab]="tab" [active]="tab == app.activeTab" [@animateTab]="{value: &quot;in&quot;, params: {size: targetTabSize}}" [@.disabled]="hasVerticalTabs() || !config.store.accessibility.animations" (click)="app.selectTab(tab)" [class.fully-draggable]="hostApp.platform !== Platform.macOS" [ngbTooltip]="tab.customTitle || tab.title"></tab-header>
+    </div>
+    <div class="btn-group background">
+      <div class="d-flex" *ngFor="let button of leftToolbarButtons">
+        <button class="btn btn-secondary btn-tab-bar" [ngbTooltip]="button.label" (click)="button.run &amp;&amp; button.run()" [fastHtmlBind]="button.icon"></button>
+      </div>
+      <div class="d-flex" ngbDropdown container="body" #activeTransfersDropdown="ngbDropdown">
+        <button class="btn btn-secondary btn-tab-bar" [hidden]="activeTransfers.length == 0" [ngbTooltip]="&quot;File transfers&quot;|translate" ngbDropdownToggle><svg aria-hidden="true" focusable="false" data-prefix="fal" data-icon="down-to-dotted-line" class="svg-inline--fa fa-down-to-dotted-line" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M364.1 246.6L253.9 370.6C237.1 388.5 210 388.5 194.1 370.6L83.92 246.6C60.99 220.8 79.3 180 113.8 180H160V76.04C160 53.95 177.9 36.04 200 36.04H248C270.1 36.04 288 53.95 288 76.04V180H334.2C368.7 180 387 220.8 364.1 246.6zM113.8 212C106.9 212 103.3 220.2 107.8 225.4L218 349.3C221.2 352.9 226.8 352.9 229.1 349.3L340.2 225.4C344.8 220.2 341.1 212 334.2 212H256V76.04C256 71.62 252.4 68.04 248 68.04H200C195.6 68.04 192 71.62 192 76.04V212H113.8zM392 448C392 434.8 402.7 424 416 424C429.3 424 440 434.8 440 448C440 461.3 429.3 472 416 472C402.7 472 392 461.3 392 448zM56 448C56 461.3 45.25 472 32 472C18.75 472 8 461.3 8 448C8 434.7 18.75 424 32 424C45.25 424 56 434.7 56 448zM104 448C104 434.7 114.7 424 128 424C141.3 424 152 434.7 152 448C152 461.3 141.3 472 128 472C114.7 472 104 461.3 104 448zM248 448C248 461.3 237.3 472 224 472C210.7 472 200 461.3 200 448C200 434.7 210.7 424 224 424C237.3 424 248 434.7 248 448zM296 448C296 434.7 306.7 424 320 424C333.3 424 344 434.7 344 448C344 461.3 333.3 472 320 472C306.7 472 296 461.3 296 448z"></path></svg></button>
+        <transfers-menu ngbDropdownMenu [(transfers)]="activeTransfers" (transfersChange)="onTransfersChange()"></transfers-menu>
+      </div>
+    </div>
+    <div class="btn-space background" [class.persistent]="config.store.appearance.frame == &quot;thin&quot;" [class.drag]="config.store.appearance.frame == &quot;thin&quot;             &amp;&amp; ((config.store.appearance.tabsLocation !== &quot;left&quot; &amp;&amp; config.store.appearance.tabsLocation !== &quot;right&quot;) || hostApp.platform !== Platform.macOS)"></div>
+    <div class="btn-group background">
+      <div class="d-flex" *ngFor="let button of rightToolbarButtons">
+        <button class="btn btn-secondary btn-tab-bar" [ngbTooltip]="button.label" (click)="button.run &amp;&amp; button.run()" [fastHtmlBind]="button.icon"></button>
+      </div>
+      <button class="btn btn-secondary btn-tab-bar btn-update" *ngIf="updatesAvailable" [ngbTooltip]="&quot;Update available - Click to install&quot;|translate" (click)="updater.update()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M32 448c0 17.7 14.3 32 32 32h160V320H32v128zm448-288h-42.1c6.2-12.1 10.1-25.5 10.1-40 0-48.5-39.5-88-88-88-41.6 0-68.5 21.3-103 68.3-34.5-47-61.4-68.3-103-68.3-48.5 0-88 39.5-88 88 0 14.5 3.8 27.9 10.1 40H32c-17.7 0-32 14.3-32 32v80c0 8.8 7.2 16 16 16h480c8.8 0 16-7.2 16-16v-80c0-17.7-14.3-32-32-32zm-326.1 0c-22.1 0-40-17.9-40-40s17.9-40 40-40c19.9 0 34.6 3.3 86.1 80h-86.1zm206.1 0h-86.1c51.4-76.5 65.7-80 86.1-80 22.1 0 40 17.9 40 40s-17.9 40-40 40zm-72 320h160c17.7 0 32-14.3 32-32V320H288v160z"/></svg></button>
+    </div>
+    <window-controls class="background" *ngIf="config.store.appearance.frame == &quot;thin&quot;             &amp;&amp; config.store.appearance.tabsLocation !== &quot;left&quot;             &amp;&amp; config.store.appearance.tabsLocation !== &quot;right&quot;             &amp;&amp; hostApp.platform == Platform.Linux"></window-controls>
+    <div class="window-controls-spacer" *ngIf="config.store.appearance.frame == &quot;thin&quot; &amp;&amp; (hostApp.platform == Platform.Windows) &amp;&amp; (config.store.appearance.tabsLocation == &quot;top&quot;)"></div>
+  </div>
+  <div class="content">
+    <start-page class="content-tab content-tab-active" *ngIf="ready &amp;&amp; app.tabs.length == 0"></start-page>
+    <tab-body class="content-tab" #tabBodies *ngFor="let tab of unsortedTabs" [class.content-tab-active]="tab == app.activeTab" [active]="tab == app.activeTab" [tab]="tab"></tab-body>
+  </div>
+</div>
+<ng-template ngbModalContainer></ng-template>

@@ -2,9 +2,10 @@
     "compilerOptions": {
         "baseUrl": "./lib",
         "module": "commonjs",
-        "target": "es2017",
+        "target": "es2022",
         "moduleResolution": "node",
         "declaration": false,
+        "useDefineForClassFields": false,
         "noImplicitAny": false,
         "removeComments": false,
         "emitDecoratorMetadata": true,
@@ -17,10 +18,7 @@
         "noUnusedLocals": true,
         "lib": [
            "dom",
-           "es2015",
-           "es2015.iterable",
-           "es2017",
-           "es7"
+           "es2022"
         ]
     },
     "compileOnSave": false,

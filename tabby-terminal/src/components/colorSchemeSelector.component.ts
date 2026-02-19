@@ -11,7 +11,7 @@ _('Search color schemes')
 /** @hidden */
 @Component({
     selector: 'color-scheme-selector',
-    templateUrl: './colorSchemeSelector.component.pug',
+    templateUrl: './colorSchemeSelector.component.html',
     styles: [`
         :host {
             display: block;

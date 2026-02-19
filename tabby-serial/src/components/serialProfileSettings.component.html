@@ -1,0 +1,97 @@
+
+<ul class="nav-tabs" ngbNav #nav="ngbNav">
+  <li ngbNavItem><a ngbNavLink translate>General</a>
+    <ng-template ngbNavContent>
+      <div class="row">
+        <div class="col-6" ng:if="hostApp.platform !== Platform.Web">
+          <div class="mb-3">
+            <label translate>Device</label>
+            <input class="form-control" type="text" alwaysVisibleTypeahead [(ngModel)]="profile.options.port" [ngbTypeahead]="portsAutocomplete" [resultFormatter]="portsFormatter">
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="mb-3">
+            <label translate>Baud rate</label>
+            <input class="form-control" type="number" alwaysVisibleTypeahead placeholder="Ask every time" [(ngModel)]="profile.options.baudrate" [ngbTypeahead]="baudratesAutocomplete">
+          </div>
+        </div>
+      </div>
+      <stream-processing-settings [options]="profile.options"></stream-processing-settings>
+    </ng-template>
+  </li>
+  <li ngbNavItem><a ngbNavLink translate>Advanced</a>
+    <ng-template ngbNavContent>
+      <div class="form-line">
+        <div class="header">
+          <div class="title" translate>Data bits</div>
+        </div>
+        <input class="form-control" type="number" placeholder="8" [(ngModel)]="profile.options.databits">
+      </div>
+      <div class="form-line">
+        <div class="header">
+          <div class="title" translate>Stop bits</div>
+        </div>
+        <input class="form-control" type="number" placeholder="1" [(ngModel)]="profile.options.stopbits">
+      </div>
+      <div class="form-line">
+        <div class="header">
+          <div class="title" translate>Parity</div>
+        </div>
+        <select class="form-control" type="text" [(ngModel)]="profile.options.parity">
+          <option value="none" translate>None</option>
+          <option value="even">Even</option>
+          <option value="odd">Odd</option>
+          <option value="mark" ng:if="hostApp.platform === Platform.Windows">Mark</option>
+          <option value="space" ng:if="hostApp.platform === Platform.Windows">Space</option>
+        </select>
+      </div>
+      <div class="form-line">
+        <div class="header">
+          <div class="title">RTS / CTS</div>
+        </div>
+        <toggle [(ngModel)]="profile.options.rtscts"></toggle>
+      </div>
+      <div class="form-line">
+        <div class="header">
+          <div class="title">XON</div>
+        </div>
+        <toggle [(ngModel)]="profile.options.xon"></toggle>
+      </div>
+      <div class="form-line">
+        <div class="header">
+          <div class="title">XOFF</div>
+        </div>
+        <toggle [(ngModel)]="profile.options.xoff"></toggle>
+      </div>
+      <div class="form-line">
+        <div class="header">
+          <div class="title">Xany</div>
+        </div>
+        <toggle [(ngModel)]="profile.options.xany"></toggle>
+      </div>
+      <div class="form-line">
+        <div class="header">
+          <div class="title" translate>Slow feed</div>
+          <div class="description" translate>Sends data one byte at a time</div>
+        </div>
+        <toggle [(ngModel)]="profile.options.slowSend"></toggle>
+      </div>
+    </ng-template>
+  </li>
+  <li ngbNavItem><a ngbNavLink translate>Colors</a>
+    <ng-template ngbNavContent>
+      <color-scheme-selector [(model)]="profile.terminalColorScheme"></color-scheme-selector>
+    </ng-template>
+  </li>
+  <li ngbNavItem><a ngbNavLink translate>Login scripts</a>
+    <ng-template ngbNavContent>
+      <login-scripts-settings [options]="profile.options"></login-scripts-settings>
+    </ng-template>
+  </li>
+  <li ngbNavItem><a ngbNavLink translate>Input</a>
+    <ng-template ngbNavContent>
+      <input-processing-settings [options]="profile.options.input"></input-processing-settings>
+    </ng-template>
+  </li>
+</ul>
+<div [ngbNavOutlet]="nav"></div>

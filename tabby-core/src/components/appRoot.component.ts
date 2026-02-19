@@ -55,7 +55,7 @@ function makeTabAnimation (dimension: string, size: number) {
 /** @hidden */
 @Component({
     selector: 'app-root',
-    templateUrl: './appRoot.component.pug',
+    templateUrl: './appRoot.component.html',
     styleUrls: ['./appRoot.component.scss'],
     animations: [
         trigger('animateTab', makeTabAnimation('width', 200)),

@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "module": "es2015",
-    "target": "es2016",
+    "module": "es2022",
+    "target": "es2022",
     "moduleResolution": "node",
+    "useDefineForClassFields": false,
     "noImplicitAny": false,
     "removeComments": false,
     "emitDeclarationOnly": false,
@@ -19,13 +20,7 @@
     "strictNullChecks": true,
     "lib": [
       "DOM",
-      "ES5",
-      "ES6",
-      "ES7",
-      "ES2015",
-      "ES2017",
-      "ES2019",
-      "ES2021"
+      "ES2022"
     ],
     "paths": {
       "*": [

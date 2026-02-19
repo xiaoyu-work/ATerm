@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { Observable, OperatorFunction, debounceTime, map, distinctUntilChanged } from 'rxjs'
-import { Component, Input, ViewChild, ViewContainerRef, ComponentFactoryResolver, Injector } from '@angular/core'
+import { Component, Input, ViewChild, ViewContainerRef, Injector } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 import { PartialProfileGroup, Profile, ProfileProvider, ProfileSettingsComponent, ProfilesService, TAB_COLORS, ProfileGroup, ConnectableProfileProvider, FullyDefined, ConfigProxy } from 'tabby-core'
 
@@ -13,7 +13,7 @@ const iconsClassList = Object.keys(iconsData).map(
 
 /** @hidden */
 @Component({
-    templateUrl: './editProfileModal.component.pug',
+    templateUrl: './editProfileModal.component.html',
 })
 export class EditProfileModalComponent<P extends Profile, PP extends ProfileProvider<P>> {
     @Input('profile') _profile: P
@@ -29,7 +29,6 @@ export class EditProfileModalComponent<P extends Profile, PP extends ProfileProv
 
     constructor (
         private injector: Injector,
-        private componentFactoryResolver: ComponentFactoryResolver,
         private profilesService: ProfilesService,
         private modalInstance: NgbActiveModal,
     ) {
@@ -63,11 +62,9 @@ export class EditProfileModalComponent<P extends Profile, PP extends ProfileProv
         const componentType = this.profileProvider.settingsComponent
         if (componentType) {
             setTimeout(() => {
-                const componentFactory = this.componentFactoryResolver.resolveComponentFactory(componentType)
-                const componentRef = componentFactory.create(this.injector)
+                const componentRef = this.placeholder.createComponent(componentType, { injector: this.injector })
                 this.settingsComponentInstance = componentRef.instance
                 this.settingsComponentInstance.profile = this.profile
-                this.placeholder.insert(componentRef.hostView)
             })
         }
     }

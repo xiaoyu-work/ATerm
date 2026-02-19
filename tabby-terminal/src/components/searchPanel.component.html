@@ -1,0 +1,15 @@
+
+<div class="input-group">
+  <input class="search-input form-control" type="text" [(ngModel)]="query" (ngModelChange)="onQueryChange()" [class.text-danger]="state.resultCount == 0" (click)="$event.stopPropagation()" (keyup.enter)="findPrevious()" (keyup.up)="findPrevious()" (keyup.down)="findNext()" (keyup.esc)="close.emit()" [placeholder]="&quot;Search&quot;|translate">
+  <div class="input-group-text result-counter" *ngIf="state.resultCount &gt; 0">{{(state.resultIndex ?? 0) + 1}} / {{state.resultCount}}</div>
+</div>
+<ng-container *ngIf="state.resultCount &gt; 0">
+  <button class="btn btn-link" (click)="findPrevious()" [ngbTooltip]="&quot;Search up&quot;|translate" placement="bottom" [fastHtmlBind]="icons.arrowUp"></button>
+  <button class="btn btn-link" (click)="findNext()" [ngbTooltip]="&quot;Search down&quot;|translate" placement="bottom" [fastHtmlBind]="icons.arrowDown"></button>
+</ng-container>
+<div class="me-2"></div>
+<button class="btn" (click)="options.caseSensitive = !options.caseSensitive; saveSearchOptions()" [class.btn-link]="!options.caseSensitive" [class.btn-info]="options.caseSensitive" [ngbTooltip]="&quot;Case sensitivity&quot;|translate" placement="bottom" [fastHtmlBind]="icons.case"></button>
+<button class="btn" (click)="options.regex = !options.regex; saveSearchOptions()" [class.btn-link]="!options.regex" [class.btn-info]="options.regex" [ngbTooltip]="&quot;Regular expression&quot;|translate" placement="bottom" [fastHtmlBind]="icons.regexp"></button>
+<button class="btn" (click)="options.wholeWord = !options.wholeWord; saveSearchOptions()" [class.btn-link]="!options.wholeWord" [class.btn-info]="options.wholeWord" [ngbTooltip]="&quot;Whole word&quot;|translate" placement="bottom" [fastHtmlBind]="icons.wholeWord"></button>
+<div class="me-2"></div>
+<button class="btn btn-link" (click)="close.emit()" [fastHtmlBind]="icons.close"></button>

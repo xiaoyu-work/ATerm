@@ -7,7 +7,7 @@ import { LocalProfilesService } from '../profiles'
 
 /** @hidden */
 @Component({
-    templateUrl: './localProfileSettings.component.pug',
+    templateUrl: './localProfileSettings.component.html',
 })
 export class LocalProfileSettingsComponent implements ProfileSettingsComponent<LocalProfile, LocalProfilesService> {
     profile: FullyDefined<LocalProfile>

@@ -1,0 +1,47 @@
+
+<div class="container mt-3 mb-3">
+  <div class="mb-3">
+    <div class="tabby-logo"></div>
+    <h1 class="tabby-title">Tabby<sup>α</sup></h1>
+  </div>
+  <div class="text-center mb-3" translate>Thank you for downloading Tabby!</div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Language</div>
+    </div>
+    <select class="form-control" [(ngModel)]="config.store.language" (ngModelChange)="config.save()">
+      <option [ngValue]="null" translate>Automatic</option>
+      <option [value]="lang.code" *ngFor="let lang of allLanguages">{{lang.name}}</option>
+    </select>
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Switch color scheme</div>
+    </div>
+    <div class="btn-group" role="group">
+      <input class="btn-check" type="radio" name="colorSchemeMode" [(ngModel)]="config.store.appearance.colorSchemeMode" (ngModelChange)="config.save()" id="colorSchemeModeAuto" [value]="&quot;auto&quot;">
+      <label class="btn btn-secondary" for="colorSchemeModeAuto"><span translate>From system</span></label>
+      <input class="btn-check" type="radio" name="colorSchemeMode" [(ngModel)]="config.store.appearance.colorSchemeMode" (ngModelChange)="config.save()" id="colorSchemeModeDark" [value]="&quot;dark&quot;">
+      <label class="btn btn-secondary" for="colorSchemeModeDark"><span translate>Always dark</span></label>
+      <input class="btn-check" type="radio" name="colorSchemeMode" [(ngModel)]="config.store.appearance.colorSchemeMode" (ngModelChange)="config.save()" id="colorSchemeModeLight" [value]="&quot;light&quot;">
+      <label class="btn btn-secondary" for="colorSchemeModeLight"><span translate>Always light</span></label>
+    </div>
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Enable analytics</div>
+      <div class="description" translate>Help track the number of Tabby installs across the world!</div>
+    </div>
+    <toggle [(ngModel)]="config.store.enableAnalytics"></toggle>
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Enable global hotkey (Ctrl-Space)</div>
+      <div class="description" translate>Toggles the Tabby window visibility</div>
+    </div>
+    <toggle [(ngModel)]="enableGlobalHotkey"></toggle>
+  </div>
+  <div class="text-center mt-5">
+    <button class="btn btn-primary" (click)="closeAndDisable()" translate>Close and never show again</button>
+  </div>
+</div>

@@ -1,0 +1,93 @@
+
+<h3>AI Assistant</h3>
+<div class="text-muted mb-3">Type <strong>@ </strong> followed by your prompt in a terminal to chat with AI.</div>
+<div class="form-line">
+  <div class="header">
+    <div class="title">Provider</div>
+  </div>
+  <select class="form-control" [(ngModel)]="config.store.ai.provider" (ngModelChange)="onProviderChange(); config.save()">
+    <option value="openai">OpenAI</option>
+    <option value="gemini">Google Gemini</option>
+    <option value="ollama">Ollama (local)</option>
+    <option value="deepseek">DeepSeek</option>
+    <option value="azure">Azure OpenAI</option>
+    <option value="custom">Custom</option>
+  </select>
+</div>
+<div class="form-line">
+  <div class="header">
+    <div class="title" *ngIf="config.store.ai.provider === &quot;azure&quot;">Azure Endpoint</div>
+    <div class="title" *ngIf="config.store.ai.provider !== &quot;azure&quot;">API Base URL</div>
+    <div class="description" *ngIf="config.store.ai.provider === &quot;azure&quot;">e.g. https://xxxx.cognitiveservices.azure.com</div>
+  </div>
+  <input class="form-control" type="text" [placeholder]="getBaseUrlPlaceholder()" [(ngModel)]="config.store.ai.baseUrl" (ngModelChange)="config.save()">
+</div>
+<div class="form-line" *ngIf="config.store.ai.provider === &quot;azure&quot;">
+  <div class="header">
+    <div class="title">Deployment Name</div>
+  </div>
+  <input class="form-control" type="text" placeholder="gpt-4.1" [(ngModel)]="config.store.ai.deployment" (ngModelChange)="config.save()">
+</div>
+<div class="form-line" *ngIf="config.store.ai.provider !== &quot;ollama&quot;">
+  <div class="header">
+    <div class="title">API Key</div>
+  </div>
+  <input class="form-control" type="password" placeholder="sk-..." [(ngModel)]="config.store.ai.apiKey" (ngModelChange)="config.save()">
+</div>
+<div class="form-line" *ngIf="config.store.ai.provider === &quot;azure&quot;">
+  <div class="header">
+    <div class="title">API Version</div>
+  </div>
+  <input class="form-control" type="text" placeholder="2024-12-01-preview" [(ngModel)]="config.store.ai.apiVersion" (ngModelChange)="config.save()">
+</div>
+<div class="form-line" *ngIf="config.store.ai.provider !== &quot;azure&quot;">
+  <div class="header">
+    <div class="title">Model</div>
+  </div>
+  <input class="form-control" type="text" [placeholder]="getModelPlaceholder()" [(ngModel)]="config.store.ai.model" (ngModelChange)="config.save()">
+</div>
+<div class="form-line">
+  <div class="header">
+    <div class="title">Context Lines</div>
+  </div>
+  <input class="form-control" type="number" min="10" max="500" [(ngModel)]="config.store.ai.maxContextLines" (ngModelChange)="config.save()">
+</div>
+<hr>
+<h4>Token Usage History</h4>
+<div class="text-muted mb-3" *ngIf="getUsageProviders().length === 0">No usage data yet.</div>
+<table class="table table-sm" *ngIf="getUsageProviders().length &gt; 0">
+  <thead>
+    <tr>
+      <th>Provider</th>
+      <th>Requests</th>
+      <th>Input Tokens</th>
+      <th>Output Tokens</th>
+      <th>Total Tokens</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let p of getUsageProviders()">
+      <td>{{ getProviderLabel(p) }}</td>
+      <td>{{ formatNumber(config.store.ai.tokenUsage[p].requestCount) }}</td>
+      <td>{{ formatNumber(config.store.ai.tokenUsage[p].promptTokens) }}</td>
+      <td>{{ formatNumber(config.store.ai.tokenUsage[p].completionTokens) }}</td>
+      <td>{{ formatNumber(config.store.ai.tokenUsage[p].totalTokens) }}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-danger" (click)="clearUsage(p)" title="Clear usage for this provider"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot *ngIf="getUsageProviders().length &gt; 1">
+    <tr class="fw-bold">
+      <td>Total</td>
+      <td>{{ formatNumber(getTotalRequests()) }}</td>
+      <td>{{ formatNumber(getTotalPromptTokens()) }}</td>
+      <td>{{ formatNumber(getTotalCompletionTokens()) }}</td>
+      <td>{{ formatNumber(getTotalTokens()) }}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-danger" (click)="clearAllUsage()">Clear All</button>
+      </td>
+    </tr>
+  </tfoot>
+</table>

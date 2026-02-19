@@ -1,0 +1,8 @@
+
+<div class="modal-body">
+  <div>{{options.message}}</div><small>{{options.detail}}</small>
+</div>
+<div class="modal-footer">
+  <div class="ms-auto"></div>
+  <button class="btn" *ngFor="let button of options.buttons; index as i" [autofocus]="i === options.defaultId" [class.btn-primary]="i === options.defaultId" [class.btn-secondary]="i !== options.defaultId" (click)="onButton(i)">{{button}}</button>
+</div>

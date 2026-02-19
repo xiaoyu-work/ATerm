@@ -1,0 +1,11 @@
+
+<div class="preview" [style.font-family]="getPreviewFontFamily()" [style.font-size]="(fontPreview ? config.store.terminal.fontSize : 11) + &quot;px&quot;" [style.font-weight]="config.store.terminal.fontWeight" [style.background-color]="scheme.background" [style.color]="scheme.foreground" [style.font-feature-settings]="'&quot;liga&quot; ' + config.store.terminal.ligatures ? 1 : 0" [style.font-variant-ligatures]="config.store.terminal.ligatures ? &quot;initial&quot; : &quot;none&quot;">
+  <div><span [style.color]="scheme.colors[2]">john</span><span [style.color]="scheme.colors[6]">@</span><span [style.color]="scheme.colors[4]">doe-pc</span><strong [style.color]="scheme.colors[1]" [style.font-weight]="config.store.terminal.fontWeightBold">$</strong><span> ls</span><span [style.background-color]="scheme.cursor">&nbsp;</span></div>
+  <div><span>-rwxr-xr-x  1 root</span><strong [style.color]="scheme.colors[3]" [style.font-weight]="config.store.terminal.fontWeightBold"> Documents</strong></div>
+  <div><span>-rwxr-xr-x  1 root&nbsp;</span><strong [style.color]="scheme.colors[0]" [style.background]="scheme.colors[2]" [style.font-weight]="config.store.terminal.fontWeightBold">Downloads</strong></div>
+  <div><span>-rwxr-xr-x  1 root&nbsp;</span><strong [style.color]="scheme.colors[0]" [style.background]="scheme.colors[8]" [style.font-weight]="config.store.terminal.fontWeightBold">Pictures</strong></div>
+  <div><span>-rwxr-xr-x  1 root</span><strong [style.color]="scheme.colors[12]" [style.font-weight]="config.store.terminal.fontWeightBold"> Music</strong></div>
+  <div *ngIf="fontPreview"><span>-rwxr-xr-x  1 root</span><span [style.color]="scheme.colors[2]"> 実行可能ファイル</span></div>
+  <div *ngIf="fontPreview"><span>-rwxr-xr-x  1 root</span><span [style.color]="scheme.colors[6]"> sym</span><span> -></span><span [style.color]="scheme.colors[1]"> link</span></div>
+  <div *ngIf="fontPreview"><span><strong [style.font-weight]="config.store.terminal.fontWeightBold">Icons:</strong><span>   </span></span><span><span> &nbsp;</span><span [style.background-color]="scheme.colors[1]" [style.color]="scheme.colors[0]"> Powerline&nbsp;</span><span [style.color]="scheme.colors[1]"></span></span></div>
+</div>

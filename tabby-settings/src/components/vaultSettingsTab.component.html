@@ -1,0 +1,47 @@
+
+<div class="text-center" *ngIf="!vault.isEnabled()"><i class="fas fa-key fa-3x m-3"></i>
+  <h3 class="m-3" translate>Vault is not configured</h3>
+  <div class="m-3" translate>Vault is an always-encrypted container for secrets such as SSH passwords and private key passphrases.</div>
+  <button class="btn btn-primary m-2" (click)="enableVault()" translate>Set master passphrase</button>
+</div>
+<div *ngIf="vault.isEnabled()">
+  <div class="d-flex align-items-center mb-3">
+    <h3 class="m-0" translate>Vault</h3>
+    <div class="d-flex ms-auto" ngbDropdown *ngIf="vault.isEnabled()">
+      <button class="btn btn-secondary" ngbDropdownToggle translate>Options</button>
+      <div ngbDropdownMenu><a ngbDropdownItem (click)="changePassphrase()"><i class="fas fa-fw fa-key"></i><span translate>Change the master passphrase</span></a><a ngbDropdownItem (click)="disableVault()"><i class="fas fa-fw fa-radiation-alt"></i><span translate>Erase the Vault</span></a></div>
+    </div>
+  </div>
+  <div *ngIf="vaultContents">
+    <div class="text-center" *ngIf="!vaultContents.secrets.length"><i class="fas fa-empty-set fa-3x"></i>
+      <h3 class="m-3" translate>Vault is empty</h3>
+    </div>
+    <div class="list-group">
+      <div class="list-group-item d-flex align-items-center p-1 ps-3" *ngFor="let secret of vaultContents.secrets"><i class="fas fa-key"></i>
+        <div class="me-auto">{{getSecretLabel(secret)}}</div>
+        <div class="hover-reveal" ngbDropdown>
+          <button class="btn btn-link" ngbDropdownToggle><i class="fas fa-ellipsis-v"></i></button>
+          <div ngbDropdownMenu>
+            <button ngbDropdownItem (click)="showSecret(secret)"><i class="fas fa-fw fa-eye"></i><span translate>Show</span></button>
+            <button ngbDropdownItem *ngIf="secret.type === VAULT_SECRET_TYPE_FILE" (click)="renameFile(castAny(secret))"><i class="fas fa-fw fa-pencil-alt"></i><span translate>Rename</span></button>
+            <button ngbDropdownItem *ngIf="secret.type === VAULT_SECRET_TYPE_FILE" (click)="replaceFileContent(castAny(secret))"><i class="fas fa-fw fa-file-import"></i><span translate>Replace</span></button>
+            <button ngbDropdownItem *ngIf="secret.type === VAULT_SECRET_TYPE_FILE" (click)="exportFile(castAny(secret))"><i class="fas fa-fw fa-file-export"></i><span translate>Export</span></button>
+            <button ngbDropdownItem (click)="removeSecret(secret)"><i class="fas fa-fw fa-trash"></i><span translate>Delete</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <h3 class="mt-5" translate>Options</h3>
+    <div class="form-line">
+      <div class="header">
+        <div class="title" translate>Encrypt config file</div>
+        <div class="description" translate>Puts all of Tabby's configuration into the vault</div>
+      </div>
+      <toggle [ngModel]="config.store.encrypted" (click)="toggleConfigEncrypted()"></toggle>
+    </div>
+  </div>
+  <div class="text-center" *ngIf="!vaultContents"><i class="fas fa-key fa-3x"></i>
+    <h3 class="m-3" translate>Vault is locked</h3>
+    <button class="btn btn-primary m-2" (click)="loadVault()" translate>Show vault contents</button>
+  </div>
+</div>

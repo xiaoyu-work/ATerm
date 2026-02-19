@@ -1,0 +1,5 @@
+
+<div class="terminal-toolbar-spacer"></div>
+<div class="content" #content [style.opacity]="frontendIsReady ? 1 : 0"></div>
+<search-panel *ngIf="showSearchPanel &amp;&amp; hasFocus &amp;&amp; frontend" @toolbarSlide [@.disabled]="!config.store.accessibility.animations" [frontend]="frontend" (close)="showSearchPanel = false; frontend.cancelSearch()"></search-panel>
+<button class="btn btn-sm btn-link toolbar-pin-button" *ngIf="enableToolbar &amp;&amp; !pinToolbar" (click)="togglePinToolbar()" (mouseenter)="showToolbar()" (mouseleave)="hideToolbar()"><i class="fas fa-wrench"></i></button>

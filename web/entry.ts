@@ -1,8 +1,7 @@
 import './polyfills'
 
 import 'zone.js'
-import 'core-js/proposals/reflect-metadata'
-import 'core-js/features/array/flat'
+import 'reflect-metadata'
 import 'rxjs'
 
 import '../app/src/global.scss'

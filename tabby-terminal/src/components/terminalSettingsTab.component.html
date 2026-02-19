@@ -1,0 +1,173 @@
+
+<div>
+  <h3 class="mb-3" translate>Rendering</h3>
+  <div class="form-line" *ngIf="hostApp.platform !== Platform.Web">
+    <div class="header">
+      <div class="title" translate>Frontend</div>
+      <div class="description" translate>Switches terminal frontend implementation (experimental)</div>
+    </div>
+    <select class="form-control" [(ngModel)]="config.store.terminal.frontend" (ngModelChange)="config.save()">
+      <option value="xterm-webgl">xterm (WebGL)</option>
+      <option value="xterm">xterm (canvas)</option>
+    </select>
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Scrollback</div>
+      <div class="description" translate>Number of lines kept in the buffer</div>
+    </div>
+    <input class="form-control" type="number" [(ngModel)]="config.store.terminal.scrollbackLines" (ngModelChange)="config.save()">
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Draw bold text in bright colors</div>
+    </div>
+    <toggle [(ngModel)]="config.store.terminal.drawBoldTextInBrightColors" (ngModelChange)="config.save()"></toggle>
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Sixel graphics support (experimental)</div>
+      <div class="description" translate>Display images via Sixel escape sequences</div>
+    </div>
+    <toggle [(ngModel)]="config.store.terminal.sixel" (ngModelChange)="config.save(); config.requestRestart()"></toggle>
+  </div>
+</div>
+<div class="mt-4">
+  <h3 translate>Keyboard</h3>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate="Use {altKeyName} as the Meta key" [translateParams]="{altKeyName: altKeyName}"></div>
+      <div class="description" translate>Lets the shell handle Meta key instead of OS</div>
+    </div>
+    <toggle [(ngModel)]="config.store.terminal.altIsMeta" (ngModelChange)="config.save()"></toggle>
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Scroll on input</div>
+      <div class="description" translate>Scrolls the terminal to the bottom on user input</div>
+    </div>
+    <toggle [(ngModel)]="config.store.terminal.scrollOnInput" (ngModelChange)="config.save()"></toggle>
+  </div>
+</div>
+<div class="mt-4">
+  <h3 translate>Mouse</h3>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Right click</div>
+      <div class="description" *ngIf="config.store.terminal.rightClick == &quot;paste&quot;" translate>Long-click for context menu</div>
+    </div>
+    <select class="form-control" [(ngModel)]="config.store.terminal.rightClick" (ngModelChange)="config.save()">
+      <option ngValue="off" translate>Off</option>
+      <option ngValue="menu" translate>Context menu</option>
+      <option ngValue="paste" translate>Paste</option>
+      <option ngValue="clipboard" translate>Paste if no selection, else copy</option>
+    </select>
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Paste on middle-click</div>
+    </div>
+    <toggle [(ngModel)]="config.store.terminal.pasteOnMiddleClick" (ngModelChange)="config.save()"></toggle>
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Word separators</div>
+      <div class="description" translate>Double-click selection will stop at these characters</div>
+    </div>
+    <input class="form-control" type="text" placeholder=" ()[]{}'&quot;" [(ngModel)]="config.store.terminal.wordSeparator" (ngModelChange)="config.save()">
+  </div>
+  <div class="form-line" *ngIf="config.store.clickableLinks">
+    <div class="header">
+      <div class="title" translate>Require a key to click links</div>
+      <div class="description" translate>When enabled, links are only clickable while holding this key</div>
+    </div>
+    <select class="form-control" [(ngModel)]="config.store.clickableLinks.modifier" (ngModelChange)="config.save()">
+      <option [ngValue]="null" translate>No modifier</option>
+      <option value="ctrlKey" *ngIf="hostApp.platform !== Platform.macOS">Ctrl</option>
+      <option value="altKey">{{altKeyName}}</option>
+      <option value="shiftKey">Shift</option>
+      <option value="metaKey">{{metaKeyName}}</option>
+    </select>
+  </div>
+</div>
+<div class="mt-4">
+  <h3 translate>Clipboard</h3>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Copy on select</div>
+    </div>
+    <toggle [(ngModel)]="config.store.terminal.copyOnSelect" (ngModelChange)="config.save()"></toggle>
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Copy with formatting</div>
+    </div>
+    <toggle [(ngModel)]="config.store.terminal.copyAsHTML" (ngModelChange)="config.save()"></toggle>
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Bracketed paste (requires shell support)</div>
+      <div class="description" translate>Prevents accidental execution of pasted commands</div>
+    </div>
+    <toggle [(ngModel)]="config.store.terminal.bracketedPaste" (ngModelChange)="config.save()"></toggle>
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Warn on multi-line paste</div>
+      <div class="description" translate>Show a confirmation box when pasting multiple lines</div>
+    </div>
+    <toggle [(ngModel)]="config.store.terminal.warnOnMultilinePaste" (ngModelChange)="config.save()"></toggle>
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Trim whitespace and newlines</div>
+      <div class="description" translate>Remove whitespace and newlines around the copied text</div>
+    </div>
+    <toggle [(ngModel)]="config.store.terminal.trimWhitespaceOnPaste" (ngModelChange)="config.save()"></toggle>
+  </div>
+</div>
+<div class="mt-4">
+  <h3 translate>Sound</h3>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Terminal bell</div>
+    </div>
+    <div class="btn-group">
+      <input class="btn-check" type="radio" name="bell" [(ngModel)]="config.store.terminal.bell" (ngModelChange)="config.save()" id="bellOff" [value]="&quot;off&quot;">
+      <label class="btn btn-secondary" for="bellOff"><span translate>Off</span></label>
+      <input class="btn-check" type="radio" name="bell" [(ngModel)]="config.store.terminal.bell" (ngModelChange)="config.save()" id="bellVisual" [value]="&quot;visual&quot;">
+      <label class="btn btn-secondary" for="bellVisual"><span translate>Visual</span></label>
+      <input class="btn-check" type="radio" name="bell" [(ngModel)]="config.store.terminal.bell" (ngModelChange)="config.save()" id="bellAudible" [value]="&quot;audible&quot;">
+      <label class="btn btn-secondary" for="bellAudible"><span translate>Audible</span></label>
+    </div>
+  </div>
+  <div class="alert alert-info d-flex align-items-center" *ngIf="config.store.terminal.bell != &quot;audible&quot; &amp;&amp; (config.store.terminal.profile || &quot;&quot;).startsWith(&quot;wsl&quot;)">
+    <div class="me-auto" translate>WSL terminal bell can only be muted via Volume Mixer</div>
+    <button class="btn btn-secondary" (click)="openWSLVolumeMixer()" translate>Show Mixer</button>
+  </div>
+</div>
+<div class="mt-4">
+  <h3 translate>Startup</h3>
+  <div class="form-line" *ngIf="hostApp.platform !== Platform.Web">
+    <div class="header">
+      <div class="title" translate>Auto-open a terminal on app start</div>
+    </div>
+    <toggle [(ngModel)]="config.store.terminal.autoOpen" (ngModelChange)="config.save()"></toggle>
+  </div>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Restore terminal tabs on app start</div>
+    </div>
+    <toggle [(ngModel)]="config.store.recoverTabs" (ngModelChange)="config.save()"></toggle>
+  </div>
+</div>
+<div class="mt-4" *ngIf="hostApp.platform === Platform.Windows">
+  <h3 translate>Windows</h3>
+  <div class="form-line">
+    <div class="header">
+      <div class="title" translate>Set Tabby as %COMSPEC%</div>
+      <div class="description" translate>Allows opening .bat files in tabs, but breaks some shells</div>
+    </div>
+    <toggle [(ngModel)]="config.store.terminal.setComSpec" (ngModelChange)="config.save()"></toggle>
+  </div>
+</div>

@@ -1,0 +1,6 @@
+
+<terminal-toolbar [tab]="this"><i class="fas fa-xs fa-circle text-success me-2" *ngIf="session &amp;&amp; session.open"></i><i class="fas fa-xs fa-circle text-danger me-2" *ngIf="!session || !session.open"></i><strong>{{profile.options.port}} ({{profile.options.baudrate}})</strong>
+  <div class="me-auto"></div>
+  <button class="btn btn-sm btn-link me-3" (click)="changeBaudRate()" *ngIf="session &amp;&amp; session.open &amp;&amp; hostApp.platform !== Platform.Web"><span translate>Change baud rate</span></button>
+  <button class="btn btn-sm btn-link" (click)="reconnect()" *ngIf="!session || !session.open"><i class="fas fa-redo"></i><span translate>Reconnect</span></button>
+</terminal-toolbar>

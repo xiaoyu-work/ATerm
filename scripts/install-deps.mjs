@@ -9,19 +9,22 @@ sh.exec(`yarn patch-package`, { fatal: true })
 log.info('deps', 'app')
 
 sh.cd('app')
-sh.exec(`yarn install --force --ignore-scripts --network-timeout 1000000`, { fatal: true })
+sh.exec(`yarn install --mode=skip-build`, { fatal: true })
 sh.exec(`yarn postinstall`, { fatal: false })
 sh.cd('..')
 
 sh.cd('web')
-sh.exec(`yarn install --force --network-timeout 1000000`, { fatal: true })
+sh.exec(`yarn install`, { fatal: true })
 sh.exec(`yarn patch-package`, { fatal: true })
 sh.cd('..')
 
 vars.allPackages.forEach(plugin => {
     log.info('deps', plugin)
     sh.cd(plugin)
-    sh.exec(`yarn install --force --network-timeout 1000000`, { fatal: true })
+    sh.exec(`yarn install`, { fatal: true })
+    if (sh.test('-d', 'patches')) {
+        sh.exec(`yarn patch-package`, { fatal: false })
+    }
     sh.cd('..')
 })
 

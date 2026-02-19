@@ -4,7 +4,7 @@ import { NotificationsService, VaultFileSecret } from 'tabby-core'
 
 /** @hidden */
 @Component({
-    templateUrl: './showSecretModal.component.pug',
+    templateUrl: './showSecretModal.component.html',
 })
 export class ShowSecretModalComponent {
     @Input() title: string

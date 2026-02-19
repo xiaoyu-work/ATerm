@@ -1,0 +1,11 @@
+
+<div class="modal-body">
+  <label translate>Name for the new directory</label>
+  <div class="mb-3 w-100 me-2">
+    <input class="form-control" type="text" [(ngModel)]="directoryName">
+  </div>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-success" (click)="create()" translate>Create</button>
+  <button class="btn btn-danger" (click)="cancel()" translate>Cancel</button>
+</div>

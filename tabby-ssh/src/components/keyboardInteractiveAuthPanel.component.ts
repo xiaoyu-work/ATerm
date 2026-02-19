@@ -5,7 +5,7 @@ import { PasswordStorageService } from '../services/passwordStorage.service'
 
 @Component({
     selector: 'keyboard-interactive-auth-panel',
-    templateUrl: './keyboardInteractiveAuthPanel.component.pug',
+    templateUrl: './keyboardInteractiveAuthPanel.component.html',
     styleUrls: ['./keyboardInteractiveAuthPanel.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

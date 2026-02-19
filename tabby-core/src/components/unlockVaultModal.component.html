@@ -1,0 +1,17 @@
+
+<div class="modal-body">
+  <div class="d-flex align-items-center mb-3">
+    <h3 class="m-0" translate>Vault is locked</h3>
+    <div class="ms-auto" ngbDropdown placement="bottom-right">
+      <button class="btn btn-link" ngbDropdownToggle (click)="$event.stopPropagation()"><span *ngIf="rememberFor" translate="Remember for {time}" [translateParams]="{time: getRememberForDisplay(rememberFor)}"></span><span *ngIf="!rememberFor" translate>Do not remember</span></button>
+      <div ngbDropdownMenu>
+        <button class="dropdown-item" (click)="rememberFor = 0" translate>Do not remember</button>
+        <button class="dropdown-item" *ngFor="let x of rememberOptions" (click)="rememberFor = x">{{getRememberForDisplay(x)}}</button>
+      </div>
+    </div>
+  </div>
+  <div class="input-group">
+    <input class="form-control form-control-lg" type="password" autofocus [(ngModel)]="passphrase" #input placeholder="Master passphrase" (keyup.enter)="ok()" (keyup.esc)="cancel()">
+    <button class="btn btn-secondary" (click)="ok()" *ngIf="passphrase"><i class="fas fa-check"></i></button>
+  </div>
+</div>

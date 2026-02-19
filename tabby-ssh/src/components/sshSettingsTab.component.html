@@ -1,0 +1,47 @@
+
+<h3>SSH</h3>
+<div class="form-line">
+  <div class="header">
+    <div class="title" translate>Warn when closing active connections</div>
+  </div>
+  <toggle [(ngModel)]="config.store.ssh.warnOnClose" (ngModelChange)="config.save()"></toggle>
+</div>
+<div class="form-line">
+  <div class="header">
+    <div class="title" translate>Verify host keys when connecting</div>
+  </div>
+  <toggle [(ngModel)]="config.store.ssh.verifyHostKeys" (ngModelChange)="config.save()"></toggle>
+</div>
+<div class="form-line" *ngIf="hostApp.platform === Platform.Windows">
+  <div class="header">
+    <div class="title" translate>WinSCP path</div>
+    <div class="description" translate>When WinSCP is detected, you can launch an SCP session from the context menu.</div>
+  </div>
+  <input class="form-control" type="text" placeholder="Auto-detect" [(ngModel)]="config.store.ssh.winSCPPath" (ngModelChange)="config.save()">
+</div>
+<div class="form-line" *ngIf="hostApp.platform === Platform.Windows">
+  <div class="header">
+    <div class="title" translate>Agent type</div>
+    <div class="description" translate>Forces a specific SSH agent connection type.</div>
+  </div>
+  <select class="form-control" [(ngModel)]="config.store.ssh.agentType" (ngModelChange)="config.save()">
+    <option value="auto" translate>Automatic</option>
+    <option value="pageant">Pageant</option>
+    <option value="pipe">Named pipe</option>
+  </select>
+</div>
+<div class="form-line" *ngIf="config.store.ssh.agentType === &quot;pipe&quot;">
+  <div class="header">
+    <div class="title" translate>Agent pipe path</div>
+    <div class="description" translate>Sets the SSH agent's named pipe path.</div>
+  </div>
+  <input class="form-control" type="text" placeholder="Default: \\.\pipe\openssh-ssh-agent" [(ngModel)]="config.store.ssh.agentPath" (ngModelChange)="config.save()">
+</div>
+<div class="form-line">
+  <div class="header">
+    <div class="title" translate>Override X11 display</div>
+    <div class="description" translate>Path or address of the local X11 socket</div>
+  </div>
+  <input class="form-control" type="text" [placeholder]="defaultX11Display" [(ngModel)]="config.store.ssh.x11Display" (ngModelChange)="config.save()">
+</div>
+<div class="alert alert-info" translate>SSH connection management is now done through the "Profiles & connections" tab</div>

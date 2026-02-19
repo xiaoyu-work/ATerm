@@ -3,7 +3,7 @@ import { ConfigService, PlatformService } from 'tabby-core'
 
 /** @hidden */
 @Component({
-    templateUrl: './colorSchemeSettingsTab.component.pug',
+    templateUrl: './colorSchemeSettingsTab.component.html',
 })
 export class ColorSchemeSettingsTabComponent {
     defaultTab = 'dark'

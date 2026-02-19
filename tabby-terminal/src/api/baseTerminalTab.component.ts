@@ -25,7 +25,7 @@ const OSC_FOCUS_OUT = Buffer.from('\x1b[O')
  */
 @Component({ template: '' })
 export class BaseTerminalTabComponent<P extends BaseTerminalProfile> extends BaseTabComponent implements OnInit, OnDestroy {
-    static template: string = require('../components/baseTerminalTab.component.pug')
+    static template: string = require('../components/baseTerminalTab.component.html')
     static styles: string[] = [require('../components/baseTerminalTab.component.scss')]
     static animations: AnimationTriggerMetadata[] = [
         trigger('toolbarSlide', [
@@ -489,11 +489,9 @@ export class BaseTerminalTabComponent<P extends BaseTerminalProfile> extends Bas
      * Feeds input into the active session
      */
     sendInput (data: string|Buffer): void {
-        if (!(data instanceof Buffer)) {
-            data = Buffer.from(data, 'utf-8')
-        }
-        this.session?.feedFromTerminal(data)
-        if (this.config.store.terminal.scrollOnInput && !data.equals(OSC_FOCUS_IN) && !data.equals(OSC_FOCUS_OUT)) {
+        const buf = typeof data === 'string' ? Buffer.from(data, 'utf-8') : data
+        this.session?.feedFromTerminal(buf)
+        if (this.config.store.terminal.scrollOnInput && !buf.equals(OSC_FOCUS_IN) && !buf.equals(OSC_FOCUS_OUT)) {
             this.frontend?.scrollToBottom()
         }
     }

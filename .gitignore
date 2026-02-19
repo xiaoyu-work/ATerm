@@ -39,8 +39,12 @@ crowdin.yml
 .crowdin.env
 .claude/
 
-# Yarn
-.yarn/install-state.gz
+# Yarn v4
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
 
 # Env / secrets
 .env

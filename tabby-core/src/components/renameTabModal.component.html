@@ -1,0 +1,8 @@
+
+<div class="modal-body">
+  <input class="form-control" type="text" #input [(ngModel)]="value" (keyup.enter)="save()" autofocus>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primary" (click)="save()" translate>Save</button>
+  <button class="btn btn-secondary" (click)="close()" translate>Cancel</button>
+</div>

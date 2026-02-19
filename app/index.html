@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html class="tabby">
+  <head>
+    <meta charset="UTF-8">
+    <base href="index.html">
+    <script>
+      console.timeStamp('index')
+      window.nodeRequire = require
+    </script>
+    <script src="./preload.js"></script>
+    <script src="./bundle.js" defer></script>
+    <style>body { transition: 0.5s background; }</style>
+  </head>
+  <body>
+    <style id="custom-css"></style>
+    <root></root>
+    <app-root>
+      <div class="preload-logo">
+        <div>
+          <div class="tabby-logo"></div>
+          <h1 class="tabby-title">Tabby<sup>α</sup></h1>
+          <div class="progress">
+            <div class="bar" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+    </app-root>
+  </body>
+</html>

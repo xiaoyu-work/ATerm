@@ -1,0 +1,29 @@
+
+<div class="modal-header">
+  <h3 class="m-0">{{group.name}}</h3>
+</div>
+<div class="modal-body">
+  <div class="row">
+    <div class="col-12 col-lg-4">
+      <div class="mb-3">
+        <label translate>Name</label>
+        <input class="form-control" type="text" autofocus [(ngModel)]="group.name">
+      </div>
+    </div>
+    <div class="col-12 col-lg-8">
+      <div class="form-line content-box">
+        <div class="header">
+          <div class="title" translate>Default profile group settings</div>
+          <div class="description" translate>These apply to all profiles of a given type in this group</div>
+        </div>
+      </div>
+      <div class="list-group mt-3 mb-3 content-box"><a class="list-group-item list-group-item-action d-flex align-items-center" (click)="editDefaults(provider)" *ngFor="let provider of providers">{{provider.name|translate}}
+          <div class="me-auto"></div>
+          <button class="btn btn-link hover-reveal ms-1" (click)="$event.stopPropagation(); deleteDefaults(provider)"><i class="fas fa-trash-arrow-up"></i></button></a></div>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primary" (click)="save()" translate>Save</button>
+  <button class="btn btn-danger" (click)="cancel()" translate>Cancel</button>
+</div>

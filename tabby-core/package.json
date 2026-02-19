@@ -30,12 +30,12 @@
     "uuid": "^9.0.0"
   },
   "peerDependencies": {
-    "@angular/animations": "^15",
-    "@angular/common": "^15",
-    "@angular/core": "^15",
-    "@angular/forms": "^15",
-    "@angular/platform-browser": "^15",
-    "@angular/platform-browser-dynamic": "^15",
+    "@angular/animations": "^19",
+    "@angular/common": "^19",
+    "@angular/core": "^19",
+    "@angular/forms": "^19",
+    "@angular/platform-browser": "^19",
+    "@angular/platform-browser-dynamic": "^19",
     "rxjs": "^7"
   }
 }

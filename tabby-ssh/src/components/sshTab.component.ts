@@ -15,7 +15,7 @@ import { SSHMultiplexerService } from '../services/sshMultiplexer.service'
 /** @hidden */
 @Component({
     selector: 'ssh-tab',
-    template: `${BaseTerminalTabComponent.template} ${require('./sshTab.component.pug')}`,
+    template: `${BaseTerminalTabComponent.template} ${require('./sshTab.component.html')}`,
     styles: [
         ...BaseTerminalTabComponent.styles,
         require('./sshTab.component.scss'),

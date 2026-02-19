@@ -1,0 +1,31 @@
+
+<ul class="nav-tabs" ngbNav #nav="ngbNav">
+  <li ngbNavItem><a ngbNavLink translate>General</a>
+    <ng-template ngbNavContent>
+      <command-line-editor [model]="profile.options"></command-line-editor>
+      <div class="form-line" *ngIf="uac?.isAvailable">
+        <div class="header">
+          <div class="title" translate>Run as administrator</div>
+        </div>
+        <toggle [(ngModel)]="profile.options.runAsAdministrator"></toggle>
+      </div>
+      <div class="mb-3">
+        <label translate>Working directory</label>
+        <div class="input-group">
+          <input class="form-control" type="text" placeholder="Home directory" [(ngModel)]="profile.options.cwd">
+          <button class="btn btn-secondary" (click)="pickWorkingDirectory()"><i class="fas fa-folder-open"></i></button>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label translate>Environment</label>
+        <environment-editor type="text" [(model)]="profile.options.env"></environment-editor>
+      </div>
+    </ng-template>
+  </li>
+  <li ngbNavItem><a ngbNavLink translate>Colors</a>
+    <ng-template ngbNavContent>
+      <color-scheme-selector [(model)]="profile.terminalColorScheme"></color-scheme-selector>
+    </ng-template>
+  </li>
+</ul>
+<div [ngbNavOutlet]="nav"></div>

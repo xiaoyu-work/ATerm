@@ -1,0 +1,48 @@
+
+<div class="header">
+  <input class="form-control flex-grow-1 w-0" *ngIf="editingPath !== null" type="text" autofocus (keydown.enter)="confirmPath()" (keydown.esc)="editingPath = null" (blur)="editingPath = null" [(ngModel)]="editingPath">
+  <div class="breadcrumb" *ngIf="editingPath === null" (dblclick)="editPath()"><a class="breadcrumb-item text-decoration-none" (click)="navigate(&quot;/&quot;)">SFTP</a><a class="breadcrumb-item text-decoration-none" *ngFor="let segment of pathSegments" (click)="navigate(segment.path)">{{segment.name}}</a></div>
+  <div class="breadcrumb-spacer flex-grow-1 h-100" (dblclick)="editPath()"></div>
+  <button class="btn btn-link btn-sm flex-shrink-0 d-flex" *ngIf="!showFilter" (click)="showFilter = true"><i class="fas fa-filter me-1"></i>
+    <div translate>Filter</div>
+  </button>
+  <button class="btn btn-link btn-sm flex-shrink-0 d-flex" (click)="openCreateDirectoryModal()"><i class="fas fa-plus me-1"></i>
+    <div translate>Create directory</div>
+  </button>
+  <button class="btn btn-link btn-sm flex-shrink-0 d-flex" (click)="upload()"><i class="fas fa-upload me-1"></i>
+    <div translate>Upload files</div>
+  </button>
+  <button class="btn btn-link btn-sm flex-shrink-0 d-flex" (click)="uploadFolder()"><i class="fas fa-upload me-1"></i>
+    <div translate>Upload folder</div>
+  </button>
+  <button class="btn btn-link text-decoration-none" (click)="close()"><svg aria-hidden="true" focusable="false" data-prefix="fal" data-icon="times" class="svg-inline--fa fa-times fa-w-10" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path fill="currentColor" d="M193.94 256L296.5 153.44l21.15-21.15c3.12-3.12 3.12-8.19 0-11.31l-22.63-22.63c-3.12-3.12-8.19-3.12-11.31 0L160 222.06 36.29 98.34c-3.12-3.12-8.19-3.12-11.31 0L2.34 120.97c-3.12 3.12-3.12 8.19 0 11.31L126.06 256 2.34 379.71c-3.12 3.12-3.12 8.19 0 11.31l22.63 22.63c3.12 3.12 8.19 3.12 11.31 0L160 289.94 262.56 392.5l21.15 21.15c3.12 3.12 8.19 3.12 11.31 0l22.63-22.63c3.12-3.12 3.12-8.19 0-11.31L193.94 256z"></path></svg></button>
+</div>
+<div class="filter-bar px-3 py-2 border-bottom" *ngIf="showFilter">
+  <div class="input-group">
+    <input class="form-control" type="text" placeholder="Filter..." autofocus [(ngModel)]="filterText" (input)="onFilterChange()" (keydown.escape)="clearFilter()">
+    <button class="btn btn-secondary" (click)="clearFilter()"><i class="fas fa-times"></i></button>
+  </div>
+</div>
+<div class="body" dropZone (transfer)="uploadOneFolder($event)"><a class="alert alert-info d-flex align-items-center" *ngIf="shouldShowCWDTip &amp;&amp; !cwdDetectionAvailable" (click)="platform.openExternal(&quot;https://tabby.sh/go/cwd-detection&quot;)">
+    <div class="me-auto"><strong translate>Working directory detection</strong>
+      <div translate>Learn how to allow Tabby to detect remote shell's working directory.</div>
+    </div>
+    <button class="close" (click)="dismissCWDTip()"><i class="fas fa-close"></i></button></a>
+  <div *ngIf="!sftp" translate>Connecting</div>
+  <div *ngIf="sftp">
+    <div *ngIf="fileList === null" translate>Loading</div>
+    <div class="list-group list-group-light" *ngIf="fileList !== null">
+      <div class="list-group-item list-group-item-action d-flex align-items-center" *ngIf="path !== &quot;/&quot; &amp;&amp; (!showFilter || filterText.trim() === &quot;&quot;)" (click)="goUp()"><i class="fas fa-fw fa-level-up-alt"></i>
+        <div translate>Go up</div>
+      </div>
+      <div class="list-group-item list-group-item-action d-flex align-items-center" *ngFor="let item of filteredFileList" (contextmenu)="showContextMenu(item, $event)" (click)="open(item)"><i class="fa-fw" [class]="getIcon(item)"></i>
+        <div>{{item.name}}</div>
+        <div class="me-auto"></div>
+        <div class="size" *ngIf="!item.isDirectory">{{item.size|filesize}}</div>
+        <div class="date">{{item.modified|tabbyDate}}</div>
+        <div class="mode">{{getModeString(item)}}</div>
+      </div>
+    </div>
+    <div class="alert alert-info text-center mt-3" *ngIf="fileList !== null &amp;&amp; filteredFileList.length === 0 &amp;&amp; showFilter &amp;&amp; filterText.trim() !== &quot;&quot;"><i class="fas fa-search me-2"></i><span translate>No files match the filter "{{filterText}}"</span></div>
+  </div>
+</div>

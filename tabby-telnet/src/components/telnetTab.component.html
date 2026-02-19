@@ -1,0 +1,4 @@
+
+<terminal-toolbar [tab]="this"><i class="fas fa-xs fa-circle text-success me-2" *ngIf="session &amp;&amp; session.open"></i><i class="fas fa-xs fa-circle text-danger me-2" *ngIf="!session || !session.open"></i><strong class="me-auto">{{profile.options.host}}:{{profile.options.port}}</strong>
+  <button class="btn btn-sm btn-link me-2" (click)="reconnect()"><i class="fas fa-redo"></i><span translate>Reconnect</span></button>
+</terminal-toolbar>

@@ -1,0 +1,14 @@
+
+<div class="mt-auto mb-auto">
+  <div class="tabby-logo"></div>
+  <h1 class="tabby-title">Tabby<sup>α</sup></h1>
+  <div class="list-group mb-4"><a class="list-group-item list-group-item-action d-flex pt-3 pb-3" *ngFor="let command of commands; trackBy: buttonsTrackBy" (click)="command.run()">
+      <div class="d-flex align-self-center" [innerHTML]="sanitizeIcon(command.icon)"></div><span>{{command.label}}</span></a></div>
+</div>
+<footer class="d-flex align-items-center">
+  <div class="btn-group me-auto">
+    <button class="btn btn-link" (click)="homeBase.openGitHub()"><i class="fab fa-github"></i><span>GitHub</span></button>
+    <button class="btn btn-link" (click)="homeBase.reportBug()"><i class="fas fa-bug"></i><span translate>Report a problem</span></button>
+  </div>
+  <div class="form-control-static selectable no-drag" translate="Version: {version}" [translateParams]="{ version: this.homeBase.appVersion }"></div>
+</footer>

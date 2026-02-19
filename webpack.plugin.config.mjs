@@ -61,7 +61,7 @@ export default options => {
             alias: options.alias ?? {},
             modules: ['.', 'src', 'node_modules', '../app/node_modules', '../node_modules'].map(x => path.join(options.dirname, x)),
             extensions: ['.ts', '.js'],
-            mainFields: ['esm2015', 'browser', 'module', 'main'],
+            mainFields: ['es2020', 'esm2020', 'esm2015', 'browser', 'module', 'main'],
         },
         ignoreWarnings: [/Failed to parse source map/],
         module: {
@@ -104,16 +104,9 @@ export default options => {
                     ],
                 },
                 {
-                    test: /\.pug$/,
-                    use: [
-                        'apply-loader',
-                        {
-                            loader: 'pug-loader',
-                            options: {
-                                pretty: true,
-                            },
-                        },
-                    ],
+                    test: /\.html$/,
+                    use: ['html-loader'],
+                    exclude: /index\.html/,
                 },
                 { test: /\.scss$/, use: ['@tabby-gang/to-string-loader', 'css-loader', 'sass-loader'], include: /(theme.*|component)\.scss/ },
                 { test: /\.scss$/, use: ['style-loader', 'css-loader', 'sass-loader'], exclude: /(theme.*|component)\.scss/ },

@@ -7,7 +7,7 @@ import deepEqual from 'deep-equal'
 /** @hidden */
 @Component({
     selector: 'multi-hotkey-input',
-    templateUrl: './multiHotkeyInput.component.pug',
+    templateUrl: './multiHotkeyInput.component.html',
     styleUrls: ['./multiHotkeyInput.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

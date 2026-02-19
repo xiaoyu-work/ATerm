@@ -1,0 +1,242 @@
+
+<ul class="nav-tabs" ngbNav #nav="ngbNav">
+  <li ngbNavItem><a ngbNavLink translate>General</a>
+    <ng-template ngbNavContent>
+      <div class="d-flex w-100 mt-3">
+        <div class="mb-3 me-2" ngbDropdown>
+          <label translate>Connection</label>
+          <button class="btn btn-secondary d-block" ngbDropdownToggle>{{getConnectionDropdownTitle()}}</button>
+          <div ngbDropdownMenu>
+            <button class="dropdown-item" (click)="connectionMode = &quot;direct&quot;" translate>Direct</button>
+            <button class="dropdown-item" *ngIf="hostApp.platform !== Platform.Web" (click)="connectionMode = &quot;proxyCommand&quot;">
+              <div>Proxy command</div>
+              <div class="text-muted" translate>Command's stdin/stdout is used instead of a network connection</div>
+            </button>
+            <button class="dropdown-item" (click)="connectionMode = &quot;jumpHost&quot;">
+              <div translate>Jump host</div>
+              <div class="text-muted" translate>Connect to a different host first and use it as a proxy</div>
+            </button>
+            <button class="dropdown-item" (click)="connectionMode = &quot;socksProxy&quot;">
+              <div translate>SOCKS proxy</div>
+              <div class="text-muted" translate>Connect through a proxy server</div>
+            </button>
+            <button class="dropdown-item" (click)="connectionMode = &quot;httpProxy&quot;">
+              <div translate>HTTP proxy</div>
+              <div class="text-muted" translate>Using CONNECT method</div>
+            </button>
+          </div>
+        </div>
+        <div class="mb-3 w-100" *ngIf="connectionMode === &quot;proxyCommand&quot;">
+          <label translate>Proxy command</label>
+          <input class="form-control" type="text" [(ngModel)]="profile.options.proxyCommand">
+        </div>
+        <div class="mb-3 w-100 me-2" *ngIf="connectionMode !== &quot;proxyCommand&quot;">
+          <label translate>Host</label>
+          <input class="form-control" type="text" [(ngModel)]="profile.options.host">
+        </div>
+        <div class="mb-3" *ngIf="connectionMode !== &quot;proxyCommand&quot;">
+          <label translate>Port</label>
+          <input class="form-control" type="number" placeholder="22" [(ngModel)]="profile.options.port">
+        </div>
+      </div>
+      <div class="mb-3" *ngIf="connectionMode === &quot;jumpHost&quot;">
+        <label translate>Jump host</label>
+        <select class="form-control" [(ngModel)]="profile.options.jumpHost">
+          <option [ngValue]="null" translate>Select</option>
+          <option [ngValue]="x.id" *ngFor="let x of jumpHosts">{{getJumpHostLabel(x)}}</option>
+        </select>
+      </div>
+      <div class="d-flex w-100" *ngIf="connectionMode === &quot;socksProxy&quot;">
+        <div class="mb-3 w-100 me-2">
+          <label translate>SOCKS proxy host</label>
+          <input class="form-control" type="text" [(ngModel)]="profile.options.socksProxyHost">
+        </div>
+        <div class="mb-3">
+          <label translate>SOCKS proxy port</label>
+          <input class="form-control" type="number" placeholder="5000" [(ngModel)]="profile.options.socksProxyPort">
+        </div>
+      </div>
+      <div class="d-flex w-100" *ngIf="connectionMode === &quot;httpProxy&quot;">
+        <div class="mb-3 w-100 me-2">
+          <label translate>HTTP proxy host</label>
+          <input class="form-control" type="text" [(ngModel)]="profile.options.httpProxyHost">
+        </div>
+        <div class="mb-3">
+          <label translate>HTTP proxy port</label>
+          <input class="form-control" type="number" placeholder="5000" [(ngModel)]="profile.options.httpProxyPort">
+        </div>
+      </div>
+      <div class="mb-3">
+        <label translate>Username</label>
+        <input class="form-control" type="text" placeholder="Ask every time" [(ngModel)]="profile.options.user">
+      </div>
+      <div class="mb-3">
+        <label translate>Authentication method</label>
+        <div class="btn-group mt-1 w-100">
+          <input class="btn-check" type="radio" name="auth" [(ngModel)]="profile.options.auth" id="authAuto" [value]="null">
+          <label class="btn btn-secondary" for="authAuto"><i class="far fa-lightbulb"></i>
+            <div class="m-0" translate>Auto</div>
+          </label>
+          <input class="btn-check" type="radio" name="auth" [(ngModel)]="profile.options.auth" id="authPassword" [value]="&quot;password&quot;">
+          <label class="btn btn-secondary" for="authPassword"><i class="fas fa-font"></i>
+            <div class="m-0" translate>Password</div>
+          </label>
+          <input class="btn-check" type="radio" name="auth" [(ngModel)]="profile.options.auth" id="authPublicKey" [value]="&quot;publicKey&quot;">
+          <label class="btn btn-secondary" for="authPublicKey"><i class="fas fa-key"></i>
+            <div class="m-0" translate>Key</div>
+          </label>
+          <input class="btn-check" type="radio" name="auth" [(ngModel)]="profile.options.auth" id="authAgent" [value]="&quot;agent&quot;">
+          <label class="btn btn-secondary" for="authAgent" ng:if="hostApp.platform !== Platform.Web"><i class="fas fa-user-secret"></i>
+            <div class="m-0" translate>Agent</div>
+          </label>
+          <input class="btn-check" type="radio" name="auth" [(ngModel)]="profile.options.auth" id="auth&quot;keyboardInteractive&quot;" [value]="&quot;keyboardInteractive&quot;">
+          <label class="btn btn-secondary" for="auth&quot;keyboardInteractive&quot;"><i class="far fa-keyboard"></i>
+            <div class="m-0" translate>Interactive</div>
+          </label>
+        </div>
+      </div>
+      <div class="form-line" *ngIf="profile.options.user &amp;&amp; (!profile.options.auth || profile.options.auth === &quot;password&quot;)">
+        <div class="header">
+          <div class="title" translate>Password</div>
+          <div class="description" *ngIf="!hasSavedPassword" translate>Save a password in the keychain</div>
+          <div class="description" *ngIf="hasSavedPassword" translate>There is a saved password for this connection</div>
+        </div>
+        <button class="btn btn-success ms-4" *ngIf="!hasSavedPassword" (click)="setPassword()"><i class="fas fa-key"></i><span translate>Set password</span></button>
+        <button class="btn btn-danger ms-4" *ngIf="hasSavedPassword" (click)="clearSavedPassword()"><i class="fas fa-trash-alt"></i><span translate>Forget</span></button>
+      </div>
+      <div class="mb-3" *ngIf="!profile.options.auth || profile.options.auth === &quot;publicKey&quot;">
+        <label translate>Private keys</label>
+        <div class="list-group mb-2">
+          <div class="list-group-item d-flex align-items-center p-1 ps-3" *ngFor="let path of profile.options.privateKeys"><i class="fas fa-key"></i>
+            <div class="no-wrap me-auto">{{path}}</div>
+            <button class="btn btn-link" (click)="removePrivateKey(path)"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+        <button class="btn btn-secondary" (click)="addPrivateKey()"><i class="fas fa-folder-open"></i><span translate>Add a private key</span></button>
+      </div>
+    </ng-template>
+  </li>
+  <li ngbNavItem><a ngbNavLink translate>Ports</a>
+    <ng-template ngbNavContent>
+      <ssh-port-forwarding-config *ngIf="profile.options.forwardedPorts" [model]="profile.options.forwardedPorts" (forwardAdded)="onForwardAdded($event)" (forwardRemoved)="onForwardRemoved($event)"></ssh-port-forwarding-config>
+    </ng-template>
+  </li>
+  <li ngbNavItem><a ngbNavLink translate>Advanced</a>
+    <ng-template ngbNavContent>
+      <div class="form-line" ng:if="hostApp.platform !== Platform.Web">
+        <div class="header">
+          <div class="title" translate>X11 forwarding</div>
+        </div>
+        <toggle [(ngModel)]="profile.options.x11"></toggle>
+      </div>
+      <div class="form-line" ng:if="hostApp.platform !== Platform.Web">
+        <div class="header">
+          <div class="title" translate>Agent forwarding</div>
+        </div>
+        <toggle [(ngModel)]="profile.options.agentForward"></toggle>
+      </div>
+      <div class="form-line">
+        <div class="header">
+          <div class="title" translate>Skip MoTD/banner</div>
+          <div class="description" translate>Will prevent the SSH greeting from showing up</div>
+        </div>
+        <toggle [(ngModel)]="profile.options.skipBanner"></toggle>
+      </div>
+      <div class="form-line">
+        <div class="header">
+          <div class="title" translate>Reuse session for multiple tabs</div>
+          <div class="description">Multiplex multiple shells through the same connection</div>
+        </div>
+        <toggle [(ngModel)]="profile.options.reuseSession"></toggle>
+      </div>
+      <div class="form-line">
+        <div class="header">
+          <div class="title" translate>Keep Alive Interval (Milliseconds)</div>
+        </div>
+        <input class="form-control" type="number" placeholder="0" [(ngModel)]="profile.options.keepaliveInterval">
+      </div>
+      <div class="form-line">
+        <div class="header">
+          <div class="title" translate>Max Keep Alive Count</div>
+        </div>
+        <input class="form-control" type="number" placeholder="3" [(ngModel)]="profile.options.keepaliveCountMax">
+      </div>
+      <div class="form-line">
+        <div class="header">
+          <div class="title" translate>Ready Timeout (Milliseconds)</div>
+        </div>
+        <input class="form-control" type="number" placeholder="20000" [(ngModel)]="profile.options.readyTimeout">
+      </div>
+    </ng-template>
+  </li>
+  <li ngbNavItem><a ngbNavLink translate>Ciphers</a>
+    <ng-template ngbNavContent>
+      <div class="form-line align-items-start">
+        <div class="header">
+          <div class="title" translate>Ciphers</div>
+        </div>
+        <div class="w-75">
+          <div *ngFor="let alg of supportedAlgorithms.cipher">
+            <checkbox [text]="alg" [(ngModel)]="algorithms.cipher[alg]"></checkbox>
+          </div>
+        </div>
+      </div>
+      <div class="form-line align-items-start">
+        <div class="header">
+          <div class="title" translate>Key exchange</div>
+        </div>
+        <div class="w-75">
+          <div *ngFor="let alg of supportedAlgorithms.kex">
+            <checkbox [text]="alg" [(ngModel)]="algorithms.kex[alg]"></checkbox>
+          </div>
+        </div>
+      </div>
+      <div class="form-line align-items-start">
+        <div class="header">
+          <div class="title">HMAC</div>
+        </div>
+        <div class="w-75">
+          <div *ngFor="let alg of supportedAlgorithms.hmac">
+            <checkbox [text]="alg" [(ngModel)]="algorithms.hmac[alg]"></checkbox>
+          </div>
+        </div>
+      </div>
+      <div class="form-line align-items-start">
+        <div class="header">
+          <div class="title" translate>Host key</div>
+        </div>
+        <div class="w-75">
+          <div *ngFor="let alg of supportedAlgorithms.serverHostKey">
+            <checkbox [text]="alg" [(ngModel)]="algorithms.serverHostKey[alg]"></checkbox>
+          </div>
+        </div>
+      </div>
+      <div class="form-line align-items-start">
+        <div class="header">
+          <div class="title">Compression</div>
+        </div>
+        <div class="w-75">
+          <div *ngFor="let alg of supportedAlgorithms.compression">
+            <checkbox [text]="alg" [(ngModel)]="algorithms.compression[alg]"></checkbox>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </li>
+  <li ngbNavItem><a ngbNavLink translate>Colors</a>
+    <ng-template ngbNavContent>
+      <color-scheme-selector [(model)]="profile.terminalColorScheme"></color-scheme-selector>
+    </ng-template>
+  </li>
+  <li ngbNavItem><a ngbNavLink translate>Login scripts</a>
+    <ng-template ngbNavContent>
+      <login-scripts-settings [options]="profile.options" #loginScriptsSettings></login-scripts-settings>
+    </ng-template>
+  </li>
+  <li ngbNavItem><a ngbNavLink translate>Input</a>
+    <ng-template ngbNavContent>
+      <input-processing-settings [options]="profile.options.input"></input-processing-settings>
+    </ng-template>
+  </li>
+</ul>
+<div [ngbNavOutlet]="nav"></div>

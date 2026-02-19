@@ -1,0 +1,15 @@
+
+<terminal-toolbar [tab]="this"><i class="fas fa-xs fa-circle text-success me-2" *ngIf="session &amp;&amp; session.open"></i><i class="fas fa-xs fa-circle text-danger me-2" *ngIf="!session || !session.open"></i><strong class="me-auto" style="user-select: text; cursor: text;" onclick="event.stopPropagation()">{{profile.options.user}}@{{profile.options.host}}:{{profile.options.port}}</strong>
+  <div class="me-2" ngbDropdown container="body" *ngIf="session &amp;&amp; !session.supportsWorkingDirectory()" placement="bottom-right bottom-left bottom">
+    <button class="btn btn-sm btn-link" ngbDropdownToggle><i class="far fa-lightbulb text-primary"></i></button>
+    <div class="bg-dark" ngbDropdownMenu><a class="d-flex align-items-center" ngbDropdownItem (click)="platform.openExternal(&quot;https://tabby.sh/go/cwd-detection&quot;)">
+        <div class="me-auto"><strong translate>Working directory detection</strong>
+          <div translate>Learn how to allow Tabby to detect remote shell's working directory.</div>
+        </div><i class="fas fa-arrow-right ms-4"></i></a></div>
+  </div>
+  <button class="btn btn-sm btn-link me-2" (click)="reconnect()"><i class="fas fa-redo"></i><span translate>Reconnect</span></button>
+  <button class="btn btn-sm btn-link me-2" (click)="openSFTP()" *ngIf="session &amp;&amp; session.open"><i class="far fa-folder-open"></i><span>SFTP</span></button>
+  <button class="btn btn-sm btn-link" *ngIf="session &amp;&amp; session.open &amp;&amp; hostApp.platform !== Platform.Web" (click)="showPortForwarding()"><i class="fas fa-plug"></i><span translate>Ports</span></button>
+</terminal-toolbar>
+<sftp-panel class="bg-dark" @panelSlide [@.disabled]="!config.store.accessibility.animations" [(path)]="sftpPath" *ngIf="sftpPanelVisible &amp;&amp; sshSession" (click)="$event.stopPropagation()" [session]="sshSession!" [cwdDetectionAvailable]="session?.supportsWorkingDirectory() ?? false" (closed)="sftpPanelVisible = false"></sftp-panel>
+<keyboard-interactive-auth-panel class="bg-dark" *ngIf="activeKIPrompt" [prompt]="activeKIPrompt" [profile]="profile" (click)="$event.stopPropagation()" (done)="activeKIPrompt = null; frontend?.focus()"></keyboard-interactive-auth-panel>

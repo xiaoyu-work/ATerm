@@ -15,7 +15,7 @@ import { PlatformService } from '../api/platform'
 /** @hidden */
 @Component({
     selector: 'tab-header',
-    templateUrl: './tabHeader.component.pug',
+    templateUrl: './tabHeader.component.html',
     styleUrls: ['./tabHeader.component.scss'],
 })
 export class TabHeaderComponent extends BaseComponent {

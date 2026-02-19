@@ -6,7 +6,7 @@ import { InputProcessingOptions } from '../middleware/inputProcessing'
 /** @hidden */
 @Component({
     selector: 'input-processing-settings',
-    templateUrl: './inputProcessingSettings.component.pug',
+    templateUrl: './inputProcessingSettings.component.html',
 })
 export class InputProcessingSettingsComponent {
     @Input() options: InputProcessingOptions

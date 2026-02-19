@@ -9,7 +9,7 @@ import { SerialSession, BAUD_RATES, SerialProfile } from '../api'
 /** @hidden */
 @Component({
     selector: 'serial-tab',
-    template: `${BaseTerminalTabComponent.template} ${require('./serialTab.component.pug')}`,
+    template: `${BaseTerminalTabComponent.template} ${require('./serialTab.component.html')}`,
     styleUrls: ['./serialTab.component.scss', ...BaseTerminalTabComponent.styles],
     animations: BaseTerminalTabComponent.animations,
 })
