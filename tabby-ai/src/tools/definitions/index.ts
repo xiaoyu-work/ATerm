@@ -8,6 +8,7 @@
 import { ToolRegistry } from '../toolRegistry'
 import { ShellTool } from './shellTool'
 import { ReadFileTool } from './readFileTool'
+import { ReadManyFilesTool } from './readManyFilesTool'
 import { WriteFileTool } from './writeFileTool'
 import { EditTool } from './editTool'
 import { ListDirectoryTool } from './listDirectoryTool'
@@ -28,6 +29,7 @@ export function createDefaultRegistry (): ToolRegistry {
 
     registry.register(new ShellTool())
     registry.register(new ReadFileTool())
+    registry.register(new ReadManyFilesTool())
     registry.register(new WriteFileTool())
     registry.register(new EditTool())
     registry.register(new ListDirectoryTool())
@@ -45,6 +47,7 @@ export function createDefaultRegistry (): ToolRegistry {
 export {
     ShellTool,
     ReadFileTool,
+    ReadManyFilesTool,
     WriteFileTool,
     EditTool,
     ListDirectoryTool,

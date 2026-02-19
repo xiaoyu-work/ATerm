@@ -64,20 +64,20 @@ class ReadFileToolInvocation extends BaseToolInvocation<ReadFileToolParams> {
 export class ReadFileTool extends DeclarativeTool<ReadFileToolParams> {
     readonly name = 'read_file'
     readonly displayName = 'Read File'
-    readonly description = 'Read the contents of a file at the specified path. Returns the file content with line numbers. For large files, use offset and limit to read specific sections.'
+    readonly description = 'Reads and returns the content of a specified file with line numbers. If the file is large, the content will be truncated. The tool\'s response will clearly indicate if truncation has occurred and will provide details on how to read more of the file using the \'offset\' and \'limit\' parameters. For text files, it can read specific line ranges for efficient context management.'
     readonly kind = ToolKind.Read
     readonly parameters = {
         file_path: {
             type: 'string',
-            description: 'The path to the file to read (absolute or relative to CWD)',
+            description: 'The path to the file to read.',
         },
         offset: {
             type: 'integer',
-            description: 'Optional: The line number to start reading from (1-based). Defaults to 1.',
+            description: 'The 1-based line number to start reading from. Requires \'limit\' to be set. Use for paginating through large files.',
         },
         limit: {
             type: 'integer',
-            description: 'Optional: The number of lines to read. Defaults to reading the entire file (up to 2000 lines).',
+            description: 'Maximum number of lines to read. Use with \'offset\' to paginate through large files. If omitted, reads the entire file (up to 2000 lines).',
         },
     }
     readonly required = ['file_path']

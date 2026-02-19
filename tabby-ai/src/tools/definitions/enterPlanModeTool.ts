@@ -39,7 +39,7 @@ class EnterPlanModeToolInvocation extends BaseToolInvocation<EnterPlanModeToolPa
 export class EnterPlanModeTool extends DeclarativeTool<EnterPlanModeToolParams> {
     readonly name = 'enter_plan_mode'
     readonly displayName = 'Enter Plan Mode'
-    readonly description = 'Enter planning mode for complex, broad-scope, or ambiguous tasks. In plan mode, you can only use read-only tools to explore the codebase and must produce a detailed implementation plan before making changes. Use this BEFORE making changes when the task involves creating a new feature, complex refactoring, or system-wide analysis. Do NOT use this for straightforward bug fixes or simple questions.'
+    readonly description = 'Switch to Plan Mode to safely research, design, and plan complex changes using read-only tools. In plan mode, only read-only tools are available (read_file, list_directory, glob, grep_search, ask_user, save_memory, write_todos, exit_plan_mode). Use this BEFORE making changes when the task involves creating a new feature, complex refactoring, or system-wide analysis. Do NOT use for straightforward bug fixes or simple questions.'
     readonly kind = ToolKind.Plan
     readonly parameters = {
         reason: {

@@ -26,6 +26,7 @@ import {
     AskUserResponse,
 } from './messageBus'
 import { createDefaultRegistry } from './tools/definitions'
+import { ChatCompressionService, CompressionStatus } from './services/chatCompressionService'
 
 // Re-export for AIMiddleware compatibility
 export { AgentCallbacks } from './tools/types'
@@ -38,7 +39,7 @@ export interface AgentResult {
 
 /** Tools available in plan mode — read-only only */
 const PLAN_MODE_TOOL_NAMES = new Set([
-    'read_file', 'list_directory', 'glob', 'grep_search',
+    'read_file', 'read_many_files', 'list_directory', 'glob', 'grep_search',
     'ask_user', 'save_memory', 'write_todos', 'exit_plan_mode',
 ])
 
@@ -86,7 +87,10 @@ export class AgentLoop {
     private registry: ToolRegistry
     private scheduler: Scheduler
     private bus: MessageBus
+    private compressionService: ChatCompressionService
     private subscriptions: { unsubscribe: () => void }[] = []
+    /** Last prompt token count from API response — used for compression decisions */
+    private lastPromptTokens = 0
 
     constructor (
         private ai: AIService,
@@ -97,6 +101,7 @@ export class AgentLoop {
         this.registry = createDefaultRegistry()
         this.bus = new MessageBus()
         this.scheduler = new Scheduler(this.registry, this.bus)
+        this.compressionService = new ChatCompressionService(ai)
 
         // Wire MessageBus events to AIMiddleware callbacks
         this.wireMessageBus()
@@ -162,10 +167,18 @@ export class AgentLoop {
             for (let turn = 0; turn < this.maxTurns; turn++) {
                 if (this.signal.aborted) break
 
-                // Context window management: keep system + last 80 messages
-                if (this.messages.length > 90) {
-                    const systemMsg = this.messages[0]
-                    this.messages = [systemMsg, ...this.messages.slice(-80)]
+                // === Context window management — compression ===
+                // Mirrors gemini-cli's ChatCompressionService trigger
+                if (turn > 0 && this.messages.length > 10) {
+                    const { messages: compressed, result } = await this.compressionService.compress(
+                        this.messages, this.lastPromptTokens, this.signal,
+                    )
+                    if (result.status === CompressionStatus.COMPRESSED) {
+                        this.messages = compressed
+                        this.callbacks.onContent(
+                            `\r\n(Context compressed: ${result.originalTokenEstimate.toLocaleString()} → ${result.newTokenEstimate.toLocaleString()} tokens)\r\n`,
+                        )
+                    }
                 }
 
                 // === processGeminiStreamEvents() ===
@@ -204,6 +217,8 @@ export class AgentLoop {
                             this.usage.completionTokens += u.completionTokens
                             this.usage.cachedTokens += u.cachedTokens
                             this.usage.totalTokens += u.totalTokens
+                            // Track last prompt tokens for compression decisions
+                            this.lastPromptTokens = u.promptTokens
                             break
                         }
 

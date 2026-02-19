@@ -71,16 +71,16 @@ class GlobToolInvocation extends BaseToolInvocation<GlobToolParams> {
 export class GlobTool extends DeclarativeTool<GlobToolParams> {
     readonly name = 'glob'
     readonly displayName = 'Glob'
-    readonly description = 'Finds files matching a glob pattern (e.g., "src/**/*.ts", "**/*.md"), returning paths sorted by modification time (newest first). Ideal for locating files by name or path structure.'
+    readonly description = 'Efficiently finds files matching specific glob patterns (e.g., `src/**/*.ts`, `**/*.md`), returning absolute paths sorted by modification time (newest first). Ideal for quickly locating files based on their name or path structure, especially in large codebases.'
     readonly kind = ToolKind.Search
     readonly parameters = {
         pattern: {
             type: 'string',
-            description: 'The glob pattern to match against (e.g., "**/*.py", "docs/*.md")',
+            description: 'The glob pattern to match against (e.g., \'**/*.py\', \'docs/*.md\').',
         },
         dir_path: {
             type: 'string',
-            description: 'Optional: The directory to search within (absolute or relative to CWD). Defaults to CWD.',
+            description: 'The absolute path to the directory to search within. If omitted, searches the root directory.',
         },
     }
     readonly required = ['pattern']

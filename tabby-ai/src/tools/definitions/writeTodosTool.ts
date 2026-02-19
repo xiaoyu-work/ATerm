@@ -12,8 +12,8 @@ import { BaseToolInvocation } from '../base/baseToolInvocation'
 import { ToolKind, ToolContext, ToolResult } from '../types'
 
 export interface TodoItem {
-    task: string
-    status: 'pending' | 'in_progress' | 'done'
+    description: string
+    status: 'pending' | 'in_progress' | 'completed' | 'cancelled'
 }
 
 export interface WriteTodosToolParams {
@@ -42,12 +42,13 @@ class WriteTodosToolInvocation extends BaseToolInvocation<WriteTodosToolParams> 
         const statusIcons: Record<string, string> = {
             pending: '[ ]',
             in_progress: '[~]',
-            done: '[x]',
+            completed: '[x]',
+            cancelled: '[-]',
         }
 
         const lines = this.params.todos.map(t => {
             const icon = statusIcons[t.status] || '[ ]'
-            return `${icon} ${t.task}`
+            return `${icon} ${t.description}`
         })
 
         const display = '\n--- Tasks ---\n' + lines.join('\n') + '\n-------------\n'
@@ -60,19 +61,36 @@ class WriteTodosToolInvocation extends BaseToolInvocation<WriteTodosToolParams> 
 export class WriteTodosTool extends DeclarativeTool<WriteTodosToolParams> {
     readonly name = 'write_todos'
     readonly displayName = 'Write Todos'
-    readonly description = 'Create or update a task list to track progress on complex multi-step tasks. Each todo has a task description and status. Use this to break down complex requests into trackable subtasks.'
+    readonly description = `Lists out the current subtasks required to complete a given user request. Helps track progress, organize complex queries, and ensure no steps are missed. The user can also see your current progress.
+
+Use this tool for complex queries that require multiple steps. If the request is actually complex after starting, create a todo list. DO NOT use this for simple tasks that can be completed in less than 2 steps.
+
+**Task state definitions**:
+- pending: Work has not begun on a given subtask.
+- in_progress: Marked just prior to beginning work. Only one subtask should be in_progress at a time.
+- completed: Subtask was successfully completed with no errors or issues.
+- cancelled: Subtask is no longer needed due to the dynamic nature of the task.
+
+**Methodology**:
+1. Use this todo list as soon as you receive a complex request.
+2. Keep track of every subtask.
+3. Mark a subtask as in_progress before you begin working on it.
+4. Update the subtask list as you proceed — it should reflect your progress and current plans.
+5. Mark a subtask as completed when done.
+6. Mark a subtask as cancelled if no longer needed.
+7. Update the todo list immediately when you start, stop, or cancel a subtask.`
     readonly kind = ToolKind.Other
     readonly parameters = {
         todos: {
             type: 'array',
-            description: 'List of todo items',
+            description: 'The complete list of todo items. This will replace the existing list.',
             items: {
                 type: 'object',
                 properties: {
-                    task: { type: 'string', description: 'Description of the task' },
-                    status: { type: 'string', enum: ['pending', 'in_progress', 'done'], description: 'Current status' },
+                    description: { type: 'string', description: 'The description of the task.' },
+                    status: { type: 'string', enum: ['pending', 'in_progress', 'completed', 'cancelled'], description: 'The current status of the task.' },
                 },
-                required: ['task', 'status'],
+                required: ['description', 'status'],
             },
         },
     }

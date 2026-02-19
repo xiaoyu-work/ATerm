@@ -63,12 +63,12 @@ class ListDirectoryToolInvocation extends BaseToolInvocation<ListDirectoryToolPa
 export class ListDirectoryTool extends DeclarativeTool<ListDirectoryToolParams> {
     readonly name = 'list_directory'
     readonly displayName = 'List Directory'
-    readonly description = 'Lists the names of files and subdirectories directly within a specified directory path.'
+    readonly description = 'Lists the names of files and subdirectories directly within a specified directory path. Can optionally ignore entries matching provided glob patterns. Directories are listed first, then files, both sorted alphabetically.'
     readonly kind = ToolKind.Read
     readonly parameters = {
         dir_path: {
             type: 'string',
-            description: 'The path to the directory to list (absolute or relative to CWD)',
+            description: 'The path to the directory to list.',
         },
     }
     readonly required = ['dir_path']

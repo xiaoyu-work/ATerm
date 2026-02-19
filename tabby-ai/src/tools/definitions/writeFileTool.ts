@@ -49,16 +49,16 @@ class WriteFileToolInvocation extends BaseToolInvocation<WriteFileToolParams> {
 export class WriteFileTool extends DeclarativeTool<WriteFileToolParams> {
     readonly name = 'write_file'
     readonly displayName = 'Write File'
-    readonly description = 'Writes content to a specified file. Creates the file and parent directories if they do not exist. Overwrites existing content.'
+    readonly description = 'Writes content to a specified file in the local filesystem. Creates the file and parent directories if they do not exist. Overwrites existing content. The user has the ability to modify `content`. If modified, this will be stated in the response.'
     readonly kind = ToolKind.Edit
     readonly parameters = {
         file_path: {
             type: 'string',
-            description: 'The path to the file to write to (absolute or relative to CWD)',
+            description: 'The path to the file to write to.',
         },
         content: {
             type: 'string',
-            description: 'The content to write to the file',
+            description: 'The content to write to the file.',
         },
     }
     readonly required = ['file_path', 'content']

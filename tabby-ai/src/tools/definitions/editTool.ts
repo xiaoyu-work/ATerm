@@ -156,24 +156,34 @@ class EditToolInvocation extends BaseToolInvocation<EditToolParams> {
 export class EditTool extends DeclarativeTool<EditToolParams> {
     readonly name = 'replace'
     readonly displayName = 'Edit (Replace)'
-    readonly description = 'Replaces text within a file. By default, replaces a single occurrence, but can replace multiple when expected_replacements is specified. Always use read_file first to examine the file before editing. The old_string must uniquely identify the text to change — include enough surrounding context (at least 3 lines before and after) to ensure a unique match.'
+    readonly description = `Replaces text within a file. By default, replaces a single occurrence, but can replace multiple occurrences when \`expected_replacements\` is specified. This tool requires providing significant context around the change to ensure precise targeting. Always use the read_file tool to examine the file's current content before attempting a text replacement.
+
+The user has the ability to modify the \`new_string\` content. If modified, this will be stated in the response.
+
+**Expectation for required parameters**:
+1. \`old_string\` MUST be the exact literal text to replace (including all whitespace, indentation, newlines, and surrounding code).
+2. \`new_string\` MUST be the exact literal text to replace \`old_string\` with. Ensure the resulting code is correct and idiomatic and that \`old_string\` and \`new_string\` are different.
+3. NEVER escape \`old_string\` or \`new_string\`, that would break the exact literal text requirement.
+**Important**: CRITICAL for \`old_string\`: Must uniquely identify the single instance to change. Include at least 3 lines of context BEFORE and AFTER the target text, matching whitespace and indentation precisely. If this string matches multiple locations, or does not match exactly, the tool will fail.
+4. Prefer to break down complex and long changes into multiple smaller atomic calls to this tool. Always check the content of the file after changes.
+**Multiple replacements**: Set \`expected_replacements\` to the number of occurrences you want to replace.`
     readonly kind = ToolKind.Edit
     readonly parameters = {
         file_path: {
             type: 'string',
-            description: 'The path to the file to modify (absolute or relative to CWD)',
+            description: 'The path to the file to modify.',
         },
         old_string: {
             type: 'string',
-            description: 'The exact literal text to replace. Must match the file content precisely, including whitespace and indentation.',
+            description: 'The exact literal text to replace, preferably unescaped. For single replacements (default), include at least 3 lines of context BEFORE and AFTER the target text, matching whitespace and indentation precisely. If this string does not match exactly, the tool will fail.',
         },
         new_string: {
             type: 'string',
-            description: 'The exact literal text to replace old_string with.',
+            description: 'The exact literal text to replace old_string with, preferably unescaped. Provide the EXACT text. Ensure the resulting code is correct and idiomatic.',
         },
         expected_replacements: {
             type: 'integer',
-            description: 'Optional: Number of replacements expected. Defaults to 1.',
+            description: 'Number of replacements expected. Defaults to 1 if not specified. Use when you want to replace multiple occurrences.',
             minimum: 1,
         },
     }

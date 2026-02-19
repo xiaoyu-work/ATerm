@@ -57,7 +57,7 @@ class ExitPlanModeToolInvocation extends BaseToolInvocation<ExitPlanModeToolPara
 export class ExitPlanModeTool extends DeclarativeTool<ExitPlanModeToolParams> {
     readonly name = 'exit_plan_mode'
     readonly displayName = 'Exit Plan Mode'
-    readonly description = 'Exit planning mode and present your plan to the user for approval. Call this after you have explored the codebase and written your implementation plan. The user will be asked to approve before you proceed with execution.'
+    readonly description = 'Signals that the planning phase is complete and requests user approval to start implementation. Call this after you have explored the codebase and formulated your implementation plan. Present a brief summary and the user will be asked to approve before you proceed with execution. If rejected, iterate on the plan.'
     readonly kind = ToolKind.Plan
     readonly parameters = {
         summary: {

@@ -50,12 +50,18 @@ class MemoryToolInvocation extends BaseToolInvocation<MemoryToolParams> {
 export class MemoryTool extends DeclarativeTool<MemoryToolParams> {
     readonly name = 'save_memory'
     readonly displayName = 'Save Memory'
-    readonly description = 'Save important context, decisions, or notes to persistent memory (.aterm/memory.md). This survives across sessions. Use this to remember project conventions, user preferences, architectural decisions, or anything that should persist.'
+    readonly description = `Saves concise global user context (preferences, facts) for use across ALL sessions.
+
+**CRITICAL: GLOBAL CONTEXT ONLY**
+NEVER save workspace-specific context, local paths, or commands (e.g. "The entry point is src/index.js", "The test command is npm test"). These are local to the current workspace and must NOT be saved globally. EXCLUSIVELY for context relevant across ALL sessions.
+
+- Use for "Remember X" or clear personal facts.
+- Do NOT use for session context.`
     readonly kind = ToolKind.Other
     readonly parameters = {
         content: {
             type: 'string',
-            description: 'The content to save to memory. Will be appended to existing memory.',
+            description: 'The specific fact or piece of information to remember. Should be a clear, self-contained statement.',
         },
     }
     readonly required = ['content']

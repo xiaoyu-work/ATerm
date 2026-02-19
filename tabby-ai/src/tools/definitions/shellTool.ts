@@ -51,12 +51,16 @@ class ShellToolInvocation extends BaseToolInvocation<ShellToolParams> {
 export class ShellTool extends DeclarativeTool<ShellToolParams> {
     readonly name = 'run_shell_command'
     readonly displayName = 'Shell Command'
-    readonly description = 'Execute a shell command and return its output. Use this for any system operations, checking status, installing packages, running builds, etc.'
+    readonly description = 'Executes a shell command and returns its output. The following information is returned: Output: Combined stdout/stderr. Can be `(empty)` or partial on error. Exit Code: Only included if non-zero (command failed). Always prefer non-interactive commands (e.g., using \'run once\' or \'CI\' flags for test runners to avoid persistent watch modes or \'git --no-pager\').'
     readonly kind = ToolKind.Execute
     readonly parameters = {
         command: {
             type: 'string',
-            description: 'The shell command to execute',
+            description: 'The exact shell command to execute.',
+        },
+        description: {
+            type: 'string',
+            description: 'Brief description of the command for the user. Be specific and concise. Ideally a single sentence.',
         },
     }
     readonly required = ['command']
