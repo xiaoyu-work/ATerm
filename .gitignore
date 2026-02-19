@@ -45,6 +45,7 @@ crowdin.yml
 !.yarn/plugins
 !.yarn/releases
 !.yarn/sdks
+**/.yarn/install-state.gz
 
 # Env / secrets
 .env
