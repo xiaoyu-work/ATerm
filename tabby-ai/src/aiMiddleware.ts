@@ -14,6 +14,7 @@ import { AIService, ChatMessage } from './ai.service'
 import { ContextCollector } from './contextCollector'
 import { AgentLoop } from './agentLoop'
 import { TokensSummary } from './streamEvents'
+import { MemoryTool } from './tools/definitions/memoryTool'
 
 const enum State {
     /** Normal mode — all input goes to shell */
@@ -28,6 +29,8 @@ const enum State {
     AGENT_CONFIRMING,
     /** Agent running — a shell command is executing */
     AGENT_EXECUTING,
+    /** Agent paused — waiting for user free-text response (ask_user tool) */
+    AGENT_ASKING,
 }
 
 export class AIMiddleware extends SessionMiddleware {
@@ -36,6 +39,8 @@ export class AIMiddleware extends SessionMiddleware {
     private atLineStart = true
     private abortController: AbortController | null = null
     private confirmResolve: ((approved: boolean) => void) | null = null
+    private askResolve: ((response: string) => void) | null = null
+    private askBuffer = ''
     private bannerShown = false
     private conversationHistory: ChatMessage[] = []
     private terminalCheckpoint = 0
@@ -73,6 +78,12 @@ export class AIMiddleware extends SessionMiddleware {
             if (this.state === State.CAPTURING) {
                 const text = data.toString('utf-8')
                 this.promptBuffer += text
+                this.outputToTerminal.next(Buffer.from(colors.white(text)))
+                return
+            }
+            if (this.state === State.AGENT_ASKING) {
+                const text = data.toString('utf-8')
+                this.askBuffer += text
                 this.outputToTerminal.next(Buffer.from(colors.white(text)))
                 return
             }
@@ -158,6 +169,37 @@ export class AIMiddleware extends SessionMiddleware {
                 }
                 return // Swallow all other input during confirmation
 
+            case State.AGENT_ASKING:
+                if (byte === 0x0D /* Enter = submit response */) {
+                    this.outputToTerminal.next(Buffer.from('\r\n'))
+                    this.askResolve?.(this.askBuffer)
+                    this.askResolve = null
+                    this.askBuffer = ''
+                    this.state = State.AGENT_STREAMING
+                    return
+                }
+                if (byte === 0x7F || byte === 0x08) {
+                    if (this.askBuffer.length > 0) {
+                        this.askBuffer = this.askBuffer.slice(0, -1)
+                        this.outputToTerminal.next(Buffer.from('\b \b'))
+                    }
+                    return
+                }
+                if (byte === 0x03 /* Ctrl+C = cancel */) {
+                    this.outputToTerminal.next(Buffer.from('\r\n'))
+                    this.askResolve?.('')
+                    this.askResolve = null
+                    this.askBuffer = ''
+                    this.state = State.AGENT_STREAMING
+                    return
+                }
+                {
+                    const ch = String.fromCharCode(byte)
+                    this.askBuffer += ch
+                    this.outputToTerminal.next(Buffer.from(colors.white(ch)))
+                }
+                return
+
             case State.AGENT_STREAMING:
             case State.AGENT_EXECUTING:
                 if (byte === 0x03 /* Ctrl+C = abort entire agent */) {
@@ -193,8 +235,9 @@ export class AIMiddleware extends SessionMiddleware {
         }
 
         // Build messages: fresh system prompt + conversation history + new user message
+        const systemPrompt = await this.buildSystemPrompt()
         const messages: ChatMessage[] = [
-            { role: 'system', content: this.buildSystemPrompt() },
+            { role: 'system', content: systemPrompt },
             ...this.conversationHistory,
             { role: 'user', content: userContent },
         ]
@@ -234,6 +277,26 @@ export class AIMiddleware extends SessionMiddleware {
                         this.confirmResolve(false)
                     }
                     this.confirmResolve = resolve
+                })
+            },
+
+            onAskUser: (question) => {
+                this.state = State.AGENT_ASKING
+                this.askBuffer = ''
+                this.outputToTerminal.next(Buffer.from(
+                    '\r\n' +
+                    colors.cyan(`  ? ${question}`) +
+                    '\r\n' +
+                    colors.gray('  > '),
+                ))
+            },
+
+            waitForUserResponse: () => {
+                return new Promise<string>((resolve) => {
+                    if (this.askResolve) {
+                        this.askResolve('')
+                    }
+                    this.askResolve = resolve
                 })
             },
 
@@ -381,8 +444,12 @@ export class AIMiddleware extends SessionMiddleware {
      *
      * Sections: Preamble, Core Mandates, Primary Workflows, Operational Guidelines, Git
      */
-    private buildSystemPrompt (): string {
+    private async buildSystemPrompt (): Promise<string> {
         const context = this.collector.toPromptString()
+        const cwd = this.collector.cwd || process.cwd()
+        const memory = await MemoryTool.loadMemory(cwd)
+        const memorySection = memory ? `\n\n# Persistent Memory\n${memory}` : ''
+
         return `You are ATerm AI, an interactive CLI agent embedded in the ATerm terminal, specializing in software engineering tasks. Your primary goal is to help users safely and effectively.
 
 # Core Mandates
@@ -436,6 +503,6 @@ Validation is the only path to finality. Never assume success or settle for unve
 - Never push to remote without being explicitly asked.
 
 # Terminal Context
-${context}`
+${context}${memorySection}`
     }
 }

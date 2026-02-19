@@ -1,0 +1,91 @@
+/**
+ * Glob search tool.
+ *
+ * Mirrors gemini-cli's GlobTool
+ * (packages/core/src/tools/definitions/glob.ts)
+ *
+ * Logic extracted from AgentLoop.globSearch().
+ */
+
+import * as fs from 'fs/promises'
+import * as path from 'path'
+import { DeclarativeTool } from '../base/declarativeTool'
+import { BaseToolInvocation } from '../base/baseToolInvocation'
+import { ToolKind, ToolContext, ToolResult } from '../types'
+import { isPathOutsideCwd } from '../security'
+import { executeCommand } from '../../shellExecutor'
+
+export interface GlobToolParams {
+    pattern: string
+    dir_path?: string
+}
+
+class GlobToolInvocation extends BaseToolInvocation<GlobToolParams> {
+    constructor (params: GlobToolParams) {
+        super(params, ToolKind.Search)
+    }
+
+    getDescription (): string {
+        return `Glob: ${this.params.pattern}`
+    }
+
+    async execute (context: ToolContext): Promise<ToolResult> {
+        const searchDir = this.params.dir_path
+            ? path.resolve(context.cwd, this.params.dir_path)
+            : context.cwd
+
+        if (isPathOutsideCwd(searchDir, context.cwd)) {
+            return this.error(`Access denied – "${this.params.dir_path}" resolves to a path outside the working directory.`)
+        }
+
+        try {
+            // Use git ls-files for .gitignore respect, fall back to find
+            const isGit = await fs.access(path.join(context.cwd, '.git')).then(() => true).catch(() => false)
+
+            let command: string
+            if (isGit) {
+                command = `git ls-files --cached --others --exclude-standard "${this.params.pattern}" | head -200`
+            } else {
+                const isWindows = process.platform === 'win32'
+                if (isWindows) {
+                    command = `dir /s /b "${this.params.pattern}" 2>NUL | head -200`
+                } else {
+                    command = `find . -name "${this.params.pattern}" -not -path "./.git/*" | head -200`
+                }
+            }
+
+            const result = await executeCommand(command, searchDir, context.signal)
+            const output = result.stdout.trim()
+
+            if (!output) {
+                return this.success(`No files found matching pattern: ${this.params.pattern}`)
+            }
+
+            return this.success(output)
+        } catch (err: any) {
+            return this.error(`Searching files: ${err.message}`)
+        }
+    }
+}
+
+export class GlobTool extends DeclarativeTool<GlobToolParams> {
+    readonly name = 'glob'
+    readonly displayName = 'Glob'
+    readonly description = 'Finds files matching a glob pattern (e.g., "src/**/*.ts", "**/*.md"), returning paths sorted by modification time (newest first). Ideal for locating files by name or path structure.'
+    readonly kind = ToolKind.Search
+    readonly parameters = {
+        pattern: {
+            type: 'string',
+            description: 'The glob pattern to match against (e.g., "**/*.py", "docs/*.md")',
+        },
+        dir_path: {
+            type: 'string',
+            description: 'Optional: The directory to search within (absolute or relative to CWD). Defaults to CWD.',
+        },
+    }
+    readonly required = ['pattern']
+
+    protected createInvocation (params: GlobToolParams, _context: ToolContext): GlobToolInvocation {
+        return new GlobToolInvocation(params)
+    }
+}
