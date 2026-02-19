@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { ConfigService } from 'tabby-core'
+import { ConfigService, PlatformService } from 'tabby-core'
 import { TerminalDecorator, BaseTerminalTabComponent } from 'tabby-terminal'
 import { ContextCollector } from './contextCollector'
 import { AIService } from './ai.service'
@@ -17,13 +17,13 @@ export class AIDecorator extends TerminalDecorator {
     constructor (
         private ai: AIService,
         private config: ConfigService,
+        private platform: PlatformService,
     ) {
         super()
     }
 
     attach (tab: BaseTerminalTabComponent<any>): void {
-        const maxLines = this.config.store.ai?.maxContextLines ?? 100
-        const collector = new ContextCollector(maxLines)
+        const collector = new ContextCollector()
         let currentSession: any = null
 
         const attachToSession = () => {
@@ -33,9 +33,17 @@ export class AIDecorator extends TerminalDecorator {
                 }
                 currentSession = tab.session
 
-                // Context collection
+                // Connect BlockTracker for structured command context
+                if (tab.session.blockTracker) {
+                    collector.setBlockTracker(tab.session.blockTracker)
+                }
+
+                // Context collection: feed output to both collector and block tracker
                 this.subscribeUntilDetached(tab, tab.session.binaryOutput$.subscribe(data => {
                     collector.pushOutput(data)
+                    tab.session?.blockTracker?.pushOutput(
+                        data.toString('utf-8'),
+                    )
                 }))
 
                 if (tab.session.oscProcessor) {
@@ -45,7 +53,7 @@ export class AIDecorator extends TerminalDecorator {
                 }
 
                 // Insert AI middleware at the front of the stack
-                tab.session.middleware.unshift(new AIMiddleware(this.ai, collector, this.config))
+                tab.session.middleware.unshift(new AIMiddleware(this.ai, collector, this.config, this.platform))
             } catch (e) {
                 console.error('[tabby-ai] Failed to attach AI middleware:', e)
             }

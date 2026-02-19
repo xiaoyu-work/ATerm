@@ -3,6 +3,7 @@ import { Logger } from 'tabby-core'
 import { LoginScriptProcessor, LoginScriptsOptions } from './middleware/loginScriptProcessing'
 import { OSCProcessor } from './middleware/oscProcessing'
 import { SessionMiddlewareStack } from './api/middleware'
+import { BlockTracker } from './api/blockTracker'
 
 /**
  * A session object for a [[BaseTerminalTabComponent]]
@@ -11,6 +12,7 @@ import { SessionMiddlewareStack } from './api/middleware'
 export abstract class BaseSession {
     open: boolean
     readonly oscProcessor = new OSCProcessor()
+    readonly blockTracker = new BlockTracker()
     readonly middleware = new SessionMiddlewareStack()
     protected output = new Subject<string>()
     protected binaryOutput = new Subject<Buffer>()
@@ -30,7 +32,14 @@ export abstract class BaseSession {
         this.middleware.push(this.oscProcessor)
         this.oscProcessor.cwdReported$.subscribe(cwd => {
             this.reportedCWD = cwd
+            this.blockTracker.setCwd(cwd)
         })
+
+        // Wire OSC 133 shell integration events to BlockTracker
+        this.oscProcessor.promptStart$.subscribe(() => this.blockTracker.onPromptStart())
+        this.oscProcessor.commandInputStart$.subscribe(() => this.blockTracker.onCommandInputStart())
+        this.oscProcessor.commandExecuted$.subscribe(() => this.blockTracker.onCommandExecuted())
+        this.oscProcessor.commandFinished$.subscribe(({ exitCode }) => this.blockTracker.onCommandFinished(exitCode))
 
         this.middleware.outputToTerminal$.subscribe(data => {
             if (!this.initialDataBufferReleased) {
@@ -78,6 +87,7 @@ export abstract class BaseSession {
             await this.gracefullyKillProcess()
         }
         this.middleware.close()
+        this.blockTracker.close()
         this.closed.complete()
         this.destroyed.complete()
         this.output.complete()

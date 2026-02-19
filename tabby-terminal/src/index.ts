@@ -103,5 +103,6 @@ export * from './middleware/utf8Splitter'
 export * from './middleware/inputProcessing'
 export * from './api/middleware'
 export * from './session'
+export * from './api/blockTracker'
 export { LoginScriptsSettingsComponent, StreamProcessingSettingsComponent }
 export { MultifocusService } from './services/multifocus.service'

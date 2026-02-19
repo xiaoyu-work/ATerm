@@ -48,9 +48,10 @@
 </div>
 <div class="form-line">
   <div class="header">
-    <div class="title">Context Lines</div>
+    <div class="title">Context Blocks</div>
+    <div class="description">Number of recent command blocks to include as AI context</div>
   </div>
-  <input class="form-control" type="number" min="10" max="500" [(ngModel)]="config.store.ai.maxContextLines" (ngModelChange)="config.save()">
+  <input class="form-control" type="number" min="1" max="20" [(ngModel)]="config.store.ai.maxContextBlocks" (ngModelChange)="config.save()">
 </div>
 <hr>
 <h4>Token Usage History</h4>

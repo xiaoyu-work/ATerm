@@ -4,6 +4,7 @@ import { Injector } from '@angular/core'
 import { HostAppService, ConfigService, WIN_BUILD_CONPTY_SUPPORTED, isWindowsBuild, Platform, BootstrapData, BOOTSTRAP_DATA, LogService } from 'tabby-core'
 import { BaseSession } from 'tabby-terminal'
 import { SessionOptions, ChildProcess, PTYInterface, PTYProxy } from './api'
+import { getShellIntegration } from './shellIntegration'
 
 const windowsDirectoryRegex = /([a-zA-Z]:[^\:\[\]\?\"\<\>\|]+)/mi
 
@@ -102,6 +103,13 @@ export class Session extends BaseSession {
             if (!fsSync.existsSync(cwd!)) {
                 console.warn('Ignoring non-existent CWD:', cwd)
                 cwd = undefined
+            }
+
+            // Inject shell integration for OSC 133 block tracking
+            if (this.config.store.terminal.shellIntegration !== false) {
+                const integration = getShellIntegration(options.command, options.args ?? [], env)
+                Object.assign(env, integration.env)
+                options.args = integration.args
             }
 
             pty = await this.ptyInterface.spawn(options.command, options.args, {

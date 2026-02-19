@@ -8,7 +8,7 @@
  */
 
 import colors from 'ansi-colors'
-import { ConfigService } from 'tabby-core'
+import { ConfigService, PlatformService } from 'tabby-core'
 import { SessionMiddleware } from 'tabby-terminal'
 import { AIService, ChatMessage } from './ai.service'
 import { ContextCollector } from './contextCollector'
@@ -33,6 +33,10 @@ const enum State {
     AGENT_ASKING,
 }
 
+const LARGE_PASTE_LINE_THRESHOLD = 5
+const LARGE_PASTE_CHAR_THRESHOLD = 500
+const PASTED_TEXT_PLACEHOLDER_REGEX = /\[Pasted Text: \d+ (?:lines|chars)(?: #\d+)?\]/g
+
 export class AIMiddleware extends SessionMiddleware {
     private static readonly RESIZE_REPAINT_SUPPRESS_MS = 220
     private static readonly AI_OUTPUT_PROTECT_WINDOW_MS = 120000
@@ -49,6 +53,8 @@ export class AIMiddleware extends SessionMiddleware {
     private terminalCheckpoint = 0
     private suppressSessionOutputUntil = 0
     private lastAIDisplayOutputAt = 0
+    /** Stores full pasted content keyed by placeholder ID */
+    private pastedContent: Record<string, string> = {}
     /** Session-level accumulated token usage — maps to gemini-cli's ModelMetrics.tokens */
     private sessionUsage: TokensSummary = { promptTokens: 0, completionTokens: 0, cachedTokens: 0, totalTokens: 0 }
 
@@ -56,6 +62,7 @@ export class AIMiddleware extends SessionMiddleware {
         private ai: AIService,
         private collector: ContextCollector,
         private config: ConfigService,
+        private platform: PlatformService,
     ) {
         super()
     }
@@ -100,20 +107,46 @@ export class AIMiddleware extends SessionMiddleware {
     feedFromTerminal (data: Buffer): void {
         // Multi-byte data (paste)
         if (data.length !== 1) {
+            const text = data.toString('utf-8')
+                .replace(/\x1b\[200~/g, '')
+                .replace(/\x1b\[201~/g, '')
+
             if (this.state === State.CAPTURING) {
-                const text = data.toString('utf-8')
-                this.promptBuffer += text
-                this.outputToTerminal.next(Buffer.from(colors.white(text)))
+                if (text) {
+                    const display = this.maybeCollapsePaste(text)
+                    this.promptBuffer += display
+                    this.outputToTerminal.next(Buffer.from(display))
+                }
                 return
             }
             if (this.state === State.AGENT_ASKING) {
-                const text = data.toString('utf-8')
-                this.askBuffer += text
-                this.outputToTerminal.next(Buffer.from(colors.white(text)))
+                if (text) {
+                    this.askBuffer += text
+                    this.outputToTerminal.next(Buffer.from(text))
+                }
+                return
+            }
+            if (this.state === State.PENDING) {
+                if (!text) {
+                    return
+                }
+
+                // For multi-byte input (paste/IME), treat as AI prompt content directly.
+                this.state = State.CAPTURING
+                this.promptBuffer = ''
+                this.outputToTerminal.next(Buffer.from(colors.cyan(' ')))
+                const pastedPrompt = text.startsWith(' ') ? text.slice(1) : text
+                if (pastedPrompt) {
+                    const display = this.maybeCollapsePaste(pastedPrompt)
+                    this.promptBuffer += display
+                    this.outputToTerminal.next(Buffer.from(display))
+                }
                 return
             }
             if (this.state === State.NORMAL) {
                 this.atLineStart = false
+                // Heuristic block tracking for sessions without OSC 133
+                this.collector.blockTracker?.pushInput(text)
                 this.outputToSession.next(data)
             }
             // In agent states, swallow multi-byte input
@@ -130,10 +163,24 @@ export class AIMiddleware extends SessionMiddleware {
                     return
                 }
                 this.atLineStart = (byte === 0x0D)
+                // Heuristic block tracking for sessions without OSC 133
+                this.collector.blockTracker?.pushInput(String.fromCharCode(byte))
                 this.outputToSession.next(data)
                 return
 
             case State.PENDING:
+                if (byte === 0x16 /* Ctrl+V */) {
+                    const pasted = this.platform.readClipboard()
+                    if (pasted) {
+                        this.state = State.CAPTURING
+                        this.promptBuffer = ''
+                        this.outputToTerminal.next(Buffer.from(colors.cyan(' ')))
+                        const display = this.maybeCollapsePaste(pasted)
+                        this.promptBuffer += display
+                        this.outputToTerminal.next(Buffer.from(display))
+                    }
+                    return
+                }
                 if (byte === 0x20 /* space */) {
                     this.state = State.CAPTURING
                     this.promptBuffer = ''
@@ -156,6 +203,15 @@ export class AIMiddleware extends SessionMiddleware {
                 return
 
             case State.CAPTURING:
+                if (byte === 0x16 /* Ctrl+V */) {
+                    const pasted = this.platform.readClipboard()
+                    if (pasted) {
+                        const display = this.maybeCollapsePaste(pasted)
+                        this.promptBuffer += display
+                        this.outputToTerminal.next(Buffer.from(display))
+                    }
+                    return
+                }
                 if (byte === 0x0D /* Enter */) {
                     this.startAgent()
                     return
@@ -178,7 +234,7 @@ export class AIMiddleware extends SessionMiddleware {
                 // Regular character
                 const char = String.fromCharCode(byte)
                 this.promptBuffer += char
-                this.outputToTerminal.next(Buffer.from(colors.white(char)))
+                this.outputToTerminal.next(Buffer.from(char))
                 return
 
             case State.AGENT_CONFIRMING:
@@ -195,6 +251,14 @@ export class AIMiddleware extends SessionMiddleware {
                 return // Swallow all other input during confirmation
 
             case State.AGENT_ASKING:
+                if (byte === 0x16 /* Ctrl+V */) {
+                    const pasted = this.platform.readClipboard()
+                    if (pasted) {
+                        this.askBuffer += pasted
+                        this.outputToTerminal.next(Buffer.from(pasted))
+                    }
+                    return
+                }
                 if (byte === 0x0D /* Enter = submit response */) {
                     this.outputToTerminal.next(Buffer.from('\r\n'))
                     this.askResolve?.(this.askBuffer)
@@ -221,7 +285,7 @@ export class AIMiddleware extends SessionMiddleware {
                 {
                     const ch = String.fromCharCode(byte)
                     this.askBuffer += ch
-                    this.outputToTerminal.next(Buffer.from(colors.white(ch)))
+                    this.outputToTerminal.next(Buffer.from(ch))
                 }
                 return
 
@@ -236,8 +300,16 @@ export class AIMiddleware extends SessionMiddleware {
     }
 
     private async startAgent (): Promise<void> {
-        const query = this.promptBuffer.trim()
+        let query = this.promptBuffer.trim()
         this.promptBuffer = ''
+
+        // Expand paste placeholders back to full content before sending to AI
+        if (Object.keys(this.pastedContent).length > 0) {
+            query = query.replace(PASTED_TEXT_PLACEHOLDER_REGEX, match =>
+                this.pastedContent[match] ?? match,
+            )
+            this.pastedContent = {}
+        }
 
         if (!query) {
             this.state = State.NORMAL
@@ -477,8 +549,35 @@ export class AIMiddleware extends SessionMiddleware {
         this.lastAIDisplayOutputAt = Date.now()
     }
 
+    /**
+     * If pasted text exceeds threshold, collapse it into a placeholder
+     * and store the full content for later expansion when submitting.
+     */
+    private maybeCollapsePaste (text: string): string {
+        const lineCount = text.split('\n').length
+        if (lineCount <= LARGE_PASTE_LINE_THRESHOLD && text.length <= LARGE_PASTE_CHAR_THRESHOLD) {
+            return text
+        }
+
+        const base = lineCount > LARGE_PASTE_LINE_THRESHOLD
+            ? `[Pasted Text: ${lineCount} lines]`
+            : `[Pasted Text: ${text.length} chars]`
+
+        // Deduplicate if same placeholder already exists
+        let id = base
+        let suffix = 2
+        while (this.pastedContent[id]) {
+            id = base.replace(']', ` #${suffix}]`)
+            suffix++
+        }
+
+        this.pastedContent[id] = text
+        return id
+    }
+
     private async buildSystemPrompt (): Promise<string> {
-        const context = this.collector.toPromptString()
+        const maxBlocks = this.config.store.ai?.maxContextBlocks ?? 5
+        const context = this.collector.toPromptString(maxBlocks)
         const cwd = this.collector.cwd || process.cwd()
         const memory = await MemoryTool.loadMemory(cwd)
         const memorySection = memory

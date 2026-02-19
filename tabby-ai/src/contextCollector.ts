@@ -4,7 +4,12 @@
  * Each terminal tab gets its own ContextCollector instance.
  * The decorator feeds PTY output into it, and when the AI is
  * triggered, we produce a snapshot of what the user is seeing.
+ *
+ * When a BlockTracker is attached (via shell integration), context
+ * is structured as discrete command blocks instead of raw scrollback.
  */
+
+import { BlockTracker, TerminalBlock } from 'tabby-terminal'
 
 const ANSI_REGEX = /\x1b\[[0-9;]*[a-zA-Z]|\x1b\].*?(\x07|\x1b\\)|\x1b[()][0-9A-B]|\x1b[>=<]|\x1b\[[\?]?[0-9;]*[a-zA-Z]/g
 
@@ -13,6 +18,7 @@ export class ContextCollector {
     private _cwd = ''
     private readonly maxLines: number
     private totalLinesPushed = 0
+    private _blockTracker: BlockTracker | null = null
 
     constructor (maxLines = 100) {
         this.maxLines = maxLines
@@ -56,6 +62,46 @@ export class ContextCollector {
         return this._cwd
     }
 
+    get blockTracker (): BlockTracker | null {
+        return this._blockTracker
+    }
+
+    setBlockTracker (tracker: BlockTracker): void {
+        this._blockTracker = tracker
+    }
+
+    /**
+     * Format recent blocks as structured context for AI.
+     * Returns full command + full output for each block — no truncation.
+     */
+    formatBlocks (n = 5): string {
+        if (!this._blockTracker) return ''
+        const blocks = this._blockTracker.getRecentBlocks(n)
+        if (blocks.length === 0) return ''
+
+        return blocks.map((b, i) => this.formatSingleBlock(b, i + 1)).join('\n\n')
+    }
+
+    private formatSingleBlock (b: TerminalBlock, index: number): string {
+        const parts: string[] = []
+        const header = b.exitCode !== null
+            ? `[Block ${index}] [exit: ${b.exitCode}]`
+            : `[Block ${index}]`
+
+        if (b.command) {
+            parts.push(`${header} $ ${b.command}`)
+        } else {
+            parts.push(header)
+        }
+        if (b.cwd) {
+            parts.push(`[cwd: ${b.cwd}]`)
+        }
+        if (b.output) {
+            parts.push(b.output)
+        }
+        return parts.join('\n')
+    }
+
     /**
      * Build a context snapshot for the AI prompt.
      */
@@ -69,8 +115,9 @@ export class ContextCollector {
 
     /**
      * Format context as a string for the AI system prompt.
+     * Uses structured blocks when available, falls back to raw scrollback.
      */
-    toPromptString (): string {
+    toPromptString (maxBlocks = 5): string {
         const ctx = this.snapshot()
         const parts: string[] = [
             '<terminal_context>',
@@ -78,7 +125,10 @@ export class ContextCollector {
             `shell: ${ctx.shell}`,
         ]
 
-        if (ctx.scrollback) {
+        const blockContext = this.formatBlocks(maxBlocks)
+        if (blockContext) {
+            parts.push('', 'Recent commands (structured blocks):', blockContext)
+        } else if (ctx.scrollback) {
             parts.push('', 'Recent terminal output:', ctx.scrollback)
         }
 

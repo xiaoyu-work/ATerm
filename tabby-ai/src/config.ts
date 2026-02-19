@@ -36,8 +36,8 @@ export class AIConfigProvider extends ConfigProvider {
             /** Azure API version (only used when provider is 'azure') */
             apiVersion: '2024-12-01-preview',
 
-            /** Max lines of terminal output to include as context */
-            maxContextLines: 100,
+            /** Number of recent terminal blocks to include as AI context */
+            maxContextBlocks: 5,
 
             /**
              * Historical token usage per provider.
