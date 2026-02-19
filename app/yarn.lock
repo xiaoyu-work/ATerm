@@ -2945,10 +2945,10 @@ node-gyp@^12.1.0, node-gyp@^5.0.2, node-gyp@^5.1.1:
     tinyglobby "^0.2.12"
     which "^6.0.0"
 
-node-pty@^1.2.0-beta.8:
-  version "1.2.0-beta.8"
-  resolved "https://registry.yarnpkg.com/node-pty/-/node-pty-1.2.0-beta.8.tgz#f23f0d69885bf521e57a3f7abc2de80764b88163"
-  integrity sha512-2gDjTGB/VaMV8cmFMg0d7IfLcWkxtyekn9VSqpq+tUOiu5+nnLfVXYHZbjZCq1kXhnxbdlBjaKLvvVWIbFkicw==
+node-pty@^1.2.0-beta.11:
+  version "1.2.0-beta.11"
+  resolved "https://registry.yarnpkg.com/node-pty/-/node-pty-1.2.0-beta.11.tgz#b12338927cd5da9cfba82e39b5b36f74e52cbbe1"
+  integrity sha512-THcUyu1WwdgoIyUvgXOZ70EOMXzheGa0q3tbEb5kUIfKgcpBJ+AJ9Q1kq0bKtYmQzr77usXiTORZTLmAUQlnoQ==
   dependencies:
     node-addon-api "^7.1.0"
 
