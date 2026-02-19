@@ -11,6 +11,7 @@ _('Search color schemes')
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'color-scheme-settings-for-mode',
     templateUrl: './colorSchemeSettingsForMode.component.html',
     styleUrls: ['./colorSchemeSettingsForMode.component.scss'],

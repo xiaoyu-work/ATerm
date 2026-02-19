@@ -7,6 +7,7 @@ class FakeDropGroup {
 
 /** @hidden */
 @Directive({
+    standalone: false,
     selector: '[cdkAutoDropGroup]',
 })
 export class CdkAutoDropGroup implements OnInit {

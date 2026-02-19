@@ -7,6 +7,7 @@ type DemoProfile = BaseTerminalProfile
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'demoTerminalTab',
     template: BaseTerminalTabComponent.template,
     styles: BaseTerminalTabComponent.styles,

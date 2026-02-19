@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 import { ToastrModule } from 'ngx-toastr'
-import { NgxFilesizeModule } from 'ngx-filesize'
+import { FileSizePipe } from 'tabby-core'
 import TabbyCoreModule, { ConfigProvider, TabRecoveryProvider, HotkeyProvider, TabContextMenuItemProvider, ProfileProvider } from 'tabby-core'
 import { SettingsTabProvider } from 'tabby-settings'
 import TabbyTerminalModule from 'tabby-terminal'
@@ -32,7 +32,7 @@ import { SFTPCreateDirectoryModalComponent } from './components/sftpCreateDirect
 @NgModule({
     imports: [
         NgbModule,
-        NgxFilesizeModule,
+        FileSizePipe,
         CommonModule,
         FormsModule,
         ToastrModule,

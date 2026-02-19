@@ -6,6 +6,7 @@ import { SelectorOption } from '../api/selector'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'selector-modal',
     templateUrl: './selectorModal.component.html',
     styleUrls: ['./selectorModal.component.scss'],

@@ -17,6 +17,7 @@ import {
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'window-settings-tab',
     templateUrl: './windowSettingsTab.component.html',
 })

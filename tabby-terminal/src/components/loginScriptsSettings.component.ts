@@ -6,6 +6,7 @@ import { LoginScript, LoginScriptsOptions } from '../middleware/loginScriptProce
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'login-scripts-settings',
     templateUrl: './loginScriptsSettings.component.html',
 })

@@ -4,6 +4,7 @@ import { CheckboxComponent } from './checkbox.component'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'toggle',
     template: `
     <div class="form-check form-switch">

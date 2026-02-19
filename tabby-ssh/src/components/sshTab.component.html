@@ -1,5 +1,5 @@
 
-<terminal-toolbar [tab]="this"><i class="fas fa-xs fa-circle text-success me-2" *ngIf="session &amp;&amp; session.open"></i><i class="fas fa-xs fa-circle text-danger me-2" *ngIf="!session || !session.open"></i><strong class="me-auto" style="user-select: text; cursor: text;" onclick="event.stopPropagation()">{{profile.options.user}}@{{profile.options.host}}:{{profile.options.port}}</strong>
+<terminal-toolbar [tab]="this"><i class="fas fa-xs fa-circle text-success me-2" *ngIf="session &amp;&amp; session.open"></i><i class="fas fa-xs fa-circle text-danger me-2" *ngIf="!session || !session.open"></i><strong class="me-auto" style="user-select: text; cursor: text;" onclick="event.stopPropagation()">{{profile.options.user}}&#64;{{profile.options.host}}:{{profile.options.port}}</strong>
   <div class="me-2" ngbDropdown container="body" *ngIf="session &amp;&amp; !session.supportsWorkingDirectory()" placement="bottom-right bottom-left bottom">
     <button class="btn btn-sm btn-link" ngbDropdownToggle><i class="far fa-lightbulb text-primary"></i></button>
     <div class="bg-dark" ngbDropdownMenu><a class="d-flex align-items-center" ngbDropdownItem (click)="platform.openExternal(&quot;https://tabby.sh/go/cwd-detection&quot;)">

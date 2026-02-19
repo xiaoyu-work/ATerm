@@ -14,6 +14,7 @@ const PROVIDER_LABELS: Record<string, string> = {
 }
 
 @Component({
+    standalone: false,
     templateUrl: './aiSettingsTab.component.html',
 })
 export class AISettingsTabComponent implements OnInit, OnDestroy {

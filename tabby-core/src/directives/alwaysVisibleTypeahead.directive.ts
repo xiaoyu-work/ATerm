@@ -2,6 +2,7 @@ import { Directive, ElementRef, AfterViewInit } from '@angular/core'
 
 /** @hidden */
 @Directive({
+    standalone: false,
     selector: '[alwaysVisibleTypeahead]',
 })
 export class AlwaysVisibleTypeaheadDirective implements AfterViewInit {

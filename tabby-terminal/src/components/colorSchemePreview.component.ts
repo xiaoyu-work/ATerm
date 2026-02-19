@@ -4,6 +4,7 @@ import { TerminalColorScheme } from '../api/interfaces'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'color-scheme-preview',
     templateUrl: './colorSchemePreview.component.html',
     styleUrls: ['./colorSchemePreview.component.scss'],

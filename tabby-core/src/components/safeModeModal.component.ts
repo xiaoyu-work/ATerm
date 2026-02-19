@@ -3,6 +3,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 
 /** @hidden */
 @Component({
+    standalone: false,
     templateUrl: './safeModeModal.component.html',
 })
 export class SafeModeModalComponent {

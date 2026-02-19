@@ -3,6 +3,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 
 /** @hidden */
 @Component({
+    standalone: false,
     templateUrl: './unlockVaultModal.component.html',
 })
 export class UnlockVaultModalComponent {

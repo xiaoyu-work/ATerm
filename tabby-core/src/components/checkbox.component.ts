@@ -4,6 +4,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'checkbox',
     template: `
         <div class="form-check form-checkbox">

@@ -259,6 +259,7 @@ export class LocaleService {
 }
 
 @Pipe({
+    standalone: false,
     name: 'tabbyDate',
 })
 export class TabbyFormatedDatePipe implements PipeTransform {

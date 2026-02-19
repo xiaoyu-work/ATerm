@@ -4,6 +4,7 @@ import { BaseTabComponent } from '../components/baseTab.component'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'tab-body',
     template: `
         <ng-template #placeholder></ng-template>

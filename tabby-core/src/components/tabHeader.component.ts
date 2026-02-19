@@ -14,6 +14,7 @@ import { PlatformService } from '../api/platform'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'tab-header',
     templateUrl: './tabHeader.component.html',
     styleUrls: ['./tabHeader.component.scss'],

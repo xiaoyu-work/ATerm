@@ -4,6 +4,7 @@ import { Frontend, SearchOptions, SearchState } from '../frontends/frontend'
 import { ConfigService, NotificationsService, TranslateService } from 'tabby-core'
 
 @Component({
+    standalone: false,
     selector: 'search-panel',
     templateUrl: './searchPanel.component.html',
     styleUrls: ['./searchPanel.component.scss'],

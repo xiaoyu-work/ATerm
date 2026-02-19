@@ -7,6 +7,7 @@ import { ConfigService, getCSSFontFamily, PlatformService, ThemesService } from 
 
 /** @hidden */
 @Component({
+    standalone: false,
     templateUrl: './appearanceSettingsTab.component.html',
     styleUrls: ['./appearanceSettingsTab.component.scss'],
 })

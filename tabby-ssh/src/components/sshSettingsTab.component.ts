@@ -4,6 +4,7 @@ import { ConfigService, HostAppService, Platform } from 'tabby-core'
 
 /** @hidden */
 @Component({
+    standalone: false,
     templateUrl: './sshSettingsTab.component.html',
 })
 export class SSHSettingsTabComponent {

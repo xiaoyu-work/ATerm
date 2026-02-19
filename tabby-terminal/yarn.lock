@@ -474,17 +474,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ngx-colors@npm:^3.4.0":
-  version: 3.4.0
-  resolution: "ngx-colors@npm:3.4.0"
+"ngx-colors@npm:^3.6.0":
+  version: 3.6.0
+  resolution: "ngx-colors@npm:3.6.0"
   dependencies:
     tslib: "npm:^2.0.0"
   peerDependencies:
-    "@angular/animations": ">=13.1.1"
-    "@angular/common": ">=13.1.1"
-    "@angular/core": ">=13.1.1"
-    "@angular/forms": ">=13.1.1"
-  checksum: 10c0/1a33336f4c0b3e87cbe511a679021c8f8017be1214105b33c1e61f9049e43203ee562737d5d3d89a4397c32faae825afd7f9754599ca83d9c885865e1f994ba1
+    "@angular/animations": ">=15.0.0"
+    "@angular/common": ">=15.0.0"
+    "@angular/core": ">=15.0.0"
+    "@angular/forms": ">=15.0.0"
+  checksum: 10c0/99a522f08ae589cf081bfae28c02c3edadfd70d73df97f196d5f5087b99fb23e7c2f896a2b2f32413a40054d4ef75dd096cb91b42099f203b8601f48141410da
   languageName: node
   linkType: hard
 
@@ -679,7 +679,7 @@ __metadata:
     cli-spinner: "npm:^0.2.10"
     dataurl: "npm:0.1.0"
     hexer: "npm:^1.5.0"
-    ngx-colors: "npm:^3.4.0"
+    ngx-colors: "npm:^3.6.0"
     patch-package: "npm:^6.5.0"
     runes: "npm:^0.4.2"
     zmodem.js: "npm:^0.1.9"

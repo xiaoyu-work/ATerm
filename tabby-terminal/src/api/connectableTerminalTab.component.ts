@@ -12,7 +12,8 @@ import { GetRecoveryTokenOptions, RecoveryToken } from 'tabby-core'
 /**
  * A class to base your custom connectable terminal tabs on
  */
-@Component({ template: '' })
+@Component({
+    standalone: false, template: '' })
 export abstract class ConnectableTerminalTabComponent<P extends ConnectableTerminalProfile> extends BaseTerminalTabComponent<P> {
 
     protected reconnectOffered = false

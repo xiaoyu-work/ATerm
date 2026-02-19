@@ -3,6 +3,7 @@ import { ConfigService, PlatformService } from 'tabby-core'
 
 /** @hidden */
 @Component({
+    standalone: false,
     templateUrl: './colorSchemeSettingsTab.component.html',
 })
 export class ColorSchemeSettingsTabComponent {

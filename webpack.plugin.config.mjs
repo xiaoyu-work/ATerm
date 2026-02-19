@@ -105,7 +105,7 @@ export default options => {
                 },
                 {
                     test: /\.html$/,
-                    use: ['html-loader'],
+                    use: [{ loader: 'html-loader', options: { esModule: false, sources: false, minimize: false } }],
                     exclude: /index\.html/,
                 },
                 { test: /\.scss$/, use: ['@tabby-gang/to-string-loader', 'css-loader', 'sass-loader'], include: /(theme.*|component)\.scss/ },

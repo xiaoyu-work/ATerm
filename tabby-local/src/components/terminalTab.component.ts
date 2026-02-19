@@ -7,6 +7,7 @@ import { Session } from '../session'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'terminalTab',
     template: BaseTerminalTabComponent.template,
     styles: BaseTerminalTabComponent.styles,

@@ -5,6 +5,7 @@ import { StreamProcessingOptions } from '../middleware/streamProcessing'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'stream-processing-settings',
     templateUrl: './streamProcessingSettings.component.html',
 })

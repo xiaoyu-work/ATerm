@@ -5,6 +5,7 @@ import { ConfigProxy, ProfileGroup, Profile, ProfileProvider, PlatformService, T
 
 /** @hidden */
 @Component({
+    standalone: false,
     templateUrl: './editProfileGroupModal.component.html',
 })
 export class EditProfileGroupModalComponent<G extends ProfileGroup> {

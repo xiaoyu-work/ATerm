@@ -7,6 +7,7 @@ import { SplitDropZoneInfo, SplitTabComponent } from './splitTab.component'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'split-tab-drop-zone',
     template: `
     <div

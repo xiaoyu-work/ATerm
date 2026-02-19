@@ -1,7 +1,8 @@
 import { HostBinding, ElementRef, Component } from '@angular/core'
 import { BaseComponent } from './base.component'
 
-@Component({})
+@Component({
+    standalone: false,})
 export abstract class SelfPositioningComponent extends BaseComponent {
     @HostBinding('style.left') cssLeft = ''
     @HostBinding('style.top') cssTop = ''

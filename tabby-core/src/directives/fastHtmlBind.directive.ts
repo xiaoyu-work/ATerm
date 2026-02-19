@@ -3,6 +3,7 @@ import { PlatformService } from '../api/platform'
 
 /** @hidden */
 @Directive({
+    standalone: false,
     selector: '[fastHtmlBind]',
 })
 export class FastHtmlBindDirective implements OnChanges {

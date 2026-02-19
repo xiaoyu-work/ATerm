@@ -5,6 +5,7 @@ import { InputProcessingOptions } from '../middleware/inputProcessing'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'input-processing-settings',
     templateUrl: './inputProcessingSettings.component.html',
 })

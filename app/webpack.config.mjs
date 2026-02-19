@@ -21,7 +21,6 @@ export default () => ({
     name: 'tabby',
     target: 'node',
     entry: {
-        'index.ignore': 'file-loader?name=index.html!html-loader!' + path.resolve(__dirname, './index.html'),
         sentry: path.resolve(__dirname, 'lib/sentry.ts'),
         preload: path.resolve(__dirname, 'src/entry.preload.ts'),
         bundle: path.resolve(__dirname, 'src/entry.ts'),
@@ -29,6 +28,7 @@ export default () => ({
     mode: process.env.TABBY_DEV ? 'development' : 'production',
     optimization:{
         minimize: false,
+        concatenateModules: false,
     },
     context: __dirname,
     devtool: 'source-map',
@@ -89,6 +89,19 @@ export default () => ({
             tsconfig: path.resolve(__dirname, 'tsconfig.json'),
             directTemplateLoading: false,
             jitMode: true,
-        })
+        }),
+        {
+            apply: (compiler) => {
+                compiler.hooks.thisCompilation.tap('CopyIndexHtml', (compilation) => {
+                    compilation.hooks.processAssets.tap(
+                        { name: 'CopyIndexHtml', stage: wp.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL },
+                        () => {
+                            const content = fs.readFileSync(path.resolve(__dirname, './index.html'), 'utf-8')
+                            compilation.emitAsset('index.html', new wp.sources.RawSource(content))
+                        },
+                    )
+                })
+            },
+        },
     ],
 })

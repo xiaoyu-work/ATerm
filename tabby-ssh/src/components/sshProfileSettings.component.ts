@@ -12,6 +12,7 @@ import { SSHProfilesService } from '../profiles'
 
 /** @hidden */
 @Component({
+    standalone: false,
     templateUrl: './sshProfileSettings.component.html',
 })
 export class SSHProfileSettingsComponent implements ProfileSettingsComponent<SSHProfile, SSHProfilesService> {

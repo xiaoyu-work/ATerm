@@ -7,6 +7,7 @@ import { LocaleService } from '../services/locale.service'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'welcome-page',
     templateUrl: './welcomeTab.component.html',
     styleUrls: ['./welcomeTab.component.scss'],

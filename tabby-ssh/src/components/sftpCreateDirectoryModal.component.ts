@@ -4,6 +4,7 @@ import { BaseComponent } from 'tabby-core'
 
 /** @hidden */
 @Component({
+    standalone: false,
     templateUrl: './sftpCreateDirectoryModal.component.html',
 })
 export class SFTPCreateDirectoryModalComponent extends BaseComponent {

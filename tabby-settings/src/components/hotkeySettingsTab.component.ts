@@ -13,6 +13,7 @@ _('Search hotkeys')
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'hotkey-settings-tab',
     templateUrl: './hotkeySettingsTab.component.html',
 })

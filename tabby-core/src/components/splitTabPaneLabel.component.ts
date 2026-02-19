@@ -7,6 +7,7 @@ import { SelfPositioningComponent } from './selfPositioning.component'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'split-tab-pane-label',
     template: `
     <div

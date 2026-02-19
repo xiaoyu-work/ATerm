@@ -3,6 +3,7 @@ import { WIN_BUILD_CONPTY_SUPPORTED, WIN_BUILD_CONPTY_STABLE, isWindowsBuild, Co
 
 /** @hidden */
 @Component({
+    standalone: false,
     templateUrl: './shellSettingsTab.component.html',
 })
 export class ShellSettingsTabComponent {

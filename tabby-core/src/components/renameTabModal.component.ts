@@ -4,6 +4,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'rename-tab-modal',
     templateUrl: './renameTabModal.component.html',
 })

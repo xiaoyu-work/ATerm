@@ -8,6 +8,7 @@ import { ShowSecretModalComponent } from './showSecretModal.component'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'vault-settings-tab',
     templateUrl: './vaultSettingsTab.component.html',
 })

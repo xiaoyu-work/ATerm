@@ -23,7 +23,8 @@ const OSC_FOCUS_OUT = Buffer.from('\x1b[O')
 /**
  * A class to base your custom terminal tabs on
  */
-@Component({ template: '' })
+@Component({
+    standalone: false, template: '' })
 export class BaseTerminalTabComponent<P extends BaseTerminalProfile> extends BaseTabComponent implements OnInit, OnDestroy {
     static template: string = require('../components/baseTerminalTab.component.html')
     static styles: string[] = [require('../components/baseTerminalTab.component.scss')]

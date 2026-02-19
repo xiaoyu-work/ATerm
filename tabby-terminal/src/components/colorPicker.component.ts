@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'color-picker',
     templateUrl: './colorPicker.component.html',
     styleUrls: ['./colorPicker.component.scss'],

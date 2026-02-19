@@ -3,6 +3,7 @@ import { SettingsTabProvider } from '../api'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'settings-tab-body',
     template: '<ng-template #placeholder></ng-template>',
     styles: [`

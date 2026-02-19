@@ -5,6 +5,7 @@ import { SessionOptions } from '../api'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'command-line-editor',
     templateUrl: './commandLineEditor.component.html',
 })

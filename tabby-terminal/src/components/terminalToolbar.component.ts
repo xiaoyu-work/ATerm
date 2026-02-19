@@ -5,6 +5,7 @@ import { BaseTerminalTabComponent } from '../api/baseTerminalTab.component'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'terminal-toolbar',
     templateUrl: './terminalToolbar.component.html',
     styleUrls: ['./terminalToolbar.component.scss'],

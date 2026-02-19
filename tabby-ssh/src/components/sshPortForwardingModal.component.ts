@@ -6,6 +6,7 @@ import { ForwardedPortConfig } from '../api'
 
 /** @hidden */
 @Component({
+    standalone: false,
     templateUrl: './sshPortForwardingModal.component.html',
 })
 export class SSHPortForwardingModalComponent {

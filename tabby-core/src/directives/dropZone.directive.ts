@@ -4,6 +4,7 @@ import './dropZone.directive.scss'
 
 /** @hidden */
 @Directive({
+    standalone: false,
     selector: '[dropZone]',
 })
 export class DropZoneDirective implements AfterViewInit {

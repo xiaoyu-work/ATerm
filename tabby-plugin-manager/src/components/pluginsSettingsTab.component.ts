@@ -15,6 +15,7 @@ _('Search plugins')
 
 /** @hidden */
 @Component({
+    standalone: false,
     templateUrl: './pluginsSettingsTab.component.html',
     styleUrls: ['./pluginsSettingsTab.component.scss'],
 })

@@ -5,6 +5,7 @@ import { SplitContainer } from './splitTab.component'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'split-tab-spanner',
     template: '',
     styleUrls: ['./splitTabSpanner.component.scss'],

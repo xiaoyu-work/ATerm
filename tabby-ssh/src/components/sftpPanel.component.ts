@@ -14,6 +14,7 @@ interface PathSegment {
 }
 
 @Component({
+    standalone: false,
     selector: 'sftp-panel',
     templateUrl: './sftpPanel.component.html',
     styleUrls: ['./sftpPanel.component.scss'],

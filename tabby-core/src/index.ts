@@ -3,7 +3,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { NgbModule, NgbTooltipConfig } from '@ng-bootstrap/ng-bootstrap'
-import { NgxFilesizeModule } from 'ngx-filesize'
+import { FileSizePipe } from './pipes/filesize.pipe'
 import { DragDropModule } from '@angular/cdk/drag-drop'
 import { TranslateModule, TranslateCompiler, TranslateService, MissingTranslationHandler } from '@ngx-translate/core'
 import { TranslateMessageFormatCompiler, MESSAGE_FORMAT_CONFIG } from 'ngx-translate-messageformat-compiler'
@@ -90,7 +90,7 @@ const PROVIDERS = [
         CommonModule,
         FormsModule,
         NgbModule,
-        NgxFilesizeModule,
+        FileSizePipe,
         DragDropModule,
         TranslateModule.forRoot({
             defaultLanguage: 'en',
@@ -268,6 +268,7 @@ export default class AppModule { // eslint-disable-line @typescript-eslint/no-ex
 export { AppRootComponent as bootstrap }
 export * from './api'
 export { AppHotkeyProvider }
+export { FileSizePipe } from './pipes/filesize.pipe'
 
 // Deprecations
 export { ToolbarButton as IToolbarButton } from './api'

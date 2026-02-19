@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 import { ToastrModule } from 'ngx-toastr'
-import { NgxFilesizeModule } from 'ngx-filesize'
+import { FileSizePipe } from 'tabby-core'
 import TabbyCoreModule, { ConfigProvider, TabRecoveryProvider, HotkeyProvider, ProfileProvider } from 'tabby-core'
 import TabbyTerminalModule from 'tabby-terminal'
 
@@ -19,7 +19,7 @@ import { TelnetProfilesService } from './profiles'
 @NgModule({
     imports: [
         NgbModule,
-        NgxFilesizeModule,
+        FileSizePipe,
         CommonModule,
         FormsModule,
         ToastrModule,

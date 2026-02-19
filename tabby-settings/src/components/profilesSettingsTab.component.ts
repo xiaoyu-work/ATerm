@@ -15,6 +15,7 @@ interface CollapsableProfileGroup extends ProfileGroup {
 
 /** @hidden */
 @Component({
+    standalone: false,
     templateUrl: './profilesSettingsTab.component.html',
     styleUrls: ['./profilesSettingsTab.component.scss'],
 })

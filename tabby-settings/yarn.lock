@@ -21,15 +21,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ngx-infinite-scroll@npm:^16":
-  version: 16.0.0
-  resolution: "ngx-infinite-scroll@npm:16.0.0"
+"ngx-infinite-scroll@npm:^19":
+  version: 19.0.0
+  resolution: "ngx-infinite-scroll@npm:19.0.0"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/common": ">=16.0.0 <17.0.0"
-    "@angular/core": ">=16.0.0 <17.0.0"
-  checksum: 10c0/031a945c54e83dda9100fc86bd5b38bec095ed85cda6ca294f3c6c05ce4de95bcd139f5d85edb19a5d22d1e09330f4903e529e9bd583331a858f69f76286e313
+    "@angular/common": ">=19.0.0 <20.0.0"
+    "@angular/core": ">=19.0.0 <20.0.0"
+  checksum: 10c0/219c1d6734899f7d25e5a66d5154a1722373ab06078f60f2c1bc64ad6d074416e7996a822c06093513e08a66eeafe0f25cdba7d5c7d699155ad77c95a1311628
   languageName: node
   linkType: hard
 
@@ -39,7 +39,7 @@ __metadata:
   dependencies:
     "@types/marked": "npm:^5.0.1"
     marked: "npm:^5.1.2"
-    ngx-infinite-scroll: "npm:^16"
+    ngx-infinite-scroll: "npm:^19"
   peerDependencies:
     "@angular/animations": ^19
     "@angular/common": ^19

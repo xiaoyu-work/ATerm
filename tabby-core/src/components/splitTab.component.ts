@@ -160,6 +160,7 @@ export type SplitDropZoneInfo = {
  * You'll mainly encounter it inside [[AppService]].tabs
  */
 @Component({
+    standalone: false,
     selector: 'split-tab',
     template: `
         <ng-container #vc></ng-container>

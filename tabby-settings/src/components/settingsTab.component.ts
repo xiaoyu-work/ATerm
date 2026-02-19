@@ -22,6 +22,7 @@ import { ReleaseNotesComponent } from './releaseNotesTab.component'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'settings-tab',
     templateUrl: './settingsTab.component.html',
     styleUrls: [

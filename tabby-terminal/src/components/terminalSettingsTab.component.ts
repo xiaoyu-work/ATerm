@@ -3,6 +3,7 @@ import { ConfigService, HostAppService, Platform, PlatformService, altKeyName, m
 
 /** @hidden */
 @Component({
+    standalone: false,
     templateUrl: './terminalSettingsTab.component.html',
 })
 export class TerminalSettingsTabComponent {

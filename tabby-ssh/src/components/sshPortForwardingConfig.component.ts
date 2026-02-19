@@ -4,6 +4,7 @@ import { ForwardedPortConfig, PortForwardType } from '../api'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'ssh-port-forwarding-config',
     templateUrl: './sshPortForwardingConfig.component.html',
 })

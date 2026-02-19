@@ -8,6 +8,7 @@ import { SerialProfilesService } from '../profiles'
 
 /** @hidden */
 @Component({
+    standalone: false,
     templateUrl: './serialProfileSettings.component.html',
 })
 export class SerialProfileSettingsComponent implements ProfileSettingsComponent<SerialProfile, SerialProfilesService> {

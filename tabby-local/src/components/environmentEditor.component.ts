@@ -4,6 +4,7 @@ import { Subject } from 'rxjs'
 
 /** @hidden */
 @Component({
+    standalone: false,
     selector: 'environment-editor',
     templateUrl: './environmentEditor.component.html',
     styleUrls: ['./environmentEditor.component.scss'],
