@@ -34,6 +34,9 @@ const enum State {
 }
 
 export class AIMiddleware extends SessionMiddleware {
+    private static readonly RESIZE_REPAINT_SUPPRESS_MS = 220
+    private static readonly AI_OUTPUT_PROTECT_WINDOW_MS = 120000
+
     private state = State.NORMAL
     private promptBuffer = ''
     private atLineStart = true
@@ -44,6 +47,8 @@ export class AIMiddleware extends SessionMiddleware {
     private bannerShown = false
     private conversationHistory: ChatMessage[] = []
     private terminalCheckpoint = 0
+    private suppressSessionOutputUntil = 0
+    private lastAIDisplayOutputAt = 0
     /** Session-level accumulated token usage — maps to gemini-cli's ModelMetrics.tokens */
     private sessionUsage: TokensSummary = { promptTokens: 0, completionTokens: 0, cachedTokens: 0, totalTokens: 0 }
 
@@ -53,6 +58,23 @@ export class AIMiddleware extends SessionMiddleware {
         private config: ConfigService,
     ) {
         super()
+    }
+
+    onTerminalResize (_columns: number, _rows: number): void {
+        const now = Date.now()
+        if (this.state !== State.NORMAL) {
+            this.suppressSessionOutputUntil = Math.max(
+                this.suppressSessionOutputUntil,
+                now + AIMiddleware.RESIZE_REPAINT_SUPPRESS_MS,
+            )
+            return
+        }
+        if (now - this.lastAIDisplayOutputAt <= AIMiddleware.AI_OUTPUT_PROTECT_WINDOW_MS) {
+            this.suppressSessionOutputUntil = Math.max(
+                this.suppressSessionOutputUntil,
+                now + AIMiddleware.RESIZE_REPAINT_SUPPRESS_MS,
+            )
+        }
     }
 
     feedFromSession (data: Buffer): void {
@@ -65,6 +87,9 @@ export class AIMiddleware extends SessionMiddleware {
             }
             // Any shell output means cursor is at a prompt/new line
             this.atLineStart = true
+            if (Date.now() < this.suppressSessionOutputUntil) {
+                return
+            }
             this.outputToTerminal.next(data)
         } catch (e) {
             console.error('[tabby-ai] feedFromSession error:', e)
@@ -222,6 +247,7 @@ export class AIMiddleware extends SessionMiddleware {
         }
 
         this.outputToTerminal.next(Buffer.from('\r\n'))
+        this.markAIDisplayOutput()
         this.state = State.AGENT_STREAMING
         this.abortController = new AbortController()
 
@@ -246,16 +272,19 @@ export class AIMiddleware extends SessionMiddleware {
             onContent: (text) => {
                 this.state = State.AGENT_STREAMING
                 const formatted = text.replace(/\n/g, '\r\n')
+                this.markAIDisplayOutput()
                 this.outputToTerminal.next(Buffer.from(colors.green(formatted)))
             },
 
             onThinking: (text) => {
                 const formatted = text.replace(/\n/g, '\r\n')
+                this.markAIDisplayOutput()
                 this.outputToTerminal.next(Buffer.from(colors.gray(formatted)))
             },
 
             onConfirmCommand: (cmd) => {
                 this.state = State.AGENT_CONFIRMING
+                this.markAIDisplayOutput()
                 this.outputToTerminal.next(Buffer.from(
                     '\r\n' +
                     colors.yellow(`  ⚡ ${cmd}`) +
@@ -275,6 +304,7 @@ export class AIMiddleware extends SessionMiddleware {
             onAskUser: (question) => {
                 this.state = State.AGENT_ASKING
                 this.askBuffer = ''
+                this.markAIDisplayOutput()
                 this.outputToTerminal.next(Buffer.from(
                     '\r\n' +
                     colors.cyan(`  ? ${question}`) +
@@ -294,20 +324,24 @@ export class AIMiddleware extends SessionMiddleware {
 
             onCommandStart: () => {
                 this.state = State.AGENT_EXECUTING
+                this.markAIDisplayOutput()
                 this.outputToTerminal.next(Buffer.from('\r\n'))
             },
 
             onCommandOutput: (chunk) => {
                 const formatted = chunk.replace(/\n/g, '\r\n')
+                this.markAIDisplayOutput()
                 this.outputToTerminal.next(Buffer.from(colors.dim(formatted)))
             },
 
             onCommandDone: () => {
                 this.state = State.AGENT_STREAMING
+                this.markAIDisplayOutput()
                 this.outputToTerminal.next(Buffer.from('\r\n'))
             },
 
             onDone: () => {
+                this.markAIDisplayOutput()
                 this.outputToTerminal.next(Buffer.from('\r\n'))
                 this.state = State.NORMAL
                 this.atLineStart = true
@@ -320,6 +354,7 @@ export class AIMiddleware extends SessionMiddleware {
             },
 
             onError: (err) => {
+                this.markAIDisplayOutput()
                 this.outputToTerminal.next(Buffer.from(
                     '\r\n' + colors.red(`  Error: ${err}`) + '\r\n',
                 ))
@@ -349,6 +384,7 @@ export class AIMiddleware extends SessionMiddleware {
             // if loop.run() itself throws, print it here as a fallback.
             // Use cast because TS narrows state to AGENT_STREAMING but callbacks mutate it.
             if ((this.state as State) !== State.NORMAL) {
+                this.markAIDisplayOutput()
                 this.outputToTerminal.next(Buffer.from(
                     '\r\n' + colors.red(`  Error: ${err}`) + '\r\n',
                 ))
@@ -397,6 +433,7 @@ export class AIMiddleware extends SessionMiddleware {
             line += colors.gray(`  (session: ${this.sessionUsage.totalTokens.toLocaleString()} total)`)
         }
 
+        this.markAIDisplayOutput()
         this.outputToTerminal.next(Buffer.from(
             colors.gray(line) + '\r\n',
         ))
@@ -436,6 +473,10 @@ export class AIMiddleware extends SessionMiddleware {
      *
      * Sections: Preamble, Core Mandates, Primary Workflows, Operational Guidelines, Git
      */
+    private markAIDisplayOutput (): void {
+        this.lastAIDisplayOutputAt = Date.now()
+    }
+
     private async buildSystemPrompt (): Promise<string> {
         const context = this.collector.toPromptString()
         const cwd = this.collector.cwd || process.cwd()

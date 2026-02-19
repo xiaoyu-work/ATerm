@@ -81,6 +81,9 @@ export class XTermFrontend extends Frontend {
     private canvasAddon?: CanvasAddon
     private opened = false
     private resizeObserver?: any
+    private zoomResizing = false
+    private zoomResizeResetTimer: ReturnType<typeof setTimeout> | null = null
+    private lastReportedResize: { rows: number; columns: number } | null = null
     private flowControl: FlowControl
 
     private configService: ConfigService
@@ -125,7 +128,18 @@ export class XTermFrontend extends Frontend {
             this.input.next(Buffer.from(data, 'utf-8'))
         })
         this.xterm.onResize(({ cols, rows }) => {
-            this.resize.next({ rows, columns: cols })
+            if (this.zoomResizing) {
+                // Zoom resize: update xterm display but don't notify PTY.
+                // ConPTY repaints on resize and overwrites content it doesn't
+                // know about (e.g. AI output injected via middleware).
+                return
+            }
+            const next = { rows, columns: cols }
+            if (this.lastReportedResize?.rows === next.rows && this.lastReportedResize.columns === next.columns) {
+                return
+            }
+            this.lastReportedResize = next
+            this.resize.next(next)
         })
         this.xterm.onTitleChange(title => {
             this.title.next(title)
@@ -314,6 +328,10 @@ export class XTermFrontend extends Frontend {
 
     destroy (): void {
         super.destroy()
+        if (this.zoomResizeResetTimer) {
+            clearTimeout(this.zoomResizeResetTimer)
+            this.zoomResizeResetTimer = null
+        }
         this.webGLAddon?.dispose()
         this.canvasAddon?.dispose()
         this.xterm.dispose()
@@ -416,18 +434,27 @@ export class XTermFrontend extends Frontend {
 
     configure (profile: BaseTerminalProfile): void {
         const config = this.configService.store
+        const fontFamily = getCSSFontFamily(config)
+        const requiresMetricsRefresh =
+            this.xterm.options.fontFamily !== fontFamily ||
+            this.configuredFontSize !== config.terminal.fontSize ||
+            this.configuredLinePadding !== config.terminal.linePadding
 
-        setImmediate(() => {
-            if (this.xterm.cols && this.xterm.rows && this.xtermCore.charMeasure) {
-                if (this.xtermCore.charMeasure) {
-                    this.xtermCore.charMeasure.measure(this.xtermCore.options)
+        this.xterm.options.fontFamily = fontFamily
+
+        if (requiresMetricsRefresh) {
+            setImmediate(() => {
+                if (this.xterm.cols && this.xterm.rows && this.xtermCore.charMeasure) {
+                    if (this.xtermCore.charMeasure) {
+                        this.xtermCore.charMeasure.measure(this.xtermCore.options)
+                    }
+                    if (this.xtermCore.renderer) {
+                        this.xtermCore.renderer._updateDimensions()
+                    }
+                    this.resizeHandler()
                 }
-                if (this.xtermCore.renderer) {
-                    this.xtermCore.renderer._updateDimensions()
-                }
-                this.resizeHandler()
-            }
-        })
+            })
+        }
 
         this.xtermCore.browser = {
             ...this.xtermCore.browser,
@@ -436,7 +463,6 @@ export class XTermFrontend extends Frontend {
             isMac: this.hostApp.platform === Platform.macOS,
         }
 
-        this.xterm.options.fontFamily = getCSSFontFamily(config)
         this.xterm.options.cursorStyle = {
             beam: 'bar',
         }[config.terminal.cursor] || config.terminal.cursor
@@ -450,7 +476,9 @@ export class XTermFrontend extends Frontend {
         this.xterm.options.minimumContrastRatio = config.terminal.minimumContrastRatio
         this.configuredFontSize = config.terminal.fontSize
         this.configuredLinePadding = config.terminal.linePadding
-        this.setFontSize()
+        if (requiresMetricsRefresh) {
+            this.setFontSize()
+        }
 
         this.copyOnSelect = config.terminal.copyOnSelect
 
@@ -464,8 +492,18 @@ export class XTermFrontend extends Frontend {
 
     setZoom (zoom: number): void {
         this.zoom = zoom
+        this.zoomResizing = true
+        if (this.zoomResizeResetTimer) {
+            clearTimeout(this.zoomResizeResetTimer)
+        }
         this.setFontSize()
         this.resizeHandler()
+        // Keep resize suppression slightly longer because xterm resize events
+        // can arrive asynchronously after fit() returns.
+        this.zoomResizeResetTimer = setTimeout(() => {
+            this.zoomResizing = false
+            this.zoomResizeResetTimer = null
+        }, 120)
     }
 
     private getSearchOptions (searchOptions?: SearchOptions): ISearchOptions {

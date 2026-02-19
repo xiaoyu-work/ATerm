@@ -750,6 +750,7 @@ export class BaseTerminalTabComponent<P extends BaseTerminalProfile> extends Bas
             this.size = { columns, rows }
             this.zone.run(() => {
                 if (this.session?.open) {
+                    this.session.middleware.notifyTerminalResize(columns, rows)
                     this.session.resize(columns, rows)
                 }
             })

@@ -16,6 +16,12 @@ export class SessionMiddleware {
         this.outputToSession.next(data)
     }
 
+    // Optional hook for terminal resize notifications.
+    // Middleware can override this to react to UI resizes.
+    onTerminalResize (_columns: number, _rows: number): void {
+        // no-op
+    }
+
     close (): void {
         this.outputToSession.complete()
         this.outputToTerminal.complete()
@@ -63,6 +69,12 @@ export class SessionMiddlewareStack extends SessionMiddleware {
 
     feedFromTerminal (data: Buffer): void {
         this.stack[this.stack.length - 1].feedFromTerminal(data)
+    }
+
+    notifyTerminalResize (columns: number, rows: number): void {
+        for (const middleware of this.stack) {
+            middleware.onTerminalResize(columns, rows)
+        }
     }
 
     close (): void {

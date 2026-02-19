@@ -163,9 +163,11 @@ export class AppRootComponent {
                     tabBody.detach()
                 }
             }
-            this.unsortedTabs = this.unsortedTabs.filter(x => x !== tab)
-            this.noTabs = app.tabs.length === 0
-            this.app.emitTabDragEnded()
+            setTimeout(() => {
+                this.unsortedTabs = this.unsortedTabs.filter(x => x !== tab)
+                this.noTabs = app.tabs.length === 0
+                this.app.emitTabDragEnded()
+            })
         })
 
         platform.fileTransferStarted$.subscribe(transfer => {
