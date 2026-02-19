@@ -1,0 +1,142 @@
+h3 AI Assistant
+
+.alert.alert-info
+    | Configure your LLM provider. Any OpenAI-compatible API endpoint is supported.
+    | Type #[strong @ ] followed by your prompt in a terminal to chat with AI.
+
+.form-line
+    .header
+        .title Provider
+        .description Select a preset or choose "Custom" for any OpenAI-compatible endpoint.
+    select.form-control(
+        [(ngModel)]='config.store.ai.provider',
+        (ngModelChange)='onProviderChange(); config.save()',
+    )
+        option(value='openai') OpenAI
+        option(value='gemini') Google Gemini
+        option(value='ollama') Ollama (local)
+        option(value='deepseek') DeepSeek
+        option(value='azure') Azure OpenAI
+        option(value='custom') Custom
+
+.form-line
+    .header
+        .title(
+            *ngIf='config.store.ai.provider === "azure"'
+        ) Azure Endpoint
+        .title(
+            *ngIf='config.store.ai.provider !== "azure"'
+        ) API Base URL
+        .description(
+            *ngIf='config.store.ai.provider === "azure"'
+        ) e.g. https://xxxx.cognitiveservices.azure.com
+        .description(
+            *ngIf='config.store.ai.provider === "custom"'
+        ) The OpenAI-compatible base URL (e.g. http://localhost:4000/v1/ for LiteLLM Proxy).
+        .description(
+            *ngIf='config.store.ai.provider !== "custom" && config.store.ai.provider !== "azure"'
+        ) Leave empty to use the default URL for the provider. Override if needed.
+    input.form-control(
+        type='text',
+        [placeholder]='getBaseUrlPlaceholder()',
+        [(ngModel)]='config.store.ai.baseUrl',
+        (ngModelChange)='config.save()',
+    )
+
+.form-line(*ngIf='config.store.ai.provider === "azure"')
+    .header
+        .title Deployment Name
+        .description Your Azure OpenAI deployment name.
+    input.form-control(
+        type='text',
+        placeholder='gpt-4.1',
+        [(ngModel)]='config.store.ai.deployment',
+        (ngModelChange)='config.save()',
+    )
+
+.form-line(*ngIf='config.store.ai.provider !== "ollama"')
+    .header
+        .title API Key
+        .description Your API key for the selected provider.
+    input.form-control(
+        type='password',
+        placeholder='sk-...',
+        [(ngModel)]='config.store.ai.apiKey',
+        (ngModelChange)='config.save()',
+    )
+
+.form-line(*ngIf='config.store.ai.provider === "azure"')
+    .header
+        .title API Version
+        .description Azure OpenAI API version.
+    input.form-control(
+        type='text',
+        placeholder='2024-12-01-preview',
+        [(ngModel)]='config.store.ai.apiVersion',
+        (ngModelChange)='config.save()',
+    )
+
+.form-line(*ngIf='config.store.ai.provider !== "azure"')
+    .header
+        .title Model
+        .description Model name to use for completions.
+    input.form-control(
+        type='text',
+        [placeholder]='getModelPlaceholder()',
+        [(ngModel)]='config.store.ai.model',
+        (ngModelChange)='config.save()',
+    )
+
+.form-line
+    .header
+        .title Context Lines
+        .description Max lines of terminal output to include as AI context.
+    input.form-control(
+        type='number',
+        min='10',
+        max='500',
+        [(ngModel)]='config.store.ai.maxContextLines',
+        (ngModelChange)='config.save()',
+    )
+
+hr
+
+h4 Token Usage History
+
+.text-muted.mb-3(*ngIf='getUsageProviders().length === 0')
+    | No usage data yet. Start using AI to see token statistics here.
+
+table.table.table-sm(*ngIf='getUsageProviders().length > 0')
+    thead
+        tr
+            th Provider
+            th Requests
+            th Input Tokens
+            th Output Tokens
+            th Total Tokens
+            th
+    tbody
+        tr(*ngFor='let p of getUsageProviders()')
+            td {{ getProviderLabel(p) }}
+            td {{ formatNumber(config.store.ai.tokenUsage[p].requestCount) }}
+            td {{ formatNumber(config.store.ai.tokenUsage[p].promptTokens) }}
+            td {{ formatNumber(config.store.ai.tokenUsage[p].completionTokens) }}
+            td {{ formatNumber(config.store.ai.tokenUsage[p].totalTokens) }}
+            td
+                button.btn.btn-sm.btn-outline-danger(
+                    (click)='clearUsage(p)',
+                    title='Clear usage for this provider',
+                )
+                    i.fas.fa-trash
+    tfoot(*ngIf='getUsageProviders().length > 1')
+        tr.fw-bold
+            td Total
+            td {{ formatNumber(getTotalRequests()) }}
+            td {{ formatNumber(getTotalPromptTokens()) }}
+            td {{ formatNumber(getTotalCompletionTokens()) }}
+            td {{ formatNumber(getTotalTokens()) }}
+            td
+                button.btn.btn-sm.btn-outline-danger(
+                    (click)='clearAllUsage()',
+                )
+                    | Clear All

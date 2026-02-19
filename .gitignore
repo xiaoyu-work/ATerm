@@ -1,0 +1,52 @@
+app/node_modules
+app/assets/webpack
+
+node_modules
+
+build/files.wxs
+dist
+*/dist
+*/typings
+*.tsbuildinfo
+
+*.xcworkspacedata
+*.xcuserstate
+*.wixpdb
+
+.DS_Store
+.DS_Store?
+
+coverage
+.nyc_output
+npm-debug.log
+
+builtin-plugins
+package-lock.json
+yarn-error.log
+
+docs/api
+.travis.ssh.key
+*.code-workspace
+.idea/
+
+.electron-symbols
+sentry.properties
+sentry-symbols.js
+
+*.psd
+
+crowdin.yml
+.crowdin.env
+.claude/
+
+# Yarn
+.yarn/install-state.gz
+
+# Env / secrets
+.env
+
+# Build artifacts
+build/config.gypi
+
+# Install logs
+app-install.log
