@@ -1,6 +1,14 @@
 # ATerm
 
-A modern terminal with built-in AI assistant. Type `@` to talk to AI directly in your terminal.
+ATerm.
+
+AI Terminal.  
+Agentic Terminal.  
+AT Terminal.    
+A Terminal.
+
+A modern terminal with a built-in AI agent assistant.  
+Type `@` and talk to AI directly from your command line.
 
 ## License
 
