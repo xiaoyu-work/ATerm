@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { Component, HostBinding } from '@angular/core'
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap'
-import { BaseComponent, VaultService, VaultSecret, Vault, PlatformService, ConfigService, VAULT_SECRET_TYPE_FILE, PromptModalComponent, VaultFileSecret, TranslateService } from 'tabby-core'
+import { BaseComponent, VaultService, VaultSecret, Vault, PlatformService, ConfigService, VAULT_SECRET_TYPE_FILE, PromptModalComponent, VaultFileSecret, TranslateService } from 'aterm-core'
 import { SetVaultPassphraseModalComponent } from './setVaultPassphraseModal.component'
 import { ShowSecretModalComponent } from './showSecretModal.component'
 

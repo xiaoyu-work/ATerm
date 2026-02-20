@@ -1,5 +1,5 @@
 import { Inject, Injectable, Optional } from '@angular/core'
-import { ConfigService, BaseTabComponent, TabContextMenuItemProvider, MenuItemOptions, ProfilesService, TranslateService } from 'tabby-core'
+import { ConfigService, BaseTabComponent, TabContextMenuItemProvider, MenuItemOptions, ProfilesService, TranslateService } from 'aterm-core'
 import { TerminalTabComponent } from './components/terminalTab.component'
 import { TerminalService } from './services/terminal.service'
 import { LocalProfile, UACService } from './api'

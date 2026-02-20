@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { Injectable } from '@angular/core'
-import { ToolbarButtonProvider, ToolbarButton, TranslateService } from 'tabby-core'
+import { ToolbarButtonProvider, ToolbarButton, TranslateService } from 'aterm-core'
 import { TerminalService } from './services/terminal.service'
 
 /** @hidden */

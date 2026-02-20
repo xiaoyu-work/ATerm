@@ -1,4 +1,4 @@
-import { BaseTerminalTabComponent } from 'tabby-terminal'
+import { BaseTerminalTabComponent } from 'aterm-terminal'
 
 export abstract class LinkHandler {
     regex: RegExp

@@ -1,9 +1,9 @@
 {
-  "name": "tabby-electron",
+  "name": "aterm-electron",
   "version": "1.0.231-nightly.0",
   "description": "Electron-specific bindings",
   "keywords": [
-    "tabby-builtin-plugin"
+    "aterm-builtin-plugin"
   ],
   "main": "dist/index.js",
   "typings": "typings/index.d.ts",
@@ -19,7 +19,7 @@
   "license": "MIT",
   "peerDependencies": {
     "@angular/core": "^19",
-    "tabby-local": "*"
+    "aterm-local": "*"
   },
   "devDependencies": {
     "electron-promise-ipc": "^2.2.4",

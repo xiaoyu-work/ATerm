@@ -10,7 +10,7 @@
 import * as fs from 'fs/promises'
 import { DeclarativeTool } from '../base/declarativeTool'
 import { BaseToolInvocation } from '../base/baseToolInvocation'
-import { ToolKind, ToolContext, ToolResult } from '../types'
+import { ToolKind, ToolContext, ToolResult, ConfirmationDetails } from '../types'
 import { validatePath } from '../security'
 
 export interface EditToolParams {
@@ -29,11 +29,27 @@ class EditToolInvocation extends BaseToolInvocation<EditToolParams> {
         return `Edit file: ${this.params.file_path}`
     }
 
+    /**
+     * Mirrors gemini-cli's EditToolInvocation.getConfirmationDetails()
+     * (packages/core/src/tools/edit.ts)
+     *
+     * Returns path_access if outside CWD, otherwise edit confirmation.
+     */
+    getConfirmationDetails (context: ToolContext): ConfirmationDetails | false {
+        const validation = validatePath(this.params.file_path, context.cwd)
+        if ('error' in validation) return false // Will error in execute()
+        if (validation.outsideCwd) {
+            return { type: 'path_access', title: 'Edit outside CWD', resolvedPath: validation.resolved }
+        }
+        return { type: 'edit', title: 'Edit file', filePath: validation.resolved }
+    }
+
     async execute (context: ToolContext): Promise<ToolResult> {
         const validation = validatePath(this.params.file_path, context.cwd)
         if ('error' in validation) {
             return this.error(validation.error)
         }
+        // outsideCwd check removed — handled by scheduler before execute()
 
         // Read current content
         let content: string

@@ -3,8 +3,8 @@ import * as path from 'path'
 import * as fs from 'fs'
 import { Subject, debounceTime, debounce } from 'rxjs'
 import { Injectable } from '@angular/core'
-import { MenuItemOptions, TranslateService } from 'tabby-core'
-import { SFTPFile, SFTPPanelComponent, SFTPContextMenuItemProvider, SFTPSession } from 'tabby-ssh'
+import { MenuItemOptions, TranslateService } from 'aterm-core'
+import { SFTPFile, SFTPPanelComponent, SFTPContextMenuItemProvider, SFTPSession } from 'aterm-ssh'
 import { ElectronPlatformService } from './services/platform.service'
 
 

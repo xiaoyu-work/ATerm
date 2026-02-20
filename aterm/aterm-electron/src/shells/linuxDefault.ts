@@ -1,8 +1,8 @@
 import * as fs from 'mz/fs'
 import { Injectable } from '@angular/core'
-import { HostAppService, Platform, LogService, Logger, TranslateService } from 'tabby-core'
+import { HostAppService, Platform, LogService, Logger, TranslateService } from 'aterm-core'
 
-import { ShellProvider, Shell } from 'tabby-local'
+import { ShellProvider, Shell } from 'aterm-local'
 
 /** @hidden */
 @Injectable()

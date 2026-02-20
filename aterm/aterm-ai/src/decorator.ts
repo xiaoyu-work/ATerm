@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
-import { ConfigService, PlatformService } from 'tabby-core'
-import { TerminalDecorator, BaseTerminalTabComponent } from 'tabby-terminal'
+import { ConfigService, PlatformService } from 'aterm-core'
+import { TerminalDecorator, BaseTerminalTabComponent } from 'aterm-terminal'
 import { ContextCollector } from './contextCollector'
 import { AIService } from './ai.service'
 import { AIMiddleware } from './aiMiddleware'
@@ -8,7 +8,7 @@ import { AIMiddleware } from './aiMiddleware'
 /**
  * Terminal decorator that attaches the AIMiddleware to every terminal session.
  *
- * Follows the ZModemDecorator pattern (tabby-terminal/src/features/zmodem.ts)
+ * Follows the ZModemDecorator pattern (aterm-terminal/src/features/zmodem.ts)
  * for robust session attachment — defers work with setTimeout and subscribes
  * to sessionChanged$ for future session changes (including tab restoration).
  */
@@ -55,7 +55,7 @@ export class AIDecorator extends TerminalDecorator {
                 // Insert AI middleware at the front of the stack
                 tab.session.middleware.unshift(new AIMiddleware(this.ai, collector, this.config, this.platform))
             } catch (e) {
-                console.error('[tabby-ai] Failed to attach AI middleware:', e)
+                console.error('[aterm-ai] Failed to attach AI middleware:', e)
             }
         }
 

@@ -1,5 +1,5 @@
 import { Component, HostBinding } from '@angular/core'
-import { ConfigService, HostAppService, Platform, PlatformService, altKeyName, metaKeyName } from 'tabby-core'
+import { ConfigService, HostAppService, Platform, PlatformService, altKeyName, metaKeyName } from 'aterm-core'
 
 /** @hidden */
 @Component({

@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as winston from 'winston'
 import { Injectable } from '@angular/core'
-import { ConsoleLogger, Logger } from 'tabby-core'
+import { ConsoleLogger, Logger } from 'aterm-core'
 import { ElectronService } from '../services/electron.service'
 
 const initializeWinston = (electron: ElectronService) => {

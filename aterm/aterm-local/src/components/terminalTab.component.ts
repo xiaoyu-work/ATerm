@@ -1,7 +1,7 @@
 import { marker as _ } from '@biesbjerg/ngx-translate-extract-marker'
 import { Component, Input, Injector, Inject, Optional } from '@angular/core'
-import { BaseTabProcess, WIN_BUILD_CONPTY_SUPPORTED, isWindowsBuild, GetRecoveryTokenOptions } from 'tabby-core'
-import { BaseTerminalTabComponent } from 'tabby-terminal'
+import { BaseTabProcess, WIN_BUILD_CONPTY_SUPPORTED, isWindowsBuild, GetRecoveryTokenOptions } from 'aterm-core'
+import { BaseTerminalTabComponent } from 'aterm-terminal'
 import { LocalProfile, SessionOptions, UACService } from '../api'
 import { Session } from '../session'
 

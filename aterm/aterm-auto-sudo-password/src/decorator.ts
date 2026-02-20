@@ -1,7 +1,7 @@
 import colors from 'ansi-colors'
 import { Injectable } from '@angular/core'
-import { TerminalDecorator, BaseTerminalTabComponent, XTermFrontend, SessionMiddleware } from 'tabby-terminal'
-import { SSHProfile, SSHTabComponent, PasswordStorageService } from 'tabby-ssh'
+import { TerminalDecorator, BaseTerminalTabComponent, XTermFrontend, SessionMiddleware } from 'aterm-terminal'
+import { SSHProfile, SSHTabComponent, PasswordStorageService } from 'aterm-ssh'
 
 const SUDO_PROMPT_REGEX = /^\[sudo\] password for ([^:]+):\s*$/im
 

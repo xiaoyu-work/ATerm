@@ -1,5 +1,5 @@
 import { Injectable, InjectFlags, Injector } from '@angular/core'
-import { NewTabParameters, PartialProfile, TranslateService, QuickConnectProfileProvider } from 'tabby-core'
+import { NewTabParameters, PartialProfile, TranslateService, QuickConnectProfileProvider } from 'aterm-core'
 import { SSHProfileSettingsComponent } from './components/sshProfileSettings.component'
 import { SSHTabComponent } from './components/sshTab.component'
 import { PasswordStorageService } from './services/passwordStorage.service'

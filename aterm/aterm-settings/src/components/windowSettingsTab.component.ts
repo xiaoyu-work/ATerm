@@ -12,7 +12,7 @@ import {
     BaseComponent,
     Screen,
     PlatformService,
-} from 'tabby-core'
+} from 'aterm-core'
 
 
 /** @hidden */

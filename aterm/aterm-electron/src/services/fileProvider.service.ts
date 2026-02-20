@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs'
 import { Injectable } from '@angular/core'
-import { FileProvider } from 'tabby-core'
+import { FileProvider } from 'aterm-core'
 import { ElectronService } from '../services/electron.service'
 import { ElectronHostWindow } from './hostWindow.service'
 

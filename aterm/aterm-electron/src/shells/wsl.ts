@@ -2,9 +2,9 @@ import * as fs from 'mz/fs'
 import slugify from 'slugify'
 
 import { Injectable } from '@angular/core'
-import { HostAppService, Platform, isWindowsBuild, WIN_BUILD_WSL_EXE_DISTRO_FLAG } from 'tabby-core'
+import { HostAppService, Platform, isWindowsBuild, WIN_BUILD_WSL_EXE_DISTRO_FLAG } from 'aterm-core'
 
-import { ShellProvider, Shell } from 'tabby-local'
+import { ShellProvider, Shell } from 'aterm-local'
 
 /* eslint-disable block-scoped-var */
 

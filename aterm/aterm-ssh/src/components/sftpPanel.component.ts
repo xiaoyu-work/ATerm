@@ -1,7 +1,7 @@
 import * as C from 'constants'
 import { posix as path } from 'path'
 import { Component, Input, Output, EventEmitter, Inject, Optional } from '@angular/core'
-import { FileUpload, DirectoryUpload, DirectoryDownload, MenuItemOptions, NotificationsService, PlatformService } from 'tabby-core'
+import { FileUpload, DirectoryUpload, DirectoryDownload, MenuItemOptions, NotificationsService, PlatformService } from 'aterm-core'
 import { SFTPSession, SFTPFile } from '../session/sftp'
 import { SSHSession } from '../session/ssh'
 import { SFTPContextMenuItemProvider } from '../api'

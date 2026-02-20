@@ -29,11 +29,6 @@ class WriteTodosToolInvocation extends BaseToolInvocation<WriteTodosToolParams> 
         return `Update ${this.params.todos.length} todo(s)`
     }
 
-    /** Todos don't require confirmation */
-    override shouldConfirmExecute (): boolean {
-        return false
-    }
-
     async execute (context: ToolContext): Promise<ToolResult> {
         if (!this.params.todos || this.params.todos.length === 0) {
             return this.success('No todos provided.')

@@ -1,4 +1,4 @@
-import type { MenuItemOptions } from 'tabby-core'
+import type { MenuItemOptions } from 'aterm-core'
 import { BaseTerminalTabComponent } from './baseTerminalTab.component'
 
 /**

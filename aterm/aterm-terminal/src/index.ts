@@ -5,8 +5,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 import { ToastrModule } from 'ngx-toastr'
 import { NgxColorsModule } from 'ngx-colors'
 
-import TabbyCorePlugin, { ConfigProvider, HotkeyProvider, TabContextMenuItemProvider, CLIHandler } from 'tabby-core'
-import { SettingsTabProvider } from 'tabby-settings'
+import TabbyCorePlugin, { ConfigProvider, HotkeyProvider, TabContextMenuItemProvider, CLIHandler } from 'aterm-core'
+import { SettingsTabProvider } from 'aterm-settings'
 
 import { AppearanceSettingsTabComponent } from './components/appearanceSettingsTab.component'
 import { ColorSchemeSettingsTabComponent } from './components/colorSchemeSettingsTab.component'

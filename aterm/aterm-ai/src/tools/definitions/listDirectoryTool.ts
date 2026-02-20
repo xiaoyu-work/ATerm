@@ -11,7 +11,7 @@ import * as fs from 'fs/promises'
 import * as path from 'path'
 import { DeclarativeTool } from '../base/declarativeTool'
 import { BaseToolInvocation } from '../base/baseToolInvocation'
-import { ToolKind, ToolContext, ToolResult } from '../types'
+import { ToolKind, ToolContext, ToolResult, ConfirmationDetails } from '../types'
 import { isPathOutsideCwd } from '../security'
 
 export interface ListDirectoryToolParams {
@@ -27,12 +27,17 @@ class ListDirectoryToolInvocation extends BaseToolInvocation<ListDirectoryToolPa
         return `List: ${this.params.dir_path}`
     }
 
+    getConfirmationDetails (context: ToolContext): ConfirmationDetails | false {
+        const resolved = path.resolve(context.cwd, this.params.dir_path)
+        if (isPathOutsideCwd(resolved, context.cwd)) {
+            return { type: 'path_access', title: 'List outside CWD', resolvedPath: resolved }
+        }
+        return false
+    }
+
     async execute (context: ToolContext): Promise<ToolResult> {
         const resolved = path.resolve(context.cwd, this.params.dir_path)
-
-        if (isPathOutsideCwd(resolved, context.cwd)) {
-            return this.error(`Access denied – "${this.params.dir_path}" resolves to a path outside the working directory.`)
-        }
+        // outsideCwd check removed — handled by scheduler before execute()
 
         try {
             const entries = await fs.readdir(resolved, { withFileTypes: true })

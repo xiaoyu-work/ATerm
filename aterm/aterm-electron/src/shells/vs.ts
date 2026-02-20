@@ -1,9 +1,9 @@
 import * as path from 'path'
 import * as fs from 'fs/promises'
 import { Injectable } from '@angular/core'
-import { HostAppService, Platform } from 'tabby-core'
+import { HostAppService, Platform } from 'aterm-core'
 
-import { ShellProvider, Shell } from 'tabby-local'
+import { ShellProvider, Shell } from 'aterm-local'
 
 /* eslint-disable quote-props */
 const vsIconMap: Record<string, string> = {

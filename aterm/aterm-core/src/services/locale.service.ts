@@ -213,7 +213,7 @@ export class LocaleService {
         // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
         translate.getParsedResult = function (translations: any, key: any, interpolateParams?: any): any {
             if (!this._defaultTranslation) {
-                const po = require(`../../../locale/en-US.po`)
+                const po = require(`../../../../locale/en-US.po`)
                 this._defaultTranslation = flattenMessageFormatTranslation(po)
             }
             this.translations[this.defaultLang][key] ??= this.compiler.compile(
@@ -241,7 +241,7 @@ export class LocaleService {
         if (!this.translate.langs.includes(lang)) {
             this.translate.addLangs([lang])
 
-            const po = require(`../../../locale/${lang}.po`)
+            const po = require(`../../../../locale/${lang}.po`)
             const translation = flattenMessageFormatTranslation(po)
             this.translate.setTranslation(lang, translation)
         }

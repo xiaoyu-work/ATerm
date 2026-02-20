@@ -276,7 +276,7 @@ export class ProfilesService {
                 }))]
 
                 try {
-                    const { SettingsTabComponent } = window['nodeRequire']('tabby-settings')
+                    const { SettingsTabComponent } = window['nodeRequire']('aterm-settings')
                     options.push({
                         name: this.translate.instant('Manage profiles'),
                         icon: 'fas fa-window-restore',

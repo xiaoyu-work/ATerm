@@ -24,7 +24,7 @@ export default options => {
     const sourceMapOptions = {
         exclude: [/node_modules/, /vendor/],
         filename: '[file].map',
-        moduleFilenameTemplate: `webpack-tabby-${options.name}:///[resource-path]`,
+        moduleFilenameTemplate: `webpack-aterm-${options.name}:///[resource-path]`,
     }
     let devtoolPlugin = wp.SourceMapDevToolPlugin
 
@@ -59,7 +59,7 @@ export default options => {
         },
         resolve: {
             alias: options.alias ?? {},
-            modules: ['.', 'src', 'node_modules', '../app/node_modules', '../node_modules'].map(x => path.join(options.dirname, x)),
+            modules: ['.', 'src', 'node_modules', '../../app/node_modules', '../../node_modules'].map(x => path.join(options.dirname, x)),
             extensions: ['.ts', '.js'],
             mainFields: ['es2020', 'esm2020', 'esm2015', 'browser', 'module', 'main'],
         },
@@ -159,7 +159,7 @@ export default options => {
             /^@angular(?!\/common\/locales)/,
             /^@ng-bootstrap/,
             /^rxjs/,
-            /^tabby-/,
+            /^aterm-/,
             ...options.externals || [],
         ],
         plugins: [

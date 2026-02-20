@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { Component } from '@angular/core'
 import { debounceTime, distinctUntilChanged, map } from 'rxjs'
-import { FullyDefined, HostAppService, Platform, ProfileSettingsComponent } from 'tabby-core'
+import { FullyDefined, HostAppService, Platform, ProfileSettingsComponent } from 'aterm-core'
 import { SerialPortInfo, BAUD_RATES, SerialProfile } from '../api'
 import { SerialService } from '../services/serial.service'
 import { SerialProfilesService } from '../profiles'

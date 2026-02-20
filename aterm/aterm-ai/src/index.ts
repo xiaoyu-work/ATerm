@@ -2,9 +2,9 @@
 import { NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
-import { ConfigProvider } from 'tabby-core'
-import { SettingsTabProvider } from 'tabby-settings'
-import { TerminalDecorator } from 'tabby-terminal'
+import { ConfigProvider } from 'aterm-core'
+import { SettingsTabProvider } from 'aterm-settings'
+import { TerminalDecorator } from 'aterm-terminal'
 
 import { AIService } from './ai.service'
 import { AIDecorator } from './decorator'

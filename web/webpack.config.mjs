@@ -24,7 +24,7 @@ for (const key of [
 }
 
 const config = {
-    name: 'tabby-web-entry',
+    name: 'aterm-web-entry',
     target: 'web',
     entry: {
         preload: path.resolve(__dirname, 'entry.preload.ts'),

@@ -1,5 +1,5 @@
 import { Component, Injector } from '@angular/core'
-import { BaseTerminalProfile, BaseTerminalTabComponent } from 'tabby-terminal'
+import { BaseTerminalProfile, BaseTerminalTabComponent } from 'aterm-terminal'
 import { Session } from '../session'
 
 // eslint-disable-next-line @typescript-eslint/no-type-alias

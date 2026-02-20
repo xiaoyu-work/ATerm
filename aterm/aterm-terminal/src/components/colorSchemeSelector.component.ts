@@ -2,7 +2,7 @@
 import { marker as _ } from '@biesbjerg/ngx-translate-extract-marker'
 
 import { Component, Inject, Input, ChangeDetectionStrategy, ChangeDetectorRef, HostBinding, Output, EventEmitter } from '@angular/core'
-import { ConfigService } from 'tabby-core'
+import { ConfigService } from 'aterm-core'
 import { TerminalColorSchemeProvider } from '../api/colorSchemeProvider'
 import { TerminalColorScheme } from '../api/interfaces'
 

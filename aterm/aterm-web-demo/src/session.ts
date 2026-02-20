@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Injector, NgZone } from '@angular/core'
 import * as path from 'path'
-import { BaseSession } from 'tabby-terminal'
-import { Logger } from 'tabby-core'
+import { BaseSession } from 'aterm-terminal'
+import { Logger } from 'aterm-core'
 
 const currentScript: any = document.currentScript
 

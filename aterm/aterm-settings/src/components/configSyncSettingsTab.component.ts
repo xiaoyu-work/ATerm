@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { Component, HostBinding } from '@angular/core'
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap'
-import { BaseComponent, ConfigService, PromptModalComponent, HostAppService, PlatformService, NotificationsService, TranslateService } from 'tabby-core'
+import { BaseComponent, ConfigService, PromptModalComponent, HostAppService, PlatformService, NotificationsService, TranslateService } from 'aterm-core'
 import { Config, ConfigSyncService } from '../services/configSync.service'
 
 

@@ -15,7 +15,7 @@ import {
     AppService,
     LocaleService,
     TranslateService,
-} from 'tabby-core'
+} from 'aterm-core'
 
 import { SettingsTabProvider } from '../api'
 import { ReleaseNotesComponent } from './releaseNotesTab.component'

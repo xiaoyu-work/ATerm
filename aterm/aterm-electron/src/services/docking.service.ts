@@ -1,6 +1,6 @@
 import { Injectable, NgZone, Inject } from '@angular/core'
 import type { Display } from 'electron'
-import { ConfigService, DockingService, Screen, PlatformService, BootstrapData, BOOTSTRAP_DATA } from 'tabby-core'
+import { ConfigService, DockingService, Screen, PlatformService, BootstrapData, BOOTSTRAP_DATA } from 'aterm-core'
 import { ElectronService } from '../services/electron.service'
 import { ElectronHostWindow, Bounds } from './hostWindow.service'
 

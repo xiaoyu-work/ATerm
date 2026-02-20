@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { ConfigProvider, HostAppService, HostWindowService, LogService, PlatformService, UpdaterService } from 'tabby-core'
+import { ConfigProvider, HostAppService, HostWindowService, LogService, PlatformService, UpdaterService } from 'aterm-core'
 
 import { WebPlatformService } from './platform'
 import { ConsoleLogService } from './services/log.service'

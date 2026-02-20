@@ -1,9 +1,9 @@
 import * as fs from 'mz/fs'
 import slugify from 'slugify'
 import { Injectable } from '@angular/core'
-import { HostAppService, Platform } from 'tabby-core'
+import { HostAppService, Platform } from 'aterm-core'
 
-import { ShellProvider, Shell } from 'tabby-local'
+import { ShellProvider, Shell } from 'aterm-local'
 
 /** @hidden */
 @Injectable()

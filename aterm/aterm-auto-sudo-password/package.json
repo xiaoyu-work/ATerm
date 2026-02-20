@@ -1,9 +1,9 @@
 {
-  "name": "tabby-auto-sudo-password",
+  "name": "aterm-auto-sudo-password",
   "version": "1.0.231-nightly.0",
   "description": "Offers to automatically paste saved sudo password in SSH sessions",
   "keywords": [
-    "tabby-builtin-plugin"
+    "aterm-builtin-plugin"
   ],
   "main": "dist/index.js",
   "typings": "typings/index.d.ts",

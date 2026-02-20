@@ -120,7 +120,7 @@ export function getShellIntegration (
     switch (shell) {
         case 'bash': {
             // Write a temp init file that sources user's bashrc then our integration
-            const initFile = path.join(os.tmpdir(), `tabby-bash-init-${process.pid}.sh`)
+            const initFile = path.join(os.tmpdir(), `aterm-bash-init-${process.pid}.sh`)
             const content = [
                 '# Tabby bash init wrapper',
                 '[ -f /etc/profile ] && . /etc/profile',
@@ -136,13 +136,13 @@ export function getShellIntegration (
                     result.args.unshift('--rcfile', initFile)
                 }
             } catch (e) {
-                console.warn('[tabby-local] Failed to write bash init file:', e)
+                console.warn('[aterm-local] Failed to write bash init file:', e)
             }
             break
         }
         case 'zsh': {
             // Create a temp ZDOTDIR with a .zshrc that sources the real one + our integration
-            const tmpZdotdir = path.join(os.tmpdir(), `tabby-zsh-${process.pid}`)
+            const tmpZdotdir = path.join(os.tmpdir(), `aterm-zsh-${process.pid}`)
             try {
                 fs.mkdirSync(tmpZdotdir, { recursive: true })
                 const realZdotdir = env.ZDOTDIR || process.env.ZDOTDIR || os.homedir()
@@ -160,7 +160,7 @@ export function getShellIntegration (
                     result.env.__TABBY_ORIGINAL_ZDOTDIR = realZdotdir
                 }
             } catch (e) {
-                console.warn('[tabby-local] Failed to write zsh init dir:', e)
+                console.warn('[aterm-local] Failed to write zsh init dir:', e)
             }
             break
         }

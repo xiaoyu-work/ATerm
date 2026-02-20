@@ -5,7 +5,7 @@ settings:
     typescript:
       project:
       - tsconfig.json
-      - tabby-*/tsconfig.json
+      - aterm/aterm-*/tsconfig.json
     node: true
 
 env:
@@ -27,7 +27,7 @@ overrides:
   parserOptions:
     project:
     - tsconfig.json
-    - '*/tsconfig.typings.json'
+    - 'aterm/*/tsconfig.typings.json'
   extends:
     - 'plugin:@typescript-eslint/all'
     - plugin:import/recommended

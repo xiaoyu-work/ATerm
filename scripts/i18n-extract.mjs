@@ -16,7 +16,7 @@ const tempHtml = 'locale/tmp-html'
     for (const plugin of vars.builtinPlugins) {
         log.info('compile-pug', plugin)
 
-        sh.exec(`yarn pug --doctype html -s --pretty -O '{require: function(){}}' -o ${tempHtml}/${plugin} ${plugin}`, { fatal: true })
+        sh.exec(`yarn pug --doctype html -s --pretty -O '{require: function(){}}' -o ${tempHtml}/${plugin} aterm/${plugin}`, { fatal: true })
     }
 
     log.info('extract-ts')
@@ -30,7 +30,7 @@ const tempHtml = 'locale/tmp-html'
         JsExtractors.callExpression('_', {
             arguments: { text: 0 },
         }),
-    ]).parseFilesGlob('./tabby-*/src/**/*.ts')
+    ]).parseFilesGlob('./aterm/aterm-*/src/**/*.ts')
 
     log.info('extract-pug')
     const options = {

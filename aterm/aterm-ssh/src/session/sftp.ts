@@ -2,7 +2,7 @@
 import { Subject, Observable } from 'rxjs'
 import { posix as posixPath } from 'path'
 import { Injector } from '@angular/core'
-import { FileDownload, FileUpload, Logger, LogService } from 'tabby-core'
+import { FileDownload, FileUpload, Logger, LogService } from 'aterm-core'
 import * as russh from 'russh'
 
 export interface SFTPFile {
@@ -112,7 +112,7 @@ export class SFTPSession {
 
     async upload (path: string, transfer: FileUpload): Promise<void> {
         this.logger.info('Uploading into', path)
-        const tempPath = path + '.tabby-upload'
+        const tempPath = path + '.aterm-upload'
         try {
             const handle = await this.open(tempPath, russh.OPEN_WRITE | russh.OPEN_CREATE)
             while (true) {

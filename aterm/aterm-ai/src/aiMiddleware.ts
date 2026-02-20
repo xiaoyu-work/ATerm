@@ -8,12 +8,14 @@
  */
 
 import colors from 'ansi-colors'
-import { ConfigService, PlatformService } from 'tabby-core'
-import { SessionMiddleware } from 'tabby-terminal'
+import { ConfigService, PlatformService } from 'aterm-core'
+import { SessionMiddleware } from 'aterm-terminal'
 import { AIService, ChatMessage } from './ai.service'
 import { ContextCollector } from './contextCollector'
 import { AgentLoop } from './agentLoop'
 import { TokensSummary } from './streamEvents'
+import { ConfirmationOutcome } from './tools/types'
+import { PathApprovalTracker } from './tools/pathApprovals'
 import { MemoryTool } from './tools/definitions/memoryTool'
 
 const enum State {
@@ -45,7 +47,8 @@ export class AIMiddleware extends SessionMiddleware {
     private promptBuffer = ''
     private atLineStart = true
     private abortController: AbortController | null = null
-    private confirmResolve: ((approved: boolean) => void) | null = null
+    private confirmResolve: ((outcome: ConfirmationOutcome) => void) | null = null
+    private confirmType: 'exec' | 'edit' | 'path_access' | undefined = undefined
     private askResolve: ((response: string) => void) | null = null
     private askBuffer = ''
     private bannerShown = false
@@ -57,6 +60,8 @@ export class AIMiddleware extends SessionMiddleware {
     private pastedContent: Record<string, string> = {}
     /** Session-level accumulated token usage — maps to gemini-cli's ModelMetrics.tokens */
     private sessionUsage: TokensSummary = { promptTokens: 0, completionTokens: 0, cachedTokens: 0, totalTokens: 0 }
+    /** Session-level path approval tracker — persists across agent invocations */
+    private pathApprovals = new PathApprovalTracker()
 
     constructor (
         private ai: AIService,
@@ -99,7 +104,7 @@ export class AIMiddleware extends SessionMiddleware {
             }
             this.outputToTerminal.next(data)
         } catch (e) {
-            console.error('[tabby-ai] feedFromSession error:', e)
+            console.error('[aterm-ai] feedFromSession error:', e)
             this.outputToTerminal.next(data)
         }
     }
@@ -238,13 +243,18 @@ export class AIMiddleware extends SessionMiddleware {
                 return
 
             case State.AGENT_CONFIRMING:
-                if (byte === 0x0D /* Enter = approve */) {
-                    this.confirmResolve?.(true)
+                if (byte === 0x0D /* Enter = approve once */) {
+                    this.confirmResolve?.(ConfirmationOutcome.ProceedOnce)
                     this.confirmResolve = null
                     return
                 }
-                if (byte === 0x03 /* Ctrl+C = skip this command */) {
-                    this.confirmResolve?.(false)
+                if ((byte === 0x79 || byte === 0x59) /* y/Y = always approve */ && this.confirmType === 'path_access') {
+                    this.confirmResolve?.(ConfirmationOutcome.ProceedAlways)
+                    this.confirmResolve = null
+                    return
+                }
+                if (byte === 0x03 /* Ctrl+C = skip */) {
+                    this.confirmResolve?.(ConfirmationOutcome.Cancel)
                     this.confirmResolve = null
                     return
                 }
@@ -354,20 +364,29 @@ export class AIMiddleware extends SessionMiddleware {
                 this.outputToTerminal.next(Buffer.from(colors.gray(formatted)))
             },
 
-            onConfirmCommand: (cmd) => {
+            onConfirmCommand: (description, type) => {
                 this.state = State.AGENT_CONFIRMING
+                this.confirmType = type
                 this.markAIDisplayOutput()
+
+                const icon = type === 'path_access' ? '📂'
+                    : type === 'exec' ? '⚡'
+                    : '📝'
+                const hint = type === 'path_access'
+                    ? '[Enter=allow / y=always / Ctrl+C=skip]'
+                    : '[Enter=run / Ctrl+C=skip]'
+
                 this.outputToTerminal.next(Buffer.from(
                     '\r\n' +
-                    colors.yellow(`  ⚡ ${cmd}`) +
-                    colors.gray('  [Enter=run / Ctrl+C=skip]'),
+                    colors.yellow(`  ${icon} ${description}`) +
+                    colors.gray(`  ${hint}`),
                 ))
             },
 
             waitForApproval: () => {
-                return new Promise<boolean>((resolve) => {
+                return new Promise<ConfirmationOutcome>((resolve) => {
                     if (this.confirmResolve) {
-                        this.confirmResolve(false)
+                        this.confirmResolve(ConfirmationOutcome.Cancel)
                     }
                     this.confirmResolve = resolve
                 })
@@ -435,7 +454,7 @@ export class AIMiddleware extends SessionMiddleware {
                 this.abortController = null
                 // Same as onDone — defer \r to after all terminal output.
             },
-        }, this.abortController.signal)
+        }, this.abortController.signal, this.pathApprovals)
 
         try {
             const result = await loop.run(messages)

@@ -1,7 +1,7 @@
 import * as path from 'path'
 import * as fs from 'mz/fs'
 import { Injectable } from '@angular/core'
-import { CLIHandler, CLIEvent, AppService, ConfigService, HostWindowService, ProfilesService, NotificationsService } from 'tabby-core'
+import { CLIHandler, CLIEvent, AppService, ConfigService, HostWindowService, ProfilesService, NotificationsService } from 'aterm-core'
 import { TerminalService } from './services/terminal.service'
 
 @Injectable()

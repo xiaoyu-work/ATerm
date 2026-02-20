@@ -7,7 +7,7 @@ import {
     HotkeyDescription,
     HotkeysService,
     HostAppService,
-} from 'tabby-core'
+} from 'aterm-core'
 
 _('Search hotkeys')
 

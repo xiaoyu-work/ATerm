@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
 import { TerminalDecorator } from '../api/decorator'
 import { BaseTerminalTabComponent } from '../api/baseTerminalTab.component'
-import { PlatformService } from 'tabby-core'
+import { PlatformService } from 'aterm-core'
 
 /** @hidden */
 @Injectable()

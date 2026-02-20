@@ -2,10 +2,10 @@ import * as path from 'path'
 import * as fs from 'fs/promises'
 import * as which from 'which'
 import { Injectable } from '@angular/core'
-import { HostAppService, Platform, ConfigService } from 'tabby-core'
+import { HostAppService, Platform, ConfigService } from 'aterm-core'
 import { ElectronService } from '../services/electron.service'
 
-import { Shell } from 'tabby-local'
+import { Shell } from 'aterm-local'
 import { WindowsBaseShellProvider } from './windowsBase'
 
 /** @hidden */

@@ -1,7 +1,7 @@
 import * as yaml from 'js-yaml'
 import axios from 'axios'
 import { Injectable } from '@angular/core'
-import { ConfigService, HostAppService, Logger, LogService, Platform, PlatformService } from 'tabby-core'
+import { ConfigService, HostAppService, Logger, LogService, Platform, PlatformService } from 'aterm-core'
 
 export interface User {
     id: number

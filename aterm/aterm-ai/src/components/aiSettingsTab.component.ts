@@ -1,5 +1,5 @@
 import { Component, ChangeDetectorRef, HostBinding, OnInit, OnDestroy } from '@angular/core'
-import { ConfigService } from 'tabby-core'
+import { ConfigService } from 'aterm-core'
 import { Subscription } from 'rxjs'
 import { PROVIDER_PRESETS } from '../providers'
 

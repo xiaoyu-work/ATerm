@@ -1,9 +1,9 @@
 {
-  "name": "tabby-linkifier",
+  "name": "aterm-linkifier",
   "version": "1.0.231-nightly.0",
   "description": "Makes URLs, IPs and file paths clickable in Tabby",
   "keywords": [
-    "tabby-builtin-plugin"
+    "aterm-builtin-plugin"
   ],
   "main": "dist/index.js",
   "typings": "typings/index.d.ts",

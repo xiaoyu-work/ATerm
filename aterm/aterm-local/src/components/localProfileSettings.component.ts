@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { Component, Inject, Optional } from '@angular/core'
 import { LocalProfile, UACService } from '../api'
-import { FullyDefined, PlatformService, ProfileSettingsComponent } from 'tabby-core'
+import { FullyDefined, PlatformService, ProfileSettingsComponent } from 'aterm-core'
 import { LocalProfilesService } from '../profiles'
 
 

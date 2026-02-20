@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core'
-import { TerminalColorSchemeProvider } from 'tabby-terminal'
+import { TerminalColorSchemeProvider } from 'aterm-terminal'
 
 import { ColorSchemes } from './colorSchemes'
 

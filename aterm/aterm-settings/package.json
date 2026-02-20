@@ -1,9 +1,9 @@
 {
-  "name": "tabby-settings",
+  "name": "aterm-settings",
   "version": "1.0.231-nightly.0",
   "description": "Tabby terminal settings page",
   "keywords": [
-    "tabby-builtin-plugin"
+    "aterm-builtin-plugin"
   ],
   "main": "dist/index.js",
   "typings": "typings/index.d.ts",
@@ -30,6 +30,6 @@
     "@angular/platform-browser": "^19",
     "@ng-bootstrap/ng-bootstrap": "^18",
     "rxjs": "^7",
-    "tabby-core": "*"
+    "aterm-core": "*"
   }
 }

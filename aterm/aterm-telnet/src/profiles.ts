@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { NewTabParameters, PartialProfile, TranslateService, QuickConnectProfileProvider } from 'tabby-core'
+import { NewTabParameters, PartialProfile, TranslateService, QuickConnectProfileProvider } from 'aterm-core'
 import { TelnetProfileSettingsComponent } from './components/telnetProfileSettings.component'
 import { TelnetTabComponent } from './components/telnetTab.component'
 import { TelnetProfile } from './session'

@@ -20,18 +20,19 @@ sh.cd('..')
 
 vars.allPackages.forEach(plugin => {
     log.info('deps', plugin)
-    sh.cd(plugin)
+    const pluginDir = plugin === 'web' ? plugin : 'aterm/' + plugin
+    sh.cd(pluginDir)
     sh.exec(`yarn install`, { fatal: true })
     if (sh.test('-d', 'patches')) {
         sh.exec(`yarn patch-package`, { fatal: false })
     }
-    sh.cd('..')
+    sh.cd(plugin === 'web' ? '..' : '../..')
 })
 
 if (['darwin', 'linux'].includes(process.platform)) {
     sh.cd('node_modules')
     for (let x of vars.builtinPlugins) {
-        sh.ln('-fs', '../' + x, x)
+        sh.ln('-fs', '../aterm/' + x, x)
     }
     sh.cd('..')
 }

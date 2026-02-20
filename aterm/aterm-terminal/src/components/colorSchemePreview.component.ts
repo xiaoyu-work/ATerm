@@ -1,5 +1,5 @@
 import { Component, Input, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core'
-import { BaseComponent, ConfigService, getCSSFontFamily } from 'tabby-core'
+import { BaseComponent, ConfigService, getCSSFontFamily } from 'aterm-core'
 import { TerminalColorScheme } from '../api/interfaces'
 
 /** @hidden */

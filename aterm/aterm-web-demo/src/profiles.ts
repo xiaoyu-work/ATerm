@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { ProfileProvider, NewTabParameters, Profile, PartialProfile } from 'tabby-core'
+import { ProfileProvider, NewTabParameters, Profile, PartialProfile } from 'aterm-core'
 import { DemoTerminalTabComponent } from './components/terminalTab.component'
 
 @Injectable({ providedIn: 'root' })

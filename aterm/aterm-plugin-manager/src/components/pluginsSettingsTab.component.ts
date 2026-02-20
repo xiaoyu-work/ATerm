@@ -4,12 +4,12 @@ import { BehaviorSubject, Observable, debounceTime, distinctUntilChanged, first,
 import semverGt from 'semver/functions/gt'
 
 import { Component, HostBinding, Input } from '@angular/core'
-import { ConfigService, PlatformService, PluginInfo } from 'tabby-core'
+import { ConfigService, PlatformService, PluginInfo } from 'aterm-core'
 import { PluginManagerService } from '../services/pluginManager.service'
 
 enum BusyState { Installing = 'Installing', Uninstalling = 'Uninstalling' }
 
-const FORCE_ENABLE = ['tabby-core', 'tabby-settings', 'tabby-electron', 'tabby-web', 'tabby-plugin-manager']
+const FORCE_ENABLE = ['aterm-core', 'aterm-settings', 'aterm-electron', 'aterm-web', 'aterm-plugin-manager']
 
 _('Search plugins')
 

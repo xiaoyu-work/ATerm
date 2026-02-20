@@ -1,5 +1,5 @@
 import { Injectable, NgZone, Injector } from '@angular/core'
-import { isWindowsBuild, WIN_BUILD_FLUENT_BG_SUPPORTED, HostAppService, Platform, CLIHandler } from 'tabby-core'
+import { isWindowsBuild, WIN_BUILD_FLUENT_BG_SUPPORTED, HostAppService, Platform, CLIHandler } from 'aterm-core'
 import { ElectronService } from '../services/electron.service'
 
 

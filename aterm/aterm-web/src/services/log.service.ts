@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { ConsoleLogger, Logger } from 'tabby-core'
+import { ConsoleLogger, Logger } from 'aterm-core'
 
 @Injectable({ providedIn: 'root' })
 export class ConsoleLogService {

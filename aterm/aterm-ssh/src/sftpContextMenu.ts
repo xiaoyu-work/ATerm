@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap'
-import { MenuItemOptions, PlatformService, TranslateService, HostAppService, Platform } from 'tabby-core'
+import { MenuItemOptions, PlatformService, TranslateService, HostAppService, Platform } from 'aterm-core'
 import { SFTPSession, SFTPFile } from './session/sftp'
 import { SFTPContextMenuItemProvider } from './api'
 import { SFTPDeleteModalComponent } from './components/sftpDeleteModal.component'

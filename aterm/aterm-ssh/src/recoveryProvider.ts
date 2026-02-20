@@ -1,5 +1,5 @@
 import { Injectable, Injector } from '@angular/core'
-import { TabRecoveryProvider, NewTabParameters, RecoveryToken, ProfilesService } from 'tabby-core'
+import { TabRecoveryProvider, NewTabParameters, RecoveryToken, ProfilesService } from 'aterm-core'
 
 import { SSHTabComponent } from './components/sshTab.component'
 

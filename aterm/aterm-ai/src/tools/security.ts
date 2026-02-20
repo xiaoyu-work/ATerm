@@ -40,19 +40,33 @@ export function isSensitivePath (resolved: string, cwd: string): boolean {
 }
 
 /**
- * Validate a file path: resolve against CWD, check traversal & sensitivity.
- * Returns the resolved path or an error string.
+ * Result of path validation.
+ * - `outsideCwd: false` → inside CWD, proceed directly
+ * - `outsideCwd: true`  → outside CWD, tool should request user confirmation
+ * - `error`             → hard-blocked (sensitive dotfiles), never allow
  */
-export function validatePath (filePath: string, cwd: string): { resolved: string } | { error: string } {
-    const resolved = path.resolve(cwd, filePath)
+export type PathValidation =
+    | { resolved: string; outsideCwd: false }
+    | { resolved: string; outsideCwd: true }
+    | { error: string }
 
-    if (isPathOutsideCwd(resolved, cwd)) {
-        return { error: `Access denied – "${filePath}" resolves to a path outside the working directory.` }
-    }
+/**
+ * Validate a file path: resolve against CWD, check sensitivity & location.
+ *
+ * Sensitive dotfiles are always hard-blocked.
+ * Paths outside CWD return `outsideCwd: true` — callers should request
+ * user confirmation before proceeding.
+ */
+export function validatePath (filePath: string, cwd: string): PathValidation {
+    const resolved = path.resolve(cwd, filePath)
 
     if (isSensitivePath(resolved, cwd)) {
         return { error: `Access denied – reading/writing sensitive dotfiles is not allowed ("${filePath}").` }
     }
 
-    return { resolved }
+    if (isPathOutsideCwd(resolved, cwd)) {
+        return { resolved, outsideCwd: true }
+    }
+
+    return { resolved, outsideCwd: false }
 }

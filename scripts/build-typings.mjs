@@ -5,5 +5,5 @@ import log from 'npmlog'
 
 vars.builtinPlugins.forEach(plugin => {
     log.info('typings', plugin)
-    sh.exec(`yarn tsc --project ${plugin}/tsconfig.typings.json`, { fatal: true })
+    sh.exec(`yarn tsc --project aterm/${plugin}/tsconfig.typings.json`, { fatal: true })
 })

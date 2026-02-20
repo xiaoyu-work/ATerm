@@ -1,9 +1,9 @@
 import stripAnsi from 'strip-ansi'
 import { SerialPortStream } from '@serialport/stream'
-import { LogService, NotificationsService } from 'tabby-core'
+import { LogService, NotificationsService } from 'aterm-core'
 import { Subject, Observable } from 'rxjs'
 import { Injector, NgZone } from '@angular/core'
-import { BaseSession, ConnectableTerminalProfile, InputProcessingOptions, InputProcessor, LoginScriptsOptions, SessionMiddleware, StreamProcessingOptions, TerminalStreamProcessor, UTF8SplitterMiddleware } from 'tabby-terminal'
+import { BaseSession, ConnectableTerminalProfile, InputProcessingOptions, InputProcessor, LoginScriptsOptions, SessionMiddleware, StreamProcessingOptions, TerminalStreamProcessor, UTF8SplitterMiddleware } from 'aterm-terminal'
 import { SerialService } from './services/serial.service'
 
 export interface SerialProfile extends ConnectableTerminalProfile {

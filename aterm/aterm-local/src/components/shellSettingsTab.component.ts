@@ -1,5 +1,5 @@
 import { Component, HostBinding } from '@angular/core'
-import { WIN_BUILD_CONPTY_SUPPORTED, WIN_BUILD_CONPTY_STABLE, isWindowsBuild, ConfigService } from 'tabby-core'
+import { WIN_BUILD_CONPTY_SUPPORTED, WIN_BUILD_CONPTY_STABLE, isWindowsBuild, ConfigService } from 'aterm-core'
 
 /** @hidden */
 @Component({

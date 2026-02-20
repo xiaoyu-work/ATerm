@@ -1,9 +1,9 @@
 {
-  "name": "tabby-web",
+  "name": "aterm-web",
   "version": "1.0.231-nightly.0",
   "description": "Web-specific bindings",
   "keywords": [
-    "tabby-builtin-plugin"
+    "aterm-builtin-plugin"
   ],
   "main": "dist/index.js",
   "typings": "typings/index.d.ts",

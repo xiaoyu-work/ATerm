@@ -11,7 +11,7 @@ import * as fs from 'fs/promises'
 import * as path from 'path'
 import { DeclarativeTool } from '../base/declarativeTool'
 import { BaseToolInvocation } from '../base/baseToolInvocation'
-import { ToolKind, ToolContext, ToolResult } from '../types'
+import { ToolKind, ToolContext, ToolResult, ConfirmationDetails } from '../types'
 import { isPathOutsideCwd } from '../security'
 import { executeCommand } from '../../shellExecutor'
 
@@ -29,14 +29,21 @@ class GlobToolInvocation extends BaseToolInvocation<GlobToolParams> {
         return `Glob: ${this.params.pattern}`
     }
 
+    getConfirmationDetails (context: ToolContext): ConfirmationDetails | false {
+        const searchDir = this.params.dir_path
+            ? path.resolve(context.cwd, this.params.dir_path)
+            : context.cwd
+        if (isPathOutsideCwd(searchDir, context.cwd)) {
+            return { type: 'path_access', title: 'Search outside CWD', resolvedPath: searchDir }
+        }
+        return false
+    }
+
     async execute (context: ToolContext): Promise<ToolResult> {
         const searchDir = this.params.dir_path
             ? path.resolve(context.cwd, this.params.dir_path)
             : context.cwd
-
-        if (isPathOutsideCwd(searchDir, context.cwd)) {
-            return this.error(`Access denied – "${this.params.dir_path}" resolves to a path outside the working directory.`)
-        }
+        // outsideCwd check removed — handled by scheduler before execute()
 
         try {
             // Use git ls-files for .gitignore respect, fall back to find

@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core'
 import { TerminalDecorator } from '../api/decorator'
 import { BaseTerminalTabComponent } from '../api/baseTerminalTab.component'
 import { SessionMiddleware } from '../api/middleware'
-import { LogService, Logger, HotkeysService, PlatformService, FileUpload } from 'tabby-core'
+import { LogService, Logger, HotkeysService, PlatformService, FileUpload } from 'aterm-core'
 
 const SPACER = '            '
 

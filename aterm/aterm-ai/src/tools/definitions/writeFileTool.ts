@@ -11,7 +11,7 @@ import * as fs from 'fs/promises'
 import * as path from 'path'
 import { DeclarativeTool } from '../base/declarativeTool'
 import { BaseToolInvocation } from '../base/baseToolInvocation'
-import { ToolKind, ToolContext, ToolResult } from '../types'
+import { ToolKind, ToolContext, ToolResult, ConfirmationDetails } from '../types'
 import { validatePath } from '../security'
 
 export interface WriteFileToolParams {
@@ -28,11 +28,27 @@ class WriteFileToolInvocation extends BaseToolInvocation<WriteFileToolParams> {
         return `Write file: ${this.params.file_path}`
     }
 
+    /**
+     * Mirrors gemini-cli's WriteFileToolInvocation.getConfirmationDetails()
+     * (packages/core/src/tools/write-file.ts)
+     *
+     * Returns path_access if outside CWD, otherwise edit confirmation.
+     */
+    getConfirmationDetails (context: ToolContext): ConfirmationDetails | false {
+        const validation = validatePath(this.params.file_path, context.cwd)
+        if ('error' in validation) return false // Will error in execute()
+        if (validation.outsideCwd) {
+            return { type: 'path_access', title: 'Write outside CWD', resolvedPath: validation.resolved }
+        }
+        return { type: 'edit', title: 'Write file', filePath: validation.resolved }
+    }
+
     async execute (context: ToolContext): Promise<ToolResult> {
         const validation = validatePath(this.params.file_path, context.cwd)
         if ('error' in validation) {
             return this.error(validation.error)
         }
+        // outsideCwd check removed — handled by scheduler before execute()
 
         try {
             // Create parent directories if needed (mirrors gemini-cli's mkdirp)

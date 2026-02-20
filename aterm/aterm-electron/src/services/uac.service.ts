@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
 import * as path from 'path'
-import { WIN_BUILD_CONPTY_SUPPORTED, isWindowsBuild } from 'tabby-core'
-import { SessionOptions, UACService } from 'tabby-local'
+import { WIN_BUILD_CONPTY_SUPPORTED, isWindowsBuild } from 'aterm-core'
+import { SessionOptions, UACService } from 'aterm-local'
 import { ElectronService } from './electron.service'
 
 /** @hidden */

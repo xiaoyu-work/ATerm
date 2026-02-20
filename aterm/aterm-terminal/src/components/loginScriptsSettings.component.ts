@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { Component, Input } from '@angular/core'
 
-import { PlatformService, TranslateService } from 'tabby-core'
+import { PlatformService, TranslateService } from 'aterm-core'
 import { LoginScript, LoginScriptsOptions } from '../middleware/loginScriptProcessing'
 
 /** @hidden */

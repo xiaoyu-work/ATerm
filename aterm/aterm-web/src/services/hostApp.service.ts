@@ -1,6 +1,6 @@
 import Bowser from 'bowser'
 import { Injectable, Injector } from '@angular/core'
-import { HostAppService, Platform } from 'tabby-core'
+import { HostAppService, Platform } from 'aterm-core'
 
 @Injectable()
 export class WebHostApp extends HostAppService {

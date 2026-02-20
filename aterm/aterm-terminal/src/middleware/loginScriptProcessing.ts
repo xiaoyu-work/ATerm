@@ -1,5 +1,5 @@
 import deepClone from 'clone-deep'
-import { Logger } from 'tabby-core'
+import { Logger } from 'aterm-core'
 import { SessionMiddleware } from '../api/middleware'
 
 export interface LoginScript {

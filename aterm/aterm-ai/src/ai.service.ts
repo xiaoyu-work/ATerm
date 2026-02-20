@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { ConfigService } from 'tabby-core'
+import { ConfigService } from 'aterm-core'
 import { EventType, StreamEvent, ToolCallRequest, TokensSummary } from './streamEvents'
 import { PROVIDER_PRESETS } from './providers'
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
-import { HostAppService, Platform } from 'tabby-core'
-import { SettingsTabProvider } from 'tabby-settings'
+import { HostAppService, Platform } from 'aterm-core'
+import { SettingsTabProvider } from 'aterm-settings'
 
 import { ShellSettingsTabComponent } from './components/shellSettingsTab.component'
 

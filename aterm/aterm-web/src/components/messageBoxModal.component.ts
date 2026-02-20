@@ -1,6 +1,6 @@
 import { Component, Input, ElementRef } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
-import { BaseComponent, HotkeysService, MessageBoxOptions } from 'tabby-core'
+import { BaseComponent, HotkeysService, MessageBoxOptions } from 'aterm-core'
 
 /** @hidden */
 @Component({

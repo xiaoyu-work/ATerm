@@ -11,7 +11,7 @@ import * as fs from 'fs/promises'
 import * as path from 'path'
 import { DeclarativeTool } from '../base/declarativeTool'
 import { BaseToolInvocation } from '../base/baseToolInvocation'
-import { ToolKind, ToolContext, ToolResult } from '../types'
+import { ToolKind, ToolContext, ToolResult, ConfirmationDetails } from '../types'
 import { isPathOutsideCwd } from '../security'
 import { executeCommand } from '../../shellExecutor'
 
@@ -34,14 +34,21 @@ class GrepToolInvocation extends BaseToolInvocation<GrepToolParams> {
         return `Grep: ${this.params.pattern}`
     }
 
+    getConfirmationDetails (context: ToolContext): ConfirmationDetails | false {
+        const searchDir = this.params.dir_path
+            ? path.resolve(context.cwd, this.params.dir_path)
+            : context.cwd
+        if (isPathOutsideCwd(searchDir, context.cwd)) {
+            return { type: 'path_access', title: 'Search outside CWD', resolvedPath: searchDir }
+        }
+        return false
+    }
+
     async execute (context: ToolContext): Promise<ToolResult> {
         const searchDir = this.params.dir_path
             ? path.resolve(context.cwd, this.params.dir_path)
             : context.cwd
-
-        if (isPathOutsideCwd(searchDir, context.cwd)) {
-            return this.error(`Access denied – "${this.params.dir_path}" resolves to a path outside the working directory.`)
-        }
+        // outsideCwd check removed — handled by scheduler before execute()
 
         try {
             const isGit = await fs.access(path.join(context.cwd, '.git')).then(() => true).catch(() => false)

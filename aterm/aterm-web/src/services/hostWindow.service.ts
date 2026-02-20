@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { ConfigService, HostWindowService, TranslateService } from 'tabby-core'
+import { ConfigService, HostWindowService, TranslateService } from 'aterm-core'
 
 @Injectable({ providedIn: 'root' })
 export class WebHostWindow extends HostWindowService {

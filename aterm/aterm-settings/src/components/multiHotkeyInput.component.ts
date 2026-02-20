@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core'
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap'
 import { HotkeyInputModalComponent } from './hotkeyInputModal.component'
-import { Hotkey } from 'tabby-core'
+import { Hotkey } from 'aterm-core'
 import deepEqual from 'deep-equal'
 
 /** @hidden */

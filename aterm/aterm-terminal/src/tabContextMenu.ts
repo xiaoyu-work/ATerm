@@ -1,6 +1,6 @@
 import { Injectable, Optional, Inject } from '@angular/core'
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap'
-import { BaseTabComponent, TabContextMenuItemProvider, NotificationsService, MenuItemOptions, TranslateService, SplitTabComponent, PromptModalComponent, ConfigService, PartialProfile, Profile } from 'tabby-core'
+import { BaseTabComponent, TabContextMenuItemProvider, NotificationsService, MenuItemOptions, TranslateService, SplitTabComponent, PromptModalComponent, ConfigService, PartialProfile, Profile } from 'aterm-core'
 import { BaseTerminalTabComponent } from './api/baseTerminalTab.component'
 import { TerminalContextMenuItemProvider } from './api/contextMenuProvider'
 import { MultifocusService } from './services/multifocus.service'

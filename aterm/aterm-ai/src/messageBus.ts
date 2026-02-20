@@ -11,7 +11,7 @@
 import { Subject } from 'rxjs'
 import { filter, map, take } from 'rxjs/operators'
 import { firstValueFrom } from 'rxjs'
-import { ConfirmationOutcome } from './tools/types'
+import { ConfirmationDetails, ConfirmationOutcome } from './tools/types'
 
 // ─── Event Types ─────────────────────────────────────────────────────
 // Mirrors gemini-cli's MessageBusType enum
@@ -31,10 +31,15 @@ export enum MessageBusEvent {
 
 // ─── Payload Types ───────────────────────────────────────────────────
 
+/**
+ * Mirrors gemini-cli's ToolConfirmationRequest
+ * (packages/core/src/confirmation-bus/types.ts)
+ *
+ * Carries structured ConfirmationDetails instead of plain strings.
+ */
 export interface ToolConfirmationRequest {
     callId: string
-    toolName: string
-    description: string
+    details: ConfirmationDetails
 }
 
 export interface ToolConfirmationResponse {

@@ -1,4 +1,4 @@
-import { BaseTerminalProfile } from 'tabby-terminal'
+import { BaseTerminalProfile } from 'aterm-terminal'
 
 export interface Shell {
     id: string

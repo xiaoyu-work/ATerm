@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@angular/core'
-import { ConfigService, PlatformService } from 'tabby-core'
-import { TerminalDecorator, BaseTerminalTabComponent, XTermFrontend } from 'tabby-terminal'
+import { ConfigService, PlatformService } from 'aterm-core'
+import { TerminalDecorator, BaseTerminalTabComponent, XTermFrontend } from 'aterm-terminal'
 import { WebLinksAddon } from '@xterm/addon-web-links'
 import { LinkHandler } from './api'
 

@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core'
-import { SettingsTabProvider } from 'tabby-settings'
+import { SettingsTabProvider } from 'aterm-settings'
 
 import { AppearanceSettingsTabComponent } from './components/appearanceSettingsTab.component'
 import { TerminalSettingsTabComponent } from './components/terminalSettingsTab.component'
 import { ColorSchemeSettingsTabComponent } from './components/colorSchemeSettingsTab.component'
-import { TranslateService } from 'tabby-core'
+import { TranslateService } from 'aterm-core'
 
 /** @hidden */
 @Injectable()

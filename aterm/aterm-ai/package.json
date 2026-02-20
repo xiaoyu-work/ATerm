@@ -1,9 +1,9 @@
 {
-  "name": "tabby-ai",
+  "name": "aterm-ai",
   "version": "1.0.0",
   "description": "AI assistant for Tabby terminal — trigger with Ctrl+Space",
   "keywords": [
-    "tabby-builtin-plugin"
+    "aterm-builtin-plugin"
   ],
   "main": "dist/index.js",
   "typings": "typings/index.d.ts",
@@ -21,8 +21,8 @@
     "ansi-colors": "^4.1.1"
   },
   "peerDependencies": {
-    "tabby-core": "*",
-    "tabby-settings": "*",
-    "tabby-terminal": "*"
+    "aterm-core": "*",
+    "aterm-settings": "*",
+    "aterm-terminal": "*"
   }
 }

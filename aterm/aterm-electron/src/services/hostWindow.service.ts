@@ -1,6 +1,6 @@
 import type { BrowserWindow, TouchBar } from 'electron'
 import { Injectable, Inject, NgZone } from '@angular/core'
-import { BootstrapData, BOOTSTRAP_DATA, HostWindowService } from 'tabby-core'
+import { BootstrapData, BOOTSTRAP_DATA, HostWindowService } from 'aterm-core'
 import { ElectronService } from '../services/electron.service'
 
 export interface Bounds {

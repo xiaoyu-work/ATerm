@@ -5,7 +5,7 @@ import { WindowSettingsTabComponent } from './components/windowSettingsTab.compo
 import { VaultSettingsTabComponent } from './components/vaultSettingsTab.component'
 import { ConfigSyncSettingsTabComponent } from './components/configSyncSettingsTab.component'
 import { ProfilesSettingsTabComponent } from './components/profilesSettingsTab.component'
-import { TranslateService } from 'tabby-core'
+import { TranslateService } from 'aterm-core'
 
 /** @hidden */
 @Injectable()

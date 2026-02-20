@@ -25,16 +25,16 @@
     "paths": {
       "*": [
         "../node_modules/*",
-        "../../app/node_modules/*",
+        "../../../app/node_modules/*",
         "./app/node_modules/*"
       ],
-      "tabby-*": ["../../tabby-*/src"],
+      "aterm-*": ["../../aterm-*/src"],
     }
   },
   "typeAcquisition": {
     "include": [
       "../node_modules",
-      "../../app/node_modules"
+      "../../../app/node_modules"
     ]
   },
   "angularCompilerOptions": {

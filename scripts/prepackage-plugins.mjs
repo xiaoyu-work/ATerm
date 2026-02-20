@@ -15,11 +15,11 @@ sh.mkdir('-p', target)
 fs.writeFileSync(path.join(target, 'package.json'), '{}')
 sh.cd(target)
 vars.builtinPlugins.forEach(plugin => {
-    if (plugin === 'tabby-web') {
+    if (plugin === 'aterm-web') {
         return
     }
     log.info('install', plugin)
-    sh.cp('-r', path.join('..', plugin), '.')
+    sh.cp('-r', path.join('..', 'aterm', plugin), '.')
     sh.rm('-rf', path.join(plugin, 'node_modules'))
     sh.cd(plugin)
     sh.exec(`yarn install`, { fatal: true })

@@ -9,7 +9,7 @@
  * is structured as discrete command blocks instead of raw scrollback.
  */
 
-import { BlockTracker, TerminalBlock } from 'tabby-terminal'
+import { BlockTracker, TerminalBlock } from 'aterm-terminal'
 
 const ANSI_REGEX = /\x1b\[[0-9;]*[a-zA-Z]|\x1b\].*?(\x07|\x1b\\)|\x1b[()][0-9A-B]|\x1b[>=<]|\x1b\[[\?]?[0-9;]*[a-zA-Z]/g
 

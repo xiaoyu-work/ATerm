@@ -10,6 +10,7 @@ import { ToolDefinition } from '../ai.service'
 import { ContextCollector } from '../contextCollector'
 import { ShellResult } from '../shellExecutor'
 import { MessageBus } from '../messageBus'
+import { PathApprovalTracker } from './pathApprovals'
 
 // ─── Tool Result ─────────────────────────────────────────────────────
 // Mirrors gemini-cli's ToolResult (packages/core/src/tools/tools.ts)
@@ -23,6 +24,15 @@ export interface ToolResult {
     /** Arbitrary structured data for inter-tool communication */
     data?: Record<string, unknown>
 }
+
+// ─── Confirmation Details ────────────────────────────────────────────
+// Mirrors gemini-cli's SerializableConfirmationDetails
+// (packages/core/src/confirmation-bus/types.ts)
+
+export type ConfirmationDetails =
+    | { type: 'exec'; title: string; command: string }
+    | { type: 'edit'; title: string; filePath: string }
+    | { type: 'path_access'; title: string; resolvedPath: string }
 
 // ─── Tool Kind ───────────────────────────────────────────────────────
 // Mirrors gemini-cli's Kind enum (packages/core/src/tools/tools.ts)
@@ -63,6 +73,8 @@ export interface ToolContext {
     callbacks: AgentCallbacks
     /** Message bus for async communication (confirmation, ask_user) */
     bus: MessageBus
+    /** Session-level path approval tracker for outside-CWD access */
+    pathApprovals: PathApprovalTracker
 }
 
 // ─── Agent Callbacks ─────────────────────────────────────────────────
@@ -71,8 +83,8 @@ export interface ToolContext {
 export interface AgentCallbacks {
     onContent: (text: string) => void
     onThinking: (text: string) => void
-    onConfirmCommand: (cmd: string) => void
-    waitForApproval: () => Promise<boolean>
+    onConfirmCommand: (description: string, type: ConfirmationDetails['type']) => void
+    waitForApproval: () => Promise<ConfirmationOutcome>
     onAskUser: (question: string) => void
     waitForUserResponse: () => Promise<string>
     onCommandStart: (cmd: string) => void
@@ -88,10 +100,16 @@ export interface AgentCallbacks {
 export interface ToolInvocation<TParams = unknown> {
     /** The parsed parameters for this invocation */
     params: TParams
+    /** Tool kind — exposed for scheduler policy decisions */
+    kind: ToolKind
     /** Human-readable description of what this invocation will do */
     getDescription(): string
-    /** Whether this invocation requires user confirmation */
-    shouldConfirmExecute(): boolean
+    /**
+     * Return confirmation details if this invocation requires user approval.
+     * Mirrors gemini-cli's getConfirmationDetails()
+     * (packages/core/src/tools/tools.ts L350-380)
+     */
+    getConfirmationDetails(context: ToolContext): ConfirmationDetails | false
     /** Execute the tool and return the result */
     execute(context: ToolContext): Promise<ToolResult>
 }
@@ -177,17 +195,8 @@ export type CompletedToolCall = SuccessfulToolCall | ErroredToolCall | Cancelled
 export type ActiveToolCall = ValidatingToolCall | ScheduledToolCall | AwaitingApprovalToolCall | ExecutingToolCall
 export type AnyToolCall = ActiveToolCall | CompletedToolCall
 
-// ─── Policy Types ────────────────────────────────────────────────────
-// Mirrors gemini-cli's policy.ts
-
-export enum PolicyDecision {
-    /** Tool is denied — do not execute */
-    Deny = 'deny',
-    /** Ask the user for approval */
-    AskUser = 'ask_user',
-    /** Auto-approve without asking */
-    Auto = 'auto',
-}
+// ─── Confirmation Outcome ────────────────────────────────────────────
+// Mirrors gemini-cli's ToolConfirmationOutcome (packages/core/src/tools/tools.ts)
 
 export enum ConfirmationOutcome {
     ProceedOnce = 'proceed_once',

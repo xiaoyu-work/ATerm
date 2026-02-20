@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { Component, Input } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
-import { ConfigProxy, ProfileGroup, Profile, ProfileProvider, PlatformService, TranslateService } from 'tabby-core'
+import { ConfigProxy, ProfileGroup, Profile, ProfileProvider, PlatformService, TranslateService } from 'aterm-core'
 
 /** @hidden */
 @Component({

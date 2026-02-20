@@ -2,7 +2,7 @@ import { Injectable, Injector } from '@angular/core'
 import WSABinding from 'serialport-binding-webserialapi'
 import AbstractBinding from '@serialport/binding-abstract'
 import { autoDetect } from '@serialport/bindings-cpp'
-import { HostAppService, PartialProfile, Platform, ProfilesService } from 'tabby-core'
+import { HostAppService, PartialProfile, Platform, ProfilesService } from 'aterm-core'
 import { SerialPortInfo, SerialProfile } from '../api'
 import { SerialTabComponent } from '../components/serialTab.component'
 

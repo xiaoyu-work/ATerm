@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { Component, HostListener, Input } from '@angular/core'
-import { AppService, SplitTabComponent } from 'tabby-core'
+import { AppService, SplitTabComponent } from 'aterm-core'
 import { BaseTerminalTabComponent } from '../api/baseTerminalTab.component'
 
 /** @hidden */

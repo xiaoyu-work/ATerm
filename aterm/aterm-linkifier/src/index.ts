@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-extraneous-class */
 import { NgModule } from '@angular/core'
 import { ToastrModule } from 'ngx-toastr'
-import { ConfigProvider } from 'tabby-core'
-import { TerminalDecorator } from 'tabby-terminal'
+import { ConfigProvider } from 'aterm-core'
+import { TerminalDecorator } from 'aterm-terminal'
 
 import { LinkHandler } from './api'
 import { UnixFileHandler, WindowsFileHandler, URLHandler, IPHandler } from './handlers'

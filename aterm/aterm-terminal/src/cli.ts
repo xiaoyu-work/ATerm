@@ -1,6 +1,6 @@
 import shellQuote from 'shell-quote'
 import { Injectable } from '@angular/core'
-import { CLIHandler, CLIEvent, AppService, HostWindowService } from 'tabby-core'
+import { CLIHandler, CLIEvent, AppService, HostWindowService } from 'aterm-core'
 import { BaseTerminalTabComponent } from './api/baseTerminalTab.component'
 
 @Injectable()

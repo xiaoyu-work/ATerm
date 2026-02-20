@@ -3,8 +3,8 @@ import { NgModule } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 
-import TabbyCorePlugin, { ProfileProvider, AppService } from 'tabby-core'
-import TabbyTerminalModule from 'tabby-terminal'
+import TabbyCorePlugin, { ProfileProvider, AppService } from 'aterm-core'
+import TabbyTerminalModule from 'aterm-terminal'
 
 import { DemoTerminalTabComponent } from './components/terminalTab.component'
 import { DemoProfilesService } from './profiles'

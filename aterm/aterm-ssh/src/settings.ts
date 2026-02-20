@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { SettingsTabProvider } from 'tabby-settings'
+import { SettingsTabProvider } from 'aterm-settings'
 
 import { SSHSettingsTabComponent } from './components/sshSettingsTab.component'
 

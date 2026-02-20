@@ -1,9 +1,9 @@
 {
-  "name": "tabby-core",
+  "name": "aterm-core",
   "version": "1.0.231-nightly.0",
   "description": "Tabby core",
   "keywords": [
-    "tabby-builtin-plugin"
+    "aterm-builtin-plugin"
   ],
   "main": "dist/index.js",
   "typings": "typings/index.d.ts",

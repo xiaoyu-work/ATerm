@@ -1,6 +1,6 @@
 import * as fsSync from 'fs'
 import { Injectable } from '@angular/core'
-import { Logger, LogService, ConfigService, ProfilesService, PartialProfile } from 'tabby-core'
+import { Logger, LogService, ConfigService, ProfilesService, PartialProfile } from 'aterm-core'
 import { TerminalTabComponent } from '../components/terminalTab.component'
 import { LocalProfile } from '../api'
 

@@ -1,8 +1,8 @@
 import * as fs from 'mz/fs'
 import * as fsSync from 'fs'
 import { Injector } from '@angular/core'
-import { HostAppService, ConfigService, WIN_BUILD_CONPTY_SUPPORTED, isWindowsBuild, Platform, BootstrapData, BOOTSTRAP_DATA, LogService } from 'tabby-core'
-import { BaseSession } from 'tabby-terminal'
+import { HostAppService, ConfigService, WIN_BUILD_CONPTY_SUPPORTED, isWindowsBuild, Platform, BootstrapData, BOOTSTRAP_DATA, LogService } from 'aterm-core'
+import { BaseSession } from 'aterm-terminal'
 import { SessionOptions, ChildProcess, PTYInterface, PTYProxy } from './api'
 import { getShellIntegration } from './shellIntegration'
 

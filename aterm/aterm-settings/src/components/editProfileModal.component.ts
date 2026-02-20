@@ -2,9 +2,9 @@
 import { Observable, OperatorFunction, debounceTime, map, distinctUntilChanged } from 'rxjs'
 import { Component, Input, ViewChild, ViewContainerRef, Injector } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
-import { PartialProfileGroup, Profile, ProfileProvider, ProfileSettingsComponent, ProfilesService, TAB_COLORS, ProfileGroup, ConnectableProfileProvider, FullyDefined, ConfigProxy } from 'tabby-core'
+import { PartialProfileGroup, Profile, ProfileProvider, ProfileSettingsComponent, ProfilesService, TAB_COLORS, ProfileGroup, ConnectableProfileProvider, FullyDefined, ConfigProxy } from 'aterm-core'
 
-const iconsData = require('../../../tabby-core/src/icons.json')
+const iconsData = require('../../../aterm-core/src/icons.json')
 const iconsClassList = Object.keys(iconsData).map(
     icon => iconsData[icon].map(
         style => `fa${style[0]} fa-${icon}`,

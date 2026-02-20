@@ -1,7 +1,7 @@
 import deepEqual from 'deep-equal'
 import { BehaviorSubject, filter, firstValueFrom, takeUntil } from 'rxjs'
 import { Injector } from '@angular/core'
-import { ConfigService, getCSSFontFamily, getWindows10Build, HostAppService, HotkeysService, NotificationsService, Platform, PlatformService, ThemesService, TranslateService } from 'tabby-core'
+import { ConfigService, getCSSFontFamily, getWindows10Build, HostAppService, HotkeysService, NotificationsService, Platform, PlatformService, ThemesService, TranslateService } from 'aterm-core'
 import { Frontend, SearchOptions, SearchState } from './frontend'
 import { Terminal, ITheme } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'

@@ -1,6 +1,6 @@
 import * as psNode from 'ps-node'
 import { ipcRenderer } from 'electron'
-import { ChildProcess, PTYInterface, PTYProxy } from 'tabby-local'
+import { ChildProcess, PTYInterface, PTYProxy } from 'aterm-local'
 import { getWorkingDirectoryFromPID } from 'native-process-working-directory'
 
 /* eslint-disable block-scoped-var */

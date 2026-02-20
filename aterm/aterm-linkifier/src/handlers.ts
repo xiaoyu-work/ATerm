@@ -3,8 +3,8 @@ import * as path from 'path'
 import untildify from 'untildify'
 import { Injectable } from '@angular/core'
 import { ToastrService } from 'ngx-toastr'
-import { PlatformService } from 'tabby-core'
-import { BaseTerminalTabComponent } from 'tabby-terminal'
+import { PlatformService } from 'aterm-core'
+import { BaseTerminalTabComponent } from 'aterm-terminal'
 
 import { LinkHandler } from './api'
 

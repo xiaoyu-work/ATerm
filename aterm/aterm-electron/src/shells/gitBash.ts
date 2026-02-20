@@ -1,8 +1,8 @@
 import * as path from 'path'
 import { Injectable } from '@angular/core'
-import { Platform, ConfigService, HostAppService } from 'tabby-core'
+import { Platform, ConfigService, HostAppService } from 'aterm-core'
 
-import { Shell } from 'tabby-local'
+import { Shell } from 'aterm-local'
 import { WindowsBaseShellProvider } from './windowsBase'
 
 /* eslint-disable block-scoped-var */

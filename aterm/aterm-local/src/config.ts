@@ -1,4 +1,4 @@
-import { ConfigProvider, Platform } from 'tabby-core'
+import { ConfigProvider, Platform } from 'aterm-core'
 
 /** @hidden */
 export class TerminalConfigProvider extends ConfigProvider {

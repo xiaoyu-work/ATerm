@@ -1,4 +1,4 @@
-import { ConnectableProfile, Profile } from 'tabby-core'
+import { ConnectableProfile, Profile } from 'aterm-core'
 
 export interface ResizeEvent {
     columns: number

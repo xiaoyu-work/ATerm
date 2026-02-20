@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { SSHProfile } from '../api'
-import { PartialProfile, ProfilesService } from 'tabby-core'
+import { PartialProfile, ProfilesService } from 'aterm-core'
 import { SSHSession } from '../session/ssh'
 
 @Injectable({ providedIn: 'root' })

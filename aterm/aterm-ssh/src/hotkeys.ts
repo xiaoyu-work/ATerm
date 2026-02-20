@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { HotkeyDescription, HotkeyProvider, TranslateService } from 'tabby-core'
+import { HotkeyDescription, HotkeyProvider, TranslateService } from 'aterm-core'
 
 /** @hidden */
 @Injectable()

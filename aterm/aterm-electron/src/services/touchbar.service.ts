@@ -2,7 +2,7 @@ import deepEqual from 'deep-equal'
 import { Subject, distinctUntilChanged, map } from 'rxjs'
 import { ipcRenderer } from 'electron'
 import { Injectable, NgZone } from '@angular/core'
-import { AppService, HostAppService, Platform } from 'tabby-core'
+import { AppService, HostAppService, Platform } from 'aterm-core'
 
 /** @hidden */
 @Injectable({ providedIn: 'root' })

@@ -9,7 +9,7 @@
 
 import { DeclarativeTool } from '../base/declarativeTool'
 import { BaseToolInvocation } from '../base/baseToolInvocation'
-import { ToolKind, ToolContext, ToolResult } from '../types'
+import { ToolKind, ToolContext, ToolResult, ConfirmationDetails } from '../types'
 import { executeCommand } from '../../shellExecutor'
 
 export interface ShellToolParams {
@@ -23,6 +23,14 @@ class ShellToolInvocation extends BaseToolInvocation<ShellToolParams> {
 
     getDescription (): string {
         return `Run: ${this.params.command}`
+    }
+
+    /**
+     * Mirrors gemini-cli's ShellToolInvocation.getConfirmationDetails()
+     * (packages/core/src/tools/shell.ts)
+     */
+    getConfirmationDetails (_context: ToolContext): ConfirmationDetails | false {
+        return { type: 'exec', title: 'Run command', command: this.params.command }
     }
 
     async execute (context: ToolContext): Promise<ToolResult> {

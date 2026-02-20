@@ -1,4 +1,4 @@
-import { MenuItemOptions } from 'tabby-core'
+import { MenuItemOptions } from 'aterm-core'
 import { SFTPFile } from '../session/sftp'
 import { SFTPPanelComponent } from '../components/sftpPanel.component'
 

@@ -1,6 +1,6 @@
 import * as keytar from 'keytar'
 import { Injectable } from '@angular/core'
-import { VaultService } from 'tabby-core'
+import { VaultService } from 'aterm-core'
 import { SSHProfile } from '../api'
 
 export const VAULT_SECRET_TYPE_PASSWORD = 'ssh:password'

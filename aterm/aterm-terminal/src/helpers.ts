@@ -1,5 +1,5 @@
 import { TerminalColorScheme } from './api/interfaces'
-import { ConfigService, ThemesService } from 'tabby-core'
+import { ConfigService, ThemesService } from 'aterm-core'
 
 export function getTerminalBackgroundColor (
     config: ConfigService,

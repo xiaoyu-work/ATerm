@@ -1,5 +1,5 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "../../tsconfig.json",
   "exclude": ["node_modules", "dist", "typings"],
   "include": ["src"],
   "compilerOptions": {
@@ -8,8 +8,8 @@
     "declaration": true,
     "declarationDir": "./typings",
     "paths": {
-      "tabby-*": ["../../tabby-*"],
-      "*": ["../../app/node_modules/*"]
+      "aterm-*": ["../../aterm-*"],
+      "*": ["../../../app/node_modules/*"]
     },
     "types": ["node"]
   }

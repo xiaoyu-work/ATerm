@@ -1,4 +1,4 @@
-import { UpdaterService } from 'tabby-core'
+import { UpdaterService } from 'aterm-core'
 
 export class NullUpdaterService extends UpdaterService {
     async check (): Promise<boolean> {

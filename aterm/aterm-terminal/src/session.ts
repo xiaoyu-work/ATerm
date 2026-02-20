@@ -1,5 +1,5 @@
 import { Observable, Subject } from 'rxjs'
-import { Logger } from 'tabby-core'
+import { Logger } from 'aterm-core'
 import { LoginScriptProcessor, LoginScriptsOptions } from './middleware/loginScriptProcessing'
 import { OSCProcessor } from './middleware/oscProcessing'
 import { SessionMiddlewareStack } from './api/middleware'

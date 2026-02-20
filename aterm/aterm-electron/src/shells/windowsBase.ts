@@ -1,6 +1,6 @@
-import { ConfigService, HostAppService } from 'tabby-core'
+import { ConfigService, HostAppService } from 'aterm-core'
 
-import { ShellProvider } from 'tabby-local'
+import { ShellProvider } from 'aterm-local'
 
 export abstract class WindowsBaseShellProvider extends ShellProvider {
     constructor (

@@ -3,7 +3,7 @@ import { Observable, debounceTime, distinctUntilChanged, map } from 'rxjs'
 import { debounce } from 'utils-decorators/dist/esm/debounce/debounce'
 
 import { Component } from '@angular/core'
-import { ConfigService, getCSSFontFamily, PlatformService, ThemesService } from 'tabby-core'
+import { ConfigService, getCSSFontFamily, PlatformService, ThemesService } from 'aterm-core'
 
 /** @hidden */
 @Component({

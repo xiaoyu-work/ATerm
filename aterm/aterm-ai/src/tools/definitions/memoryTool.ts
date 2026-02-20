@@ -26,11 +26,6 @@ class MemoryToolInvocation extends BaseToolInvocation<MemoryToolParams> {
         return 'Save to memory'
     }
 
-    /** Memory tool does not require confirmation */
-    override shouldConfirmExecute (): boolean {
-        return false
-    }
-
     async execute (context: ToolContext): Promise<ToolResult> {
         const memDir = path.join(context.cwd, '.aterm')
         const memFile = path.join(memDir, 'memory.md')

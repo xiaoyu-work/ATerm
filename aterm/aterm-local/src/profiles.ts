@@ -1,7 +1,7 @@
 import { marker as _ } from '@biesbjerg/ngx-translate-extract-marker'
 import deepClone from 'clone-deep'
 import { Injectable, Inject } from '@angular/core'
-import { ProfileProvider, NewTabParameters, ConfigService, SplitTabComponent, AppService, PartialProfile } from 'tabby-core'
+import { ProfileProvider, NewTabParameters, ConfigService, SplitTabComponent, AppService, PartialProfile } from 'aterm-core'
 import { TerminalTabComponent } from './components/terminalTab.component'
 import { LocalProfileSettingsComponent } from './components/localProfileSettings.component'
 import { ShellProvider, Shell, SessionOptions, LocalProfile } from './api'

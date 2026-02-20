@@ -1,5 +1,5 @@
 import { Subject, Observable } from 'rxjs'
-import { SubscriptionContainer } from 'tabby-core'
+import { SubscriptionContainer } from 'aterm-core'
 
 export class SessionMiddleware {
     get outputToSession$ (): Observable<Buffer> { return this.outputToSession }

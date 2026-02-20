@@ -1,14 +1,13 @@
 /**
- * Policy checking and confirmation resolution.
+ * Confirmation resolution — sends structured details to UI, waits for response.
  *
  * Mirrors gemini-cli's:
- * - packages/core/src/scheduler/policy.ts (checkPolicy)
  * - packages/core/src/scheduler/confirmation.ts (resolveConfirmation, awaitConfirmation)
  *
- * Simplified: no ModifyWithEditor/ModifyInline, only ProceedOnce/Cancel.
+ * Policy checking has been extracted to scheduler/policy.ts.
  */
 
-import { ToolInvocation, PolicyDecision, ConfirmationOutcome } from '../tools/types'
+import { ConfirmationDetails, ConfirmationOutcome } from '../tools/types'
 import {
     MessageBus,
     MessageBusEvent,
@@ -17,41 +16,27 @@ import {
 } from '../messageBus'
 
 /**
- * Check the default policy for a tool invocation.
- *
- * Mirrors gemini-cli's checkPolicy():
- * - If the tool does not require confirmation → Auto
- * - Otherwise → AskUser
- */
-export function checkPolicy (invocation: ToolInvocation): PolicyDecision {
-    if (!invocation.shouldConfirmExecute()) {
-        return PolicyDecision.Auto
-    }
-    return PolicyDecision.AskUser
-}
-
-/**
  * Request user confirmation via the message bus.
  *
- * Mirrors gemini-cli's resolveConfirmation() + awaitConfirmation():
- * - Publishes TOOL_CONFIRMATION_REQUEST
- * - Waits for TOOL_CONFIRMATION_RESPONSE with matching callId
- * - Returns the user's decision
+ * Mirrors gemini-cli's resolveConfirmation() + awaitConfirmation()
+ * (packages/core/src/scheduler/confirmation.ts)
+ *
+ * Publishes structured ConfirmationDetails to the UI layer,
+ * then waits for the user's response.
  */
 export async function resolveConfirmation (
     callId: string,
-    toolName: string,
-    description: string,
+    details: ConfirmationDetails,
     bus: MessageBus,
 ): Promise<ConfirmationOutcome> {
-    // Publish confirmation request
+    // Publish confirmation request with structured details
     bus.emit<ToolConfirmationRequest>(MessageBusEvent.TOOL_CONFIRMATION_REQUEST, {
         callId,
-        toolName,
-        description,
+        details,
     })
 
     // Wait for response matching this callId
+    // Mirrors gemini-cli's awaitConfirmation() — races MessageBus listener
     const response = await bus.waitFor<ToolConfirmationResponse>(
         MessageBusEvent.TOOL_CONFIRMATION_RESPONSE,
         (r) => r.callId === callId,

@@ -3,8 +3,8 @@ import { Socket } from 'net'
 import colors from 'ansi-colors'
 import stripAnsi from 'strip-ansi'
 import { Injector } from '@angular/core'
-import { LogService } from 'tabby-core'
-import { BaseSession, ConnectableTerminalProfile, InputProcessingOptions, InputProcessor, LoginScriptsOptions, SessionMiddleware, StreamProcessingOptions, TerminalStreamProcessor } from 'tabby-terminal'
+import { LogService } from 'aterm-core'
+import { BaseSession, ConnectableTerminalProfile, InputProcessingOptions, InputProcessor, LoginScriptsOptions, SessionMiddleware, StreamProcessingOptions, TerminalStreamProcessor } from 'aterm-terminal'
 import { Subject, Observable } from 'rxjs'
 
 

@@ -36,7 +36,7 @@ if (process.platform === 'win32' && !process.env.VCToolsVersion) {
 }
 
 let lifecycles = []
-for (let dir of ['app', 'tabby-core', 'tabby-local', 'tabby-ssh', 'tabby-terminal']) {
+for (let dir of ['app', 'aterm/aterm-core', 'aterm/aterm-local', 'aterm/aterm-ssh', 'aterm/aterm-terminal']) {
     const build = rebuild({
         buildPath: path.resolve(__dirname, '../' + dir),
         electronVersion: vars.electronVersion,

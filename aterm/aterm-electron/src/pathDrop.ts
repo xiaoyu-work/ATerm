@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { TerminalDecorator, BaseTerminalTabComponent } from 'tabby-terminal'
+import { TerminalDecorator, BaseTerminalTabComponent } from 'aterm-terminal'
 import { webUtils } from 'electron'
 
 /** @hidden */

@@ -1,5 +1,5 @@
 {
-  "name": "tabby",
+  "name": "aterm",
   "description": "A terminal for a modern age",
   "private": true,
   "repository": "https://github.com/Eugeny/tabby",
@@ -52,15 +52,15 @@
     "@types/node": "20.3.1"
   },
   "peerDependencies": {
-    "tabby-community-color-schemes": "*",
-    "tabby-core": "*",
-    "tabby-electron": "*",
-    "tabby-local": "*",
-    "tabby-plugin-manager": "*",
-    "tabby-serial": "*",
-    "tabby-settings": "*",
-    "tabby-ssh": "*",
-    "tabby-terminal": "*"
+    "aterm-community-color-schemes": "*",
+    "aterm-core": "*",
+    "aterm-electron": "*",
+    "aterm-local": "*",
+    "aterm-plugin-manager": "*",
+    "aterm-serial": "*",
+    "aterm-settings": "*",
+    "aterm-ssh": "*",
+    "aterm-terminal": "*"
   },
   "resolutions": {
     "node-abi": "4.9.0",

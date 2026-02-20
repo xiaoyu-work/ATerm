@@ -1,4 +1,4 @@
-import { ConnectableTerminalProfile, InputProcessingOptions, LoginScriptsOptions } from 'tabby-terminal'
+import { ConnectableTerminalProfile, InputProcessingOptions, LoginScriptsOptions } from 'aterm-terminal'
 
 export enum SSHAlgorithmType {
     HMAC = 'hmac',

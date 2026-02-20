@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core'
-import { PlatformService, LogService, UpdaterService, DockingService, HostAppService, ThemesService, Platform, AppService, ConfigService, WIN_BUILD_FLUENT_BG_SUPPORTED, isWindowsBuild, HostWindowService, HotkeyProvider, ConfigProvider, FileProvider } from 'tabby-core'
-import { TerminalColorSchemeProvider, TerminalDecorator } from 'tabby-terminal'
-import { SFTPContextMenuItemProvider, SSHProfileImporter, AutoPrivateKeyLocator } from 'tabby-ssh'
-import { PTYInterface, ShellProvider, UACService } from 'tabby-local'
+import { PlatformService, LogService, UpdaterService, DockingService, HostAppService, ThemesService, Platform, AppService, ConfigService, WIN_BUILD_FLUENT_BG_SUPPORTED, isWindowsBuild, HostWindowService, HotkeyProvider, ConfigProvider, FileProvider } from 'aterm-core'
+import { TerminalColorSchemeProvider, TerminalDecorator } from 'aterm-terminal'
+import { SFTPContextMenuItemProvider, SSHProfileImporter, AutoPrivateKeyLocator } from 'aterm-ssh'
+import { PTYInterface, ShellProvider, UACService } from 'aterm-local'
 import { auditTime } from 'rxjs'
 
 import { HyperColorSchemes } from './colorSchemes'

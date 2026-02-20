@@ -7,7 +7,7 @@ import { promisify } from 'node:util'
 const configs = [
     '../app/webpack.config.main.mjs',
     '../app/webpack.config.mjs',
-    ...vars.allPackages.map(x => `../${x}/webpack.config.mjs`),
+    ...vars.allPackages.map(x => x === 'web' ? `../${x}/webpack.config.mjs` : `../aterm/${x}/webpack.config.mjs`),
 ]
 
 ;(async () => {

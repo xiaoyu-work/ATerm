@@ -1,4 +1,4 @@
-import { UTF8Splitter } from 'tabby-core'
+import { UTF8Splitter } from 'aterm-core'
 
 import { SessionMiddleware } from '../api/middleware'
 

@@ -3,7 +3,7 @@ import { marker as _ } from '@biesbjerg/ngx-translate-extract-marker'
 import axios from 'axios'
 import * as marked from '../../node_modules/marked/src/marked'
 import { Component, Injector } from '@angular/core'
-import { BaseTabComponent, TranslateService } from 'tabby-core'
+import { BaseTabComponent, TranslateService } from 'aterm-core'
 
 export interface Release {
     name: string

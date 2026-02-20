@@ -87,10 +87,10 @@ class ReadManyFilesToolInvocation extends BaseToolInvocation<ReadManyFilesToolPa
                 return true
             })
 
-            // Security check
+            // Security check — allow outside-CWD files if session has approved via policy
             const safeFiles = filteredFiles.filter(file => {
                 const resolved = path.resolve(cwd, file)
-                return !isPathOutsideCwd(resolved, cwd)
+                return context.pathApprovals.isAllowed() || !isPathOutsideCwd(resolved, cwd)
             })
 
             if (safeFiles.length === 0) {

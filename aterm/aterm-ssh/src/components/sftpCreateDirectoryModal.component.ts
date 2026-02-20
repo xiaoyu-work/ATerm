@@ -1,6 +1,6 @@
 import { Component } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
-import { BaseComponent } from 'tabby-core'
+import { BaseComponent } from 'aterm-core'
 
 /** @hidden */
 @Component({

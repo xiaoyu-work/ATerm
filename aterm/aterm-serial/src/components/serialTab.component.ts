@@ -2,8 +2,8 @@
 import { marker as _ } from '@biesbjerg/ngx-translate-extract-marker'
 import colors from 'ansi-colors'
 import { Component, Injector } from '@angular/core'
-import { Platform, SelectorService } from 'tabby-core'
-import { BaseTerminalTabComponent, ConnectableTerminalTabComponent } from 'tabby-terminal'
+import { Platform, SelectorService } from 'aterm-core'
+import { BaseTerminalTabComponent, ConnectableTerminalTabComponent } from 'aterm-terminal'
 import { SerialSession, BAUD_RATES, SerialProfile } from '../api'
 
 /** @hidden */

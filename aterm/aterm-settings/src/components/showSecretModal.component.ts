@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
-import { NotificationsService, VaultFileSecret } from 'tabby-core'
+import { NotificationsService, VaultFileSecret } from 'aterm-core'
 
 /** @hidden */
 @Component({

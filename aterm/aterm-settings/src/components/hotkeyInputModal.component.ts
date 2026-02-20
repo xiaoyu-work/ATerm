@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core'
 import { trigger, transition, style, animate } from '@angular/animations'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
-import { HotkeysService, BaseComponent, Keystroke, ConfigService } from 'tabby-core'
+import { HotkeysService, BaseComponent, Keystroke, ConfigService } from 'aterm-core'
 
 const INPUT_TIMEOUT = 1000
 

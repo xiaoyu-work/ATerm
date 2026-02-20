@@ -5,12 +5,12 @@ import * as os from 'os'
 import promiseIpc, { RendererProcessType } from 'electron-promise-ipc'
 import { execFile } from 'mz/child_process'
 import { Injectable, NgZone } from '@angular/core'
-import { PlatformService, ClipboardContent, Platform, MenuItemOptions, MessageBoxOptions, MessageBoxResult, DirectoryUpload, FileUpload, FileDownload, DirectoryDownload, FileUploadOptions, wrapPromise, TranslateService, FileTransfer, PlatformTheme } from 'tabby-core'
+import { PlatformService, ClipboardContent, Platform, MenuItemOptions, MessageBoxOptions, MessageBoxResult, DirectoryUpload, FileUpload, FileDownload, DirectoryDownload, FileUploadOptions, wrapPromise, TranslateService, FileTransfer, PlatformTheme } from 'aterm-core'
 import { ElectronService } from '../services/electron.service'
 import { ElectronHostWindow } from './hostWindow.service'
 import { ShellIntegrationService } from './shellIntegration.service'
 import { ElectronHostAppService } from './hostApp.service'
-import { configPath } from '../../../app/lib/config'
+import { configPath } from '../../../../app/lib/config'
 const fontManager = require('fontmanager-redux') // eslint-disable-line
 
 /* eslint-disable block-scoped-var */

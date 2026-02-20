@@ -7,8 +7,8 @@
           <div class="row">
             <div class="col-12 col-md-6">
               <div class="logo-area">
-                <div class="tabby-logo mt-3"></div>
-                <h1 class="tabby-title">Tabby<sup>α</sup></h1>
+                <div class="aterm-logo mt-3"></div>
+                <h1 class="aterm-title">ATerm<sup>α</sup></h1>
                 <div class="text-muted">{{homeBase.appVersion}}</div>
                 <button class="btn btn-secondary mt-3 mb-2" *ngIf="!updateAvailable &amp;&amp; hostApp.platform !== Platform.Web" (click)="checkForUpdates()" [disabled]="checkingForUpdate"><i class="fas fa-sync" [class.fa-spin]="checkingForUpdate"></i><span translate>Check for updates</span></button>
                 <button class="btn btn-info mt-3 mb-2" *ngIf="updateAvailable" (click)="updater.update()"><i class="fas fa-sync"></i><span translate>Update</span></button>

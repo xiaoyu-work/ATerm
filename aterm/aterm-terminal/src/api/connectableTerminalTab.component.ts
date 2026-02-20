@@ -6,7 +6,7 @@ import { first } from 'rxjs'
 
 import { ConnectableTerminalProfile } from './interfaces'
 import { BaseTerminalTabComponent } from './baseTerminalTab.component'
-import { GetRecoveryTokenOptions, RecoveryToken } from 'tabby-core'
+import { GetRecoveryTokenOptions, RecoveryToken } from 'aterm-core'
 
 
 /**

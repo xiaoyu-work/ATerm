@@ -1,7 +1,7 @@
 import * as fs from 'mz/fs'
 import * as path from 'path'
 import * as remote from '@electron/remote'
-import { PluginInfo } from '../../tabby-core/src/api/mainProcess'
+import { PluginInfo } from '../../aterm/aterm-core/src/api/mainProcess'
 import { PLUGIN_BLACKLIST } from './pluginBlacklist'
 
 const nodeModule = require('module') // eslint-disable-line @typescript-eslint/no-var-requires
@@ -17,7 +17,7 @@ function normalizePath (p: string): string {
     return p
 }
 
-const builtinPluginsPath = process.env.TABBY_DEV ? path.dirname(remote.app.getAppPath()) : path.join((process as any).resourcesPath, 'builtin-plugins')
+const builtinPluginsPath = process.env.TABBY_DEV ? path.join(path.dirname(remote.app.getAppPath()), 'aterm') : path.join((process as any).resourcesPath, 'builtin-plugins')
 
 const cachedBuiltinModules = {
     '@angular/animations': require('@angular/animations'),
@@ -42,10 +42,10 @@ const cachedBuiltinModules = {
 
 const builtinModules = [
     ...Object.keys(cachedBuiltinModules),
-    'tabby-core',
-    'tabby-local',
-    'tabby-settings',
-    'tabby-terminal',
+    'aterm-core',
+    'aterm-local',
+    'aterm-settings',
+    'aterm-terminal',
 ]
 
 const originalRequire = (global as any).require
@@ -93,7 +93,7 @@ export function initModuleLookup (userPluginsPath: string): void {
     })
 }
 
-const PLUGIN_PREFIX = 'tabby-'
+const PLUGIN_PREFIX = 'aterm-'
 const LEGACY_PLUGIN_PREFIX = 'terminus-'
 
 async function getCandidateLocationsInPluginDir (pluginDir: any): Promise<{ pluginDir: string, packageName: string }[]> {
@@ -162,7 +162,7 @@ async function parsePluginInfo (pluginDir: string, packageName: string): Promise
     try {
         const info = JSON.parse(await fs.readFile(infoPath, { encoding: 'utf-8' }))
 
-        if (!info.keywords || !(info.keywords.includes('terminus-plugin') || info.keywords.includes('terminus-builtin-plugin') || info.keywords.includes('tabby-plugin') || info.keywords.includes('tabby-builtin-plugin'))) {
+        if (!info.keywords || !(info.keywords.includes('terminus-plugin') || info.keywords.includes('terminus-builtin-plugin') || info.keywords.includes('aterm-plugin') || info.keywords.includes('aterm-builtin-plugin'))) {
             return null
         }
 
@@ -242,8 +242,8 @@ export async function loadPlugins (foundPlugins: PluginInfo[], progress: Progres
             console.info(`Loading ${foundPlugin.name}: ${nodeRequire.resolve(foundPlugin.path)}`)
             try {
                 const packageModule = nodeRequire(foundPlugin.path)
-                if (foundPlugin.packageName.startsWith('tabby-')) {
-                    cachedBuiltinModules[foundPlugin.packageName.replace('tabby-', 'terminus-')] = packageModule
+                if (foundPlugin.packageName.startsWith('aterm-')) {
+                    cachedBuiltinModules[foundPlugin.packageName.replace('aterm-', 'terminus-')] = packageModule
                 }
                 const pluginModule = packageModule.default.forRoot ? packageModule.default.forRoot() : packageModule.default
                 pluginModule.pluginName = foundPlugin.name

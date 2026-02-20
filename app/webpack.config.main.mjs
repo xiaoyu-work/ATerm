@@ -5,7 +5,7 @@ import * as url from 'url'
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 
 const config = {
-    name: 'tabby-main',
+    name: 'aterm-main',
     target: 'electron-main',
     entry: {
         main: path.resolve(__dirname, 'lib/index.ts'),

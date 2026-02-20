@@ -1,4 +1,4 @@
-import { ConfigProvider } from 'tabby-core'
+import { ConfigProvider } from 'aterm-core'
 
 /** @hidden */
 export class TelnetConfigProvider extends ConfigProvider {

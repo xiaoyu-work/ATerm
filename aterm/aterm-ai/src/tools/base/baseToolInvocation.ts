@@ -5,11 +5,14 @@
  * (packages/core/src/tools/tools.ts L290-430)
  *
  * Provides:
- * - Default shouldConfirmExecute() based on ToolKind
+ * - Default getConfirmationDetails() returning false (no confirmation needed)
  * - Helper methods for creating ToolResult
+ *
+ * Subclasses override getConfirmationDetails() to provide tool-specific
+ * confirmation details (path access, shell commands, edits).
  */
 
-import { ToolInvocation, ToolResult, ToolContext, ToolKind } from '../types'
+import { ToolInvocation, ToolResult, ToolContext, ToolKind, ConfirmationDetails } from '../types'
 
 export abstract class BaseToolInvocation<TParams = unknown>
     implements ToolInvocation<TParams> {
@@ -23,22 +26,18 @@ export abstract class BaseToolInvocation<TParams = unknown>
     abstract execute (context: ToolContext): Promise<ToolResult>
 
     /**
-     * Default policy: read-only/search/think/communicate/plan tools auto-approve,
-     * everything else requires user confirmation.
+     * Return confirmation details if this invocation requires user approval.
      *
-     * Mirrors gemini-cli's getMessageBusDecision() simplified logic.
+     * Mirrors gemini-cli's getConfirmationDetails()
+     * (packages/core/src/tools/tools.ts L350-380)
+     *
+     * Default: no confirmation needed. Subclasses override for:
+     * - Shell commands → { type: 'exec', command }
+     * - Path access outside CWD → { type: 'path_access', resolvedPath }
+     * - File edits → { type: 'edit', filePath }
      */
-    shouldConfirmExecute (): boolean {
-        switch (this.kind) {
-            case ToolKind.Read:
-            case ToolKind.Search:
-            case ToolKind.Think:
-            case ToolKind.Communicate:
-            case ToolKind.Plan:
-                return false
-            default:
-                return true
-        }
+    getConfirmationDetails (_context: ToolContext): ConfirmationDetails | false {
+        return false
     }
 
     /** Helper: create a success ToolResult */

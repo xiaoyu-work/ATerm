@@ -15,7 +15,8 @@ import { AIService, ChatMessage } from './ai.service'
 import { ContextCollector } from './contextCollector'
 import { EventType, ToolCallRequest, TokensSummary } from './streamEvents'
 import { ToolRegistry } from './tools/toolRegistry'
-import { AgentCallbacks, ToolCallStatus, ToolContext, ConfirmationOutcome } from './tools/types'
+import { AgentCallbacks, ToolCallStatus, ToolContext } from './tools/types'
+import { PathApprovalTracker } from './tools/pathApprovals'
 import { Scheduler } from './scheduler/scheduler'
 import {
     MessageBus,
@@ -97,6 +98,7 @@ export class AgentLoop {
         private collector: ContextCollector,
         private callbacks: AgentCallbacks,
         private signal: AbortSignal,
+        private pathApprovals: PathApprovalTracker = new PathApprovalTracker(),
     ) {
         this.registry = createDefaultRegistry()
         this.bus = new MessageBus()
@@ -115,19 +117,23 @@ export class AgentLoop {
      * - ASK_USER_REQUEST → callbacks.onAskUser → waitForUserResponse → ASK_USER_RESPONSE
      */
     private wireMessageBus (): void {
-        // Tool confirmation: scheduler requests → UI shows prompt → user responds
+        // Tool confirmation: scheduler sends structured details → UI shows prompt → user responds
+        // Mirrors gemini-cli's confirmation bus wiring
         const confirmSub = this.bus.on<ToolConfirmationRequest>(
             MessageBusEvent.TOOL_CONFIRMATION_REQUEST,
             async (req) => {
-                this.callbacks.onConfirmCommand(req.description)
-                const approved = await this.callbacks.waitForApproval()
+                const { details } = req
+                // Extract display description from structured details
+                const description = details.type === 'exec' ? details.command
+                    : details.type === 'path_access' ? details.resolvedPath
+                    : details.filePath
+                this.callbacks.onConfirmCommand(description, details.type)
+                const outcome = await this.callbacks.waitForApproval()
                 this.bus.emit<ToolConfirmationResponse>(
                     MessageBusEvent.TOOL_CONFIRMATION_RESPONSE,
                     {
                         callId: req.callId,
-                        outcome: approved
-                            ? ConfirmationOutcome.ProceedOnce
-                            : ConfirmationOutcome.Cancel,
+                        outcome,
                     },
                 )
             },
@@ -266,6 +272,7 @@ export class AgentLoop {
                     collector: this.collector,
                     callbacks: this.callbacks,
                     bus: this.bus,
+                    pathApprovals: this.pathApprovals,
                 }
 
                 const completedCalls = await this.scheduler.schedule(

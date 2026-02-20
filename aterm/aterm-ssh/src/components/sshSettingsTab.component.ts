@@ -1,6 +1,6 @@
 import { Component, HostBinding } from '@angular/core'
 import { X11Socket } from '../session/x11'
-import { ConfigService, HostAppService, Platform } from 'tabby-core'
+import { ConfigService, HostAppService, Platform } from 'aterm-core'
 
 /** @hidden */
 @Component({

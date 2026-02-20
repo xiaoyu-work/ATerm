@@ -1,5 +1,5 @@
 import { Component } from '@angular/core'
-import { ConfigService, PlatformService } from 'tabby-core'
+import { ConfigService, PlatformService } from 'aterm-core'
 
 /** @hidden */
 @Component({

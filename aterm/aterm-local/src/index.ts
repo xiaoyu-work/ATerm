@@ -4,9 +4,9 @@ import { FormsModule } from '@angular/forms'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 import { ToastrModule } from 'ngx-toastr'
 
-import TabbyCorePlugin, { HostAppService, ToolbarButtonProvider, TabRecoveryProvider, ConfigProvider, HotkeysService, HotkeyProvider, TabContextMenuItemProvider, CLIHandler, ProfileProvider } from 'tabby-core'
-import TabbyTerminalModule from 'tabby-terminal'
-import { SettingsTabProvider } from 'tabby-settings'
+import TabbyCorePlugin, { HostAppService, ToolbarButtonProvider, TabRecoveryProvider, ConfigProvider, HotkeysService, HotkeyProvider, TabContextMenuItemProvider, CLIHandler, ProfileProvider } from 'aterm-core'
+import TabbyTerminalModule from 'aterm-terminal'
+import { SettingsTabProvider } from 'aterm-settings'
 
 import { TerminalTabComponent } from './components/terminalTab.component'
 import { ShellSettingsTabComponent } from './components/shellSettingsTab.component'

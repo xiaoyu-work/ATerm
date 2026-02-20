@@ -18,7 +18,7 @@ const linkerPlugin = createEs2015LinkerPlugin({
 })
 
 export default () => ({
-    name: 'tabby',
+    name: 'aterm',
     target: 'node',
     entry: {
         sentry: path.resolve(__dirname, 'lib/sentry.ts'),

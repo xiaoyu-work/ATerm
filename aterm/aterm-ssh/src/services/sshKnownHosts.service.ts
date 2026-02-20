@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { ConfigService } from 'tabby-core'
+import { ConfigService } from 'aterm-core'
 
 export interface KnownHostSelector {
     host: string

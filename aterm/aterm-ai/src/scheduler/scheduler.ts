@@ -1,11 +1,13 @@
 /**
- * Tool call scheduler — orchestrates tool execution with state machine.
+ * Tool call scheduler — orchestrates tool execution with policy + confirmation.
  *
- * Mirrors gemini-cli's Scheduler
+ * Mirrors gemini-cli's CoreToolScheduler
  * (packages/core/src/scheduler/scheduler.ts)
  *
- * Flow: validate → build invocations → partition (read-only/write)
- *       → execute read-only in parallel → execute write sequentially with confirmation
+ * Flow: validate → build invocations → partition (auto/confirm)
+ *       → execute auto-group in parallel
+ *       → process confirm-group sequentially:
+ *         getConfirmationDetails → checkPolicy → resolveConfirmation → updatePolicy → execute
  *       → return completed calls
  */
 
@@ -16,11 +18,12 @@ import {
     CompletedToolCall,
     ScheduledToolCall,
     ConfirmationOutcome,
-    PolicyDecision,
+    MUTATOR_KINDS,
 } from '../tools/types'
 import { SchedulerStateManager } from './stateManager'
 import { ToolExecutor } from './toolExecutor'
-import { checkPolicy, resolveConfirmation } from './confirmation'
+import { PolicyDecision, checkPolicy, updatePolicy } from './policy'
+import { resolveConfirmation } from './confirmation'
 import { MessageBus, MessageBusEvent } from '../messageBus'
 
 export class Scheduler {
@@ -35,10 +38,10 @@ export class Scheduler {
     /**
      * Schedule and execute a batch of tool calls.
      *
-     * Mirrors gemini-cli's Scheduler.schedule():
+     * Mirrors gemini-cli's CoreToolScheduler.schedule():
      * 1. _startBatch(): Validate & build invocations
-     * 2. _processQueue(): Partition into read-only (parallel) and write (sequential)
-     * 3. _processToolCall(): checkPolicy → resolveConfirmation → _execute
+     * 2. _processQueue(): Partition into auto (parallel) and confirm (sequential)
+     * 3. _processToolCall(): getConfirmationDetails → checkPolicy → resolveConfirmation → execute
      * 4. Return completed calls
      */
     async schedule (
@@ -78,19 +81,31 @@ export class Scheduler {
         // === _processQueue(): Partition and execute ===
         const scheduled = this.stateManager.getScheduledCalls()
 
-        // Read-only tools can run in parallel (no confirmation needed)
-        const readOnlyCalls = scheduled.filter(c => !c.invocation.shouldConfirmExecute())
-        const writeCalls = scheduled.filter(c => c.invocation.shouldConfirmExecute())
+        // Partition: tools that MIGHT need confirmation go to sequential group,
+        // tools that definitely don't need confirmation run in parallel.
+        //
+        // Mirrors gemini-cli's partitioning of read-only vs write tools.
+        const autoGroup: ScheduledToolCall[] = []
+        const confirmGroup: ScheduledToolCall[] = []
 
-        // Execute read-only tools in parallel
-        if (readOnlyCalls.length > 0 && !context.signal.aborted) {
+        for (const call of scheduled) {
+            const details = call.invocation.getConfirmationDetails(context)
+            if (!details && !MUTATOR_KINDS.includes(call.invocation.kind)) {
+                autoGroup.push(call)
+            } else {
+                confirmGroup.push(call)
+            }
+        }
+
+        // Execute auto-group in parallel (no confirmation needed)
+        if (autoGroup.length > 0 && !context.signal.aborted) {
             await Promise.all(
-                readOnlyCalls.map(call => this.processToolCall(call, context)),
+                autoGroup.map(call => this.executeDirect(call, context)),
             )
         }
 
-        // Execute write tools sequentially with confirmation
-        for (const call of writeCalls) {
+        // Execute confirm-group sequentially (may need user interaction)
+        for (const call of confirmGroup) {
             if (context.signal.aborted) {
                 this.stateManager.finalizeCancelled(call.callId, 'Aborted')
                 continue
@@ -112,46 +127,63 @@ export class Scheduler {
     /**
      * Process a single tool call through the full pipeline.
      *
-     * Mirrors gemini-cli's Scheduler._processToolCall():
-     * 1. checkPolicy → DENY/AUTO/ASK_USER
-     * 2. If ASK_USER → resolveConfirmation
-     * 3. If approved → _execute
+     * Mirrors gemini-cli's CoreToolScheduler._processToolCall():
+     * 1. getConfirmationDetails(context) → get structured details
+     * 2. checkPolicy(details, invocation, pathApprovals) → DENY/AUTO/ASK_USER
+     * 3. If ASK_USER → resolveConfirmation(callId, details, bus) → user responds
+     * 4. updatePolicy(outcome, details, pathApprovals) → handle "always allow"
+     * 5. execute(invocation, context)
      */
     private async processToolCall (
         call: ScheduledToolCall,
         context: ToolContext,
     ): Promise<void> {
-        const { callId, invocation, description, toolName } = call
+        const { callId, invocation } = call
 
-        // === Policy check ===
-        const policy = checkPolicy(invocation)
+        // 1. Get confirmation details — re-computed each time because
+        //    pathApprovals state may have changed from earlier approvals in this batch
+        const details = invocation.getConfirmationDetails(context)
+
+        // 2. Check policy
+        const policy = checkPolicy(details, invocation, context.pathApprovals)
 
         if (policy === PolicyDecision.Deny) {
             this.stateManager.finalizeCancelled(callId, 'Denied by policy')
             return
         }
 
-        if (policy === PolicyDecision.AskUser) {
+        if (policy === PolicyDecision.AskUser && details) {
             this.stateManager.updateToAwaitingApproval(callId)
 
-            const outcome = await resolveConfirmation(
-                callId, toolName, description, this.bus,
-            )
+            const outcome = await resolveConfirmation(callId, details, this.bus)
 
             if (outcome === ConfirmationOutcome.Cancel) {
                 this.stateManager.finalizeCancelled(callId, 'User declined')
                 return
             }
+
+            // 3. Update policy — handle "always allow" transitions
+            updatePolicy(outcome, details, context.pathApprovals)
         }
 
-        // === Execute ===
-        this.stateManager.updateToExecuting(callId)
-        const result = await this.executor.execute(invocation, context)
+        // 4. Execute
+        await this.executeDirect(call, context)
+    }
+
+    /**
+     * Execute a tool call directly (no confirmation).
+     */
+    private async executeDirect (
+        call: ScheduledToolCall,
+        context: ToolContext,
+    ): Promise<void> {
+        this.stateManager.updateToExecuting(call.callId)
+        const result = await this.executor.execute(call.invocation, context)
 
         if (result.error) {
-            this.stateManager.finalizeError(callId, result.error)
+            this.stateManager.finalizeError(call.callId, result.error)
         } else {
-            this.stateManager.finalizeSuccess(callId, result)
+            this.stateManager.finalizeSuccess(call.callId, result)
         }
     }
 }

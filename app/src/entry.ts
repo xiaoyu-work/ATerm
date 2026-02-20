@@ -14,7 +14,7 @@ import { platformBrowserDynamic } from '@angular/platform-browser-dynamic'
 import { ipcRenderer } from 'electron'
 
 import { getRootModule } from './app.module'
-import { BootstrapData, BOOTSTRAP_DATA, PluginInfo } from '../../tabby-core/src/api/mainProcess'
+import { BootstrapData, BOOTSTRAP_DATA, PluginInfo } from '../../aterm/aterm-core/src/api/mainProcess'
 
 // Always land on the start view
 location.hash = ''

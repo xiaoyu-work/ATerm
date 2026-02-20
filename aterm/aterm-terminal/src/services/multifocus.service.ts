@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
 import { BaseTerminalTabComponent } from '../api/baseTerminalTab.component'
 import { Subscription } from 'rxjs'
-import { SplitTabComponent, TranslateService, AppService, HotkeysService } from 'tabby-core'
+import { SplitTabComponent, TranslateService, AppService, HotkeysService } from 'aterm-core'
 
 @Injectable({ providedIn: 'root' })
 export class MultifocusService {

@@ -4,14 +4,14 @@ import * as path from 'path'
 import * as glob from 'glob'
 import * as yaml from 'js-yaml'
 import { Injectable } from '@angular/core'
-import { PartialProfile } from 'tabby-core'
+import { PartialProfile } from 'aterm-core'
 import {
     SSHProfileImporter,
     PortForwardType,
     SSHProfile,
     AutoPrivateKeyLocator,
     ForwardedPortConfig,
-} from 'tabby-ssh'
+} from 'aterm-ssh'
 
 import { ElectronService } from './services/electron.service'
 import SSHConfig, { Directive, LineType } from 'ssh-config'

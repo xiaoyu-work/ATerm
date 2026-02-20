@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core'
 import { Subject, debounceTime } from 'rxjs'
 import { Frontend, SearchOptions, SearchState } from '../frontends/frontend'
-import { ConfigService, NotificationsService, TranslateService } from 'tabby-core'
+import { ConfigService, NotificationsService, TranslateService } from 'aterm-core'
 
 @Component({
     standalone: false,

@@ -1,4 +1,4 @@
-import { ConfigProvider } from 'tabby-core'
+import { ConfigProvider } from 'aterm-core'
 
 export class AIConfigProvider extends ConfigProvider {
     defaults = {

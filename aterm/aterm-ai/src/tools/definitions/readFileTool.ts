@@ -10,7 +10,7 @@
 import * as fs from 'fs/promises'
 import { DeclarativeTool } from '../base/declarativeTool'
 import { BaseToolInvocation } from '../base/baseToolInvocation'
-import { ToolKind, ToolContext, ToolResult } from '../types'
+import { ToolKind, ToolContext, ToolResult, ConfirmationDetails } from '../types'
 import { validatePath } from '../security'
 
 export interface ReadFileToolParams {
@@ -28,11 +28,25 @@ class ReadFileToolInvocation extends BaseToolInvocation<ReadFileToolParams> {
         return `Read file: ${this.params.file_path}`
     }
 
+    /**
+     * Mirrors gemini-cli's path validation in ReadFileToolInvocation.
+     * Returns path_access details if file is outside CWD.
+     */
+    getConfirmationDetails (context: ToolContext): ConfirmationDetails | false {
+        const validation = validatePath(this.params.file_path, context.cwd)
+        if ('error' in validation) return false // Will error in execute()
+        if (validation.outsideCwd) {
+            return { type: 'path_access', title: 'Read outside CWD', resolvedPath: validation.resolved }
+        }
+        return false
+    }
+
     async execute (context: ToolContext): Promise<ToolResult> {
         const validation = validatePath(this.params.file_path, context.cwd)
         if ('error' in validation) {
             return this.error(validation.error)
         }
+        // outsideCwd check removed — handled by scheduler before execute()
 
         try {
             const content = await fs.readFile(validation.resolved, 'utf-8')

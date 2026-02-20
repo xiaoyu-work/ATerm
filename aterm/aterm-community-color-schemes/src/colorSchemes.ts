@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { TerminalColorSchemeProvider, TerminalColorScheme } from 'tabby-terminal'
+import { TerminalColorSchemeProvider, TerminalColorScheme } from 'aterm-terminal'
 
 const schemeContents = (require as any).context('../schemes/', false, /.*/)
 

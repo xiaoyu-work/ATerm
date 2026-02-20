@@ -1,5 +1,5 @@
 import { NgZone, Injectable } from '@angular/core'
-import { ConfigService, HostAppService, Platform, ProfilesService, TranslateService } from 'tabby-core'
+import { ConfigService, HostAppService, Platform, ProfilesService, TranslateService } from 'aterm-core'
 import { ElectronService } from './electron.service'
 
 /** @hidden */

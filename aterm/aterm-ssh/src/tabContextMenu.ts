@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { BaseTabComponent, TabContextMenuItemProvider, HostAppService, Platform, MenuItemOptions, TranslateService } from 'tabby-core'
+import { BaseTabComponent, TabContextMenuItemProvider, HostAppService, Platform, MenuItemOptions, TranslateService } from 'aterm-core'
 import { SSHTabComponent } from './components/sshTab.component'
 import { SSHService } from './services/ssh.service'
 

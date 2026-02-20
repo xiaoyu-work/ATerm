@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { ToolbarButtonProvider, ToolbarButton, AppService, HostAppService, HotkeysService, TranslateService } from 'tabby-core'
+import { ToolbarButtonProvider, ToolbarButton, AppService, HostAppService, HotkeysService, TranslateService } from 'aterm-core'
 
 import { SettingsTabComponent } from './components/settingsTab.component'
 

@@ -1,9 +1,9 @@
 {
-  "name": "tabby-telnet",
+  "name": "aterm-telnet",
   "version": "1.0.231-nightly.0",
   "description": "Telnet/socket connections for Tabby",
   "keywords": [
-    "tabby-builtin-plugin"
+    "aterm-builtin-plugin"
   ],
   "main": "dist/index.js",
   "typings": "typings/index.d.ts",
@@ -29,8 +29,8 @@
     "@angular/platform-browser": "^19",
     "@ng-bootstrap/ng-bootstrap": "^18",
     "rxjs": "^7",
-    "tabby-core": "*",
-    "tabby-settings": "*",
-    "tabby-terminal": "*"
+    "aterm-core": "*",
+    "aterm-settings": "*",
+    "aterm-terminal": "*"
   }
 }

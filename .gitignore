@@ -7,6 +7,8 @@ build/files.wxs
 dist
 */dist
 */typings
+aterm/*/dist
+aterm/*/typings
 *.tsbuildinfo
 
 *.xcworkspacedata

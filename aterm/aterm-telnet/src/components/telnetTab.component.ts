@@ -1,8 +1,8 @@
 import { marker as _ } from '@biesbjerg/ngx-translate-extract-marker'
 import colors from 'ansi-colors'
 import { Component, Injector } from '@angular/core'
-import { Platform } from 'tabby-core'
-import { BaseTerminalTabComponent, ConnectableTerminalTabComponent } from 'tabby-terminal'
+import { Platform } from 'aterm-core'
+import { BaseTerminalTabComponent, ConnectableTerminalTabComponent } from 'aterm-terminal'
 import { TelnetProfile, TelnetSession } from '../session'
 
 

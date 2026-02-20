@@ -34,8 +34,7 @@ class ExitPlanModeToolInvocation extends BaseToolInvocation<ExitPlanModeToolPara
         const callId = `plan_${Date.now()}`
         context.bus.emit<ToolConfirmationRequest>(MessageBusEvent.TOOL_CONFIRMATION_REQUEST, {
             callId,
-            toolName: 'exit_plan_mode',
-            description: 'Approve plan and proceed?',
+            details: { type: 'edit', title: 'Approve plan', filePath: 'plan' },
         })
 
         const response = await context.bus.waitFor<ToolConfirmationResponse>(

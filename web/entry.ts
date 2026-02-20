@@ -12,7 +12,7 @@ import { enableDebugTools } from '@angular/platform-browser'
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic'
 
 import { getRootModule } from '../app/src/app.module'
-import { BootstrapData, BOOTSTRAP_DATA } from '../tabby-core/src/api/mainProcess'
+import { BootstrapData, BOOTSTRAP_DATA } from '../aterm/aterm-core/src/api/mainProcess'
 
 interface BootstrapOptions {
     packageModules: any[]

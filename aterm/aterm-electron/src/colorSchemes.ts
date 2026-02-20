@@ -1,7 +1,7 @@
 import * as fs from 'mz/fs'
 import * as path from 'path'
 import { Injectable } from '@angular/core'
-import { TerminalColorSchemeProvider, TerminalColorScheme } from 'tabby-terminal'
+import { TerminalColorSchemeProvider, TerminalColorScheme } from 'aterm-terminal'
 
 /** @hidden */
 @Injectable()
