@@ -205,7 +205,7 @@ export class Application {
             this.tray.setContextMenu(contextMenu)
         }
 
-        this.tray.setToolTip(`Tabby ${app.getVersion()}`)
+        this.tray.setToolTip(`Aterm ${app.getVersion()}`)
     }
 
     disableTray (): void {
@@ -249,7 +249,7 @@ export class Application {
             {
                 label: 'Application',
                 submenu: [
-                    { role: 'about', label: 'About Tabby' },
+                    { role: 'about', label: 'About Aterm' },
                     { type: 'separator' },
                     {
                         label: 'Preferences',
@@ -315,14 +315,14 @@ export class Application {
                     {
                         label: 'Website',
                         click () {
-                            shell.openExternal('https://eugeny.github.io/tabby')
+                            shell.openExternal('https://github.com/xiaoyu-work/ATerm')
                         },
                     },
                 ],
             },
         ]
 
-        if (process.env.TABBY_DEV) {
+        if (process.env.ATERM_DEV) {
             template[2].submenu['unshift']({ role: 'reload' })
         }
 

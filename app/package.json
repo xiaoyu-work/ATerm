@@ -2,9 +2,9 @@
   "name": "aterm",
   "description": "A terminal for a modern age",
   "private": true,
-  "repository": "https://github.com/Eugeny/tabby",
+  "repository": "https://github.com/xiaoyu-work/ATerm",
   "author": {
-    "name": "Tabby Developers",
+    "name": "Aterm Developers",
     "email": "e@ajenti.org"
   },
   "main": "dist/main.js",

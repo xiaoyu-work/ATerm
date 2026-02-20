@@ -1,7 +1,7 @@
 {
   "name": "aterm-plugin-manager",
   "version": "1.0.231-nightly.0",
-  "description": "Tabby's plugin manager",
+  "description": "Aterm's plugin manager",
   "keywords": [
     "aterm-builtin-plugin"
   ],
@@ -15,7 +15,7 @@
     "dist",
     "typings"
   ],
-  "author": "Tabby Developers",
+  "author": "Aterm Developers",
   "license": "MIT",
   "devDependencies": {
     "@types/semver": "^7.1.0",

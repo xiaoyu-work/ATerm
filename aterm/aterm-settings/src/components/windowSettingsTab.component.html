@@ -64,7 +64,7 @@
 <div class="form-line" *ngIf="hostApp.platform !== Platform.Web &amp;&amp; hostApp.platform !== Platform.Linux">
   <div class="header">
     <div class="title" translate>Hide tray icon</div>
-    <div class="description" translate>Hide Tabby from tray or menu bar.</div>
+    <div class="description" translate>Hide Aterm from tray or menu bar.</div>
   </div>
   <toggle [(ngModel)]="config.store.hideTray" (ngModelChange)="saveConfiguration(true)"></toggle>
 </div>

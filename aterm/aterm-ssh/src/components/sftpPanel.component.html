@@ -23,9 +23,9 @@
     <button class="btn btn-secondary" (click)="clearFilter()"><i class="fas fa-times"></i></button>
   </div>
 </div>
-<div class="body" dropZone (transfer)="uploadOneFolder($event)"><a class="alert alert-info d-flex align-items-center" *ngIf="shouldShowCWDTip &amp;&amp; !cwdDetectionAvailable" (click)="platform.openExternal(&quot;https://tabby.sh/go/cwd-detection&quot;)">
+<div class="body" dropZone (transfer)="uploadOneFolder($event)"><a class="alert alert-info d-flex align-items-center" *ngIf="shouldShowCWDTip &amp;&amp; !cwdDetectionAvailable">
     <div class="me-auto"><strong translate>Working directory detection</strong>
-      <div translate>Learn how to allow Tabby to detect remote shell's working directory.</div>
+      <div translate>Learn how to allow Aterm to detect remote shell's working directory.</div>
     </div>
     <button class="close" (click)="dismissCWDTip()"><i class="fas fa-close"></i></button></a>
   <div *ngIf="!sftp" translate>Connecting</div>
@@ -39,7 +39,7 @@
         <div>{{item.name}}</div>
         <div class="me-auto"></div>
         <div class="size" *ngIf="!item.isDirectory">{{item.size|filesize}}</div>
-        <div class="date">{{item.modified|tabbyDate}}</div>
+        <div class="date">{{item.modified|atermDate}}</div>
         <div class="mode">{{getModeString(item)}}</div>
       </div>
     </div>

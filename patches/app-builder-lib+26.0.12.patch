@@ -9,7 +9,7 @@ index d159c17..eb48466 100644
 -        const name = this.name;
 -        // https://github.com/electron-userland/electron-builder/issues/2963
 -        return name.startsWith("@") ? this.sanitizedProductName : name;
-+        return 'tabby-terminal';
++        return 'aterm-terminal';
      }
      get sanitizedName() {
          return (0, filename_1.sanitizeFileName)(this.name);

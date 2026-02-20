@@ -1,4 +1,4 @@
-# Tabby Core Plugin
+# Aterm Core Plugin
 
 See also:
 
@@ -20,7 +20,7 @@ This module provides:
 Using the API:
 
 ```ts
-import { AppService, TabContextMenuItemProvider } from 'tabby-core'
+import { AppService, TabContextMenuItemProvider } from 'aterm-core'
 ```
 
 Exporting your subclasses:

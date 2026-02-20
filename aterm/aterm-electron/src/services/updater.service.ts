@@ -4,7 +4,7 @@ import axios from 'axios'
 import { Logger, LogService, ConfigService, UpdaterService, PlatformService, TranslateService } from 'aterm-core'
 import { ElectronService } from '../services/electron.service'
 
-const UPDATES_URL = 'https://api.github.com/repos/eugeny/tabby/releases/latest'
+const UPDATES_URL = 'https://api.github.com/repos/xiaoyu-work/ATerm/releases/latest'
 
 @Injectable()
 export class ElectronUpdaterService extends UpdaterService {
@@ -46,7 +46,7 @@ export class ElectronUpdaterService extends UpdaterService {
         })
 
         config.ready$.toPromise().then(() => {
-            if (config.store.enableAutomaticUpdates && this.electronUpdaterAvailable && !process.env.TABBY_DEV) {
+            if (config.store.enableAutomaticUpdates && this.electronUpdaterAvailable && !process.env.ATERM_DEV) {
                 this.logger.debug('Checking for updates')
                 try {
                     this.electron.ipcRenderer.send('updater:check-for-updates')
@@ -122,7 +122,7 @@ export class ElectronUpdaterService extends UpdaterService {
             if ((await this.platform.showMessageBox(
                 {
                     type: 'warning',
-                    message: this.translate.instant('Installing the update will close all tabs and restart Tabby.'),
+                    message: this.translate.instant('Installing the update will close all tabs and restart Aterm.'),
                     buttons: [
                         this.translate.instant('Update'),
                         this.translate.instant('Cancel'),

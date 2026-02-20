@@ -1,7 +1,7 @@
 {
   "name": "aterm-settings",
   "version": "1.0.231-nightly.0",
-  "description": "Tabby terminal settings page",
+  "description": "Aterm terminal settings page",
   "keywords": [
     "aterm-builtin-plugin"
   ],
@@ -15,7 +15,7 @@
     "dist",
     "typings"
   ],
-  "author": "Tabby Developers",
+  "author": "Aterm Developers",
   "license": "MIT",
   "devDependencies": {
     "@types/marked": "^5.0.1",

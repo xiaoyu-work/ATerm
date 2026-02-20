@@ -260,9 +260,9 @@ export class LocaleService {
 
 @Pipe({
     standalone: false,
-    name: 'tabbyDate',
+    name: 'atermDate',
 })
-export class TabbyFormatedDatePipe implements PipeTransform {
+export class AtermFormatedDatePipe implements PipeTransform {
 
     constructor (private locale: LocaleService) {}
 

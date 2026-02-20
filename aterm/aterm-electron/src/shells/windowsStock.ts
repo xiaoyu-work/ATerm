@@ -32,7 +32,7 @@ export class WindowsStockShellsProvider extends WindowsBaseShellProvider {
             `clink_${process.arch}.exe`,
         )
 
-        if (process.env.TABBY_DEV) {
+        if (process.env.ATERM_DEV) {
             clinkPath = path.join(
                 path.dirname(this.electron.app.getPath('exe')),
                 '..', '..', '..',

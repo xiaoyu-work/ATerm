@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 import { ToastrModule } from 'ngx-toastr'
 
-import TabbyCorePlugin, { HostAppService, ToolbarButtonProvider, TabRecoveryProvider, ConfigProvider, HotkeysService, HotkeyProvider, TabContextMenuItemProvider, CLIHandler, ProfileProvider } from 'aterm-core'
-import TabbyTerminalModule from 'aterm-terminal'
+import AtermCorePlugin, { HostAppService, ToolbarButtonProvider, TabRecoveryProvider, ConfigProvider, HotkeysService, HotkeyProvider, TabContextMenuItemProvider, CLIHandler, ProfileProvider } from 'aterm-core'
+import AtermTerminalModule from 'aterm-terminal'
 import { SettingsTabProvider } from 'aterm-settings'
 
 import { TerminalTabComponent } from './components/terminalTab.component'
@@ -33,8 +33,8 @@ import { LocalProfilesService } from './profiles'
         FormsModule,
         NgbModule,
         ToastrModule,
-        TabbyCorePlugin,
-        TabbyTerminalModule,
+        AtermCorePlugin,
+        AtermTerminalModule,
     ],
     providers: [
         { provide: SettingsTabProvider, useClass: ShellSettingsTabProvider, multi: true },

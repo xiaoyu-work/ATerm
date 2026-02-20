@@ -10,24 +10,24 @@ import * as fs from 'fs'
 //   ESC ] 133 ; D ; <exit_code> BEL  — command finished
 
 const BASH_INTEGRATION = `
-# Tabby shell integration — do not edit
-if [ -n "$__TABBY_SHELL_INTEGRATION_ACTIVE" ]; then return; fi
-__TABBY_SHELL_INTEGRATION_ACTIVE=1
+# Aterm shell integration — do not edit
+if [ -n "$__ATERM_SHELL_INTEGRATION_ACTIVE" ]; then return; fi
+__ATERM_SHELL_INTEGRATION_ACTIVE=1
 
-__tabby_precmd() {
+__aterm_precmd() {
     local ec=$?
     printf '\\e]133;D;%d\\a' "$ec"
     printf '\\e]133;A\\a'
 }
 
-__tabby_preexec() {
+__aterm_preexec() {
     printf '\\e]133;C\\a'
 }
 
-if [[ ! "$PROMPT_COMMAND" == *"__tabby_precmd"* ]]; then
-    PROMPT_COMMAND="__tabby_precmd\${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
+if [[ ! "$PROMPT_COMMAND" == *"__aterm_precmd"* ]]; then
+    PROMPT_COMMAND="__aterm_precmd\${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
 fi
-trap '__tabby_preexec' DEBUG
+trap '__aterm_preexec' DEBUG
 
 # Append 133;B marker to PS1
 if [[ ! "$PS1" == *"133;B"* ]]; then
@@ -36,59 +36,59 @@ fi
 `
 
 const ZSH_INTEGRATION = `
-# Tabby shell integration — do not edit
-if [[ -n "$__TABBY_SHELL_INTEGRATION_ACTIVE" ]]; then return; fi
-__TABBY_SHELL_INTEGRATION_ACTIVE=1
+# Aterm shell integration — do not edit
+if [[ -n "$__ATERM_SHELL_INTEGRATION_ACTIVE" ]]; then return; fi
+__ATERM_SHELL_INTEGRATION_ACTIVE=1
 
-__tabby_precmd() {
+__aterm_precmd() {
     local ec=$?
     printf '\\e]133;D;%d\\a' "$ec"
     printf '\\e]133;A\\a'
 }
 
-__tabby_preexec() {
+__aterm_preexec() {
     printf '\\e]133;C\\a'
 }
 
 autoload -Uz add-zsh-hook
-add-zsh-hook precmd __tabby_precmd
-add-zsh-hook preexec __tabby_preexec
+add-zsh-hook precmd __aterm_precmd
+add-zsh-hook preexec __aterm_preexec
 
 # Append 133;B marker to PS1
 PS1="\${PS1}%{$(printf '\\e]133;B\\a')%}"
 `
 
 const FISH_INTEGRATION = `
-# Tabby shell integration — do not edit
-if set -q __TABBY_SHELL_INTEGRATION_ACTIVE
+# Aterm shell integration — do not edit
+if set -q __ATERM_SHELL_INTEGRATION_ACTIVE
     exit 0
 end
-set -g __TABBY_SHELL_INTEGRATION_ACTIVE 1
+set -g __ATERM_SHELL_INTEGRATION_ACTIVE 1
 
-function __tabby_postexec --on-event fish_postexec
+function __aterm_postexec --on-event fish_postexec
     printf '\\e]133;D;%d\\a' $status
 end
 
-function __tabby_prompt --on-event fish_prompt
+function __aterm_prompt --on-event fish_prompt
     printf '\\e]133;A\\a'
 end
 
-function __tabby_preexec --on-event fish_preexec
+function __aterm_preexec --on-event fish_preexec
     printf '\\e]133;C\\a'
 end
 `
 
 const PWSH_INTEGRATION = `
-# Tabby shell integration — do not edit
-if ($env:__TABBY_SHELL_INTEGRATION_ACTIVE) { return }
-$env:__TABBY_SHELL_INTEGRATION_ACTIVE = "1"
+# Aterm shell integration — do not edit
+if ($env:__ATERM_SHELL_INTEGRATION_ACTIVE) { return }
+$env:__ATERM_SHELL_INTEGRATION_ACTIVE = "1"
 
-$__tabbyOrigPrompt = $function:prompt
+$__atermOrigPrompt = $function:prompt
 function prompt {
     $exitCode = if ($global:?) { 0 } else { 1 }
     [Console]::Write("$([char]0x1b)]133;D;$exitCode$([char]0x07)")
     [Console]::Write("$([char]0x1b)]133;A$([char]0x07)")
-    $result = & $__tabbyOrigPrompt
+    $result = & $__atermOrigPrompt
     [Console]::Write("$([char]0x1b)]133;B$([char]0x07)")
     return $result
 }
@@ -122,7 +122,7 @@ export function getShellIntegration (
             // Write a temp init file that sources user's bashrc then our integration
             const initFile = path.join(os.tmpdir(), `aterm-bash-init-${process.pid}.sh`)
             const content = [
-                '# Tabby bash init wrapper',
+                '# Aterm bash init wrapper',
                 '[ -f /etc/profile ] && . /etc/profile',
                 '[ -f ~/.bash_profile ] && . ~/.bash_profile || { [ -f ~/.bash_login ] && . ~/.bash_login || [ -f ~/.profile ] && . ~/.profile; }',
                 '[ -f ~/.bashrc ] && . ~/.bashrc',
@@ -147,7 +147,7 @@ export function getShellIntegration (
                 fs.mkdirSync(tmpZdotdir, { recursive: true })
                 const realZdotdir = env.ZDOTDIR || process.env.ZDOTDIR || os.homedir()
                 const content = [
-                    '# Tabby zsh init wrapper',
+                    '# Aterm zsh init wrapper',
                     `ZDOTDIR="${realZdotdir}"`,
                     '[ -f "$ZDOTDIR/.zshenv" ] && . "$ZDOTDIR/.zshenv"',
                     '[ -f "$ZDOTDIR/.zshrc" ] && . "$ZDOTDIR/.zshrc"',
@@ -157,7 +157,7 @@ export function getShellIntegration (
                 result.env.ZDOTDIR = tmpZdotdir
                 // Save real ZDOTDIR so the wrapper can restore it
                 if (realZdotdir !== os.homedir()) {
-                    result.env.__TABBY_ORIGINAL_ZDOTDIR = realZdotdir
+                    result.env.__ATERM_ORIGINAL_ZDOTDIR = realZdotdir
                 }
             } catch (e) {
                 console.warn('[aterm-local] Failed to write zsh init dir:', e)

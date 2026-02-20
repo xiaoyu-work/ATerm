@@ -42,7 +42,7 @@
           <h3 translate>Application settings</h3>
           <div class="form-line">
             <div class="header">
-              <div class="title" translate>Language</div><a class="description" (click)="homeBase.openTranslations()"><span translate>Help translate Tabby</span><i class="fas fa-external-link-square-alt ms-1"></i></a>
+              <div class="title" translate>Language</div>
             </div>
             <select class="form-control" [(ngModel)]="config.store.language" (ngModelChange)="saveConfiguration(true)">
               <option [ngValue]="null" translate>Automatic</option>
@@ -59,7 +59,7 @@
           <div class="form-line" *ngIf="hostApp.platform !== Platform.Web">
             <div class="header">
               <div class="title" translate>Enable analytics</div>
-              <div class="description" translate>We're only tracking your Tabby and OS versions.</div>
+              <div class="description" translate>We're only tracking your Aterm and OS versions.</div>
             </div>
             <toggle [(ngModel)]="config.store.enableAnalytics" (ngModelChange)="saveConfiguration(true)"></toggle>
           </div>

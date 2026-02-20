@@ -5,8 +5,8 @@ import './portable'
 
 // set defaults of environment variables
 import 'dotenv/config'
-process.env.TABBY_PLUGINS ??= ''
-process.env.TABBY_CONFIG_DIRECTORY ??= app.getPath('userData')
+process.env.ATERM_PLUGINS ??= ''
+process.env.ATERM_CONFIG_DIRECTORY ??= app.getPath('userData')
 
 
 import 'v8-compile-cache'
@@ -35,13 +35,13 @@ process.mainModule = module
 
 const application = new Application(configStore)
 
-// Register tabby:// URL scheme
+// Register aterm:// URL scheme
 if (process.defaultApp) {
     if (process.argv.length >= 2) {
-        app.setAsDefaultProtocolClient('tabby', process.execPath, [process.argv[1]])
+        app.setAsDefaultProtocolClient('aterm', process.execPath, [process.argv[1]])
     }
 } else {
-    app.setAsDefaultProtocolClient('tabby')
+    app.setAsDefaultProtocolClient('aterm')
 }
 
 ipcMain.on('app:new-window', () => {

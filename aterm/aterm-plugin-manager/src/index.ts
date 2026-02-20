@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 
-import TabbyCorePlugin from 'aterm-core'
+import AtermCorePlugin from 'aterm-core'
 import { SettingsTabProvider } from 'aterm-settings'
 
 import { PluginsSettingsTabComponent } from './components/pluginsSettingsTab.component'
@@ -15,7 +15,7 @@ import { PluginsSettingsTabProvider } from './settings'
         CommonModule,
         FormsModule,
         NgbModule,
-        TabbyCorePlugin,
+        AtermCorePlugin,
     ],
     providers: [
         { provide: SettingsTabProvider, useClass: PluginsSettingsTabProvider, multi: true },

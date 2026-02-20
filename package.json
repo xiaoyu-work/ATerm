@@ -95,10 +95,10 @@
   "scripts": {
     "build": "npm run build:typings && node scripts/build-modules.mjs",
     "build:typings": "node scripts/build-typings.mjs",
-    "watch": "cross-env TABBY_DEV=1 webpack --progress --color --watch",
-    "start": "cross-env TABBY_DEV=1 electron app -d --inspect",
+    "watch": "cross-env ATERM_DEV=1 webpack --progress --color --watch",
+    "start": "cross-env ATERM_DEV=1 electron app -d --inspect",
     "start:prod": "electron app --debug",
-    "prod": "cross-env TABBY_DEV=1 electron app",
+    "prod": "cross-env ATERM_DEV=1 electron app",
     "docs": "node scripts/build-docs.mjs",
     "lint": "eslint --ext ts aterm/*/src */lib",
     "postinstall": "patch-package && node ./scripts/install-deps.mjs && node ./scripts/build-native.mjs",

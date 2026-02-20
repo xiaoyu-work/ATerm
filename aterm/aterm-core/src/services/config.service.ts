@@ -434,11 +434,7 @@ export class ConfigService {
             config.version = 6
         }
         if (config.version < 7) {
-            if (!config.configSync?.host || config.configSync?.host === 'https://api.tabby.sh') {
-                config.configSync ??= {}
-                delete config.configSync.host
-                delete config.configSync.token
-            }
+            delete config.configSync
             config.version = 7
         }
         if (config.version < 8) {
@@ -501,12 +497,10 @@ export class ConfigService {
         }
         delete decryptedVault.config.vault
         delete decryptedVault.config.encrypted
-        delete decryptedVault.config.configSync
         return {
             ...decryptedVault.config,
             vault: store.vault,
             encrypted: store.encrypted,
-            configSync: store.configSync,
         }
     }
 
@@ -521,11 +515,9 @@ export class ConfigService {
         vault.config = { ...store }
         delete vault.config.vault
         delete vault.config.encrypted
-        delete vault.config.configSync
         return {
             vault: await this.vault.encrypt(vault),
             encrypted: true,
-            configSync: store.configSync,
         }
     }
 }

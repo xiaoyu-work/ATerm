@@ -22,7 +22,7 @@ export class ElectronUACService extends UACService {
             'UAC.exe',
         )
 
-        if (process.env.TABBY_DEV) {
+        if (process.env.ATERM_DEV) {
             helperPath = path.join(
                 path.dirname(this.electron.app.getPath('exe')),
                 '..', '..', '..',

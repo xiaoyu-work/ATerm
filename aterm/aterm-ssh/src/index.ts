@@ -4,9 +4,9 @@ import { FormsModule } from '@angular/forms'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 import { ToastrModule } from 'ngx-toastr'
 import { FileSizePipe } from 'aterm-core'
-import TabbyCoreModule, { ConfigProvider, TabRecoveryProvider, HotkeyProvider, TabContextMenuItemProvider, ProfileProvider } from 'aterm-core'
+import AtermCoreModule, { ConfigProvider, TabRecoveryProvider, HotkeyProvider, TabContextMenuItemProvider, ProfileProvider } from 'aterm-core'
 import { SettingsTabProvider } from 'aterm-settings'
-import TabbyTerminalModule from 'aterm-terminal'
+import AtermTerminalModule from 'aterm-terminal'
 
 import { SSHProfileSettingsComponent } from './components/sshProfileSettings.component'
 import { SSHPortForwardingModalComponent } from './components/sshPortForwardingModal.component'
@@ -36,8 +36,8 @@ import { SFTPCreateDirectoryModalComponent } from './components/sftpCreateDirect
         CommonModule,
         FormsModule,
         ToastrModule,
-        TabbyCoreModule,
-        TabbyTerminalModule,
+        AtermCoreModule,
+        AtermTerminalModule,
     ],
     providers: [
         { provide: ConfigProvider, useClass: SSHConfigProvider, multi: true },

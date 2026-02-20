@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 import { ToastrModule } from 'ngx-toastr'
-import TabbyCoreModule, { ConfigProvider, TabRecoveryProvider, HotkeyProvider, ProfileProvider } from 'aterm-core'
-import TabbyTerminalModule from 'aterm-terminal'
+import AtermCoreModule, { ConfigProvider, TabRecoveryProvider, HotkeyProvider, ProfileProvider } from 'aterm-core'
+import AtermTerminalModule from 'aterm-terminal'
 
 import { SerialProfileSettingsComponent } from './components/serialProfileSettings.component'
 import { SerialTabComponent } from './components/serialTab.component'
@@ -21,8 +21,8 @@ import { SerialProfilesService } from './profiles'
         CommonModule,
         FormsModule,
         ToastrModule,
-        TabbyCoreModule,
-        TabbyTerminalModule,
+        AtermCoreModule,
+        AtermTerminalModule,
     ],
     providers: [
         { provide: ConfigProvider, useClass: SerialConfigProvider, multi: true },

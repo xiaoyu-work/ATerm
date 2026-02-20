@@ -27,7 +27,7 @@ import { AISettingsTabComponent } from './components/aiSettingsTab.component'
         AISettingsTabComponent,
     ],
 })
-export default class TabbyAIModule {}
+export default class AtermAIModule {}
 
 export { AIService } from './ai.service'
 export { AIDecorator } from './decorator'

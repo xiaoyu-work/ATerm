@@ -1,4 +1,4 @@
-# Tabby Terminal Plugin
+# Aterm Terminal Plugin
 
 * terminal tabs
 * terminal frontends

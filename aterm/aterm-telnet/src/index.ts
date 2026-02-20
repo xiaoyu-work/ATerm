@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 import { ToastrModule } from 'ngx-toastr'
 import { FileSizePipe } from 'aterm-core'
-import TabbyCoreModule, { ConfigProvider, TabRecoveryProvider, HotkeyProvider, ProfileProvider } from 'aterm-core'
-import TabbyTerminalModule from 'aterm-terminal'
+import AtermCoreModule, { ConfigProvider, TabRecoveryProvider, HotkeyProvider, ProfileProvider } from 'aterm-core'
+import AtermTerminalModule from 'aterm-terminal'
 
 import { TelnetProfileSettingsComponent } from './components/telnetProfileSettings.component'
 import { TelnetTabComponent } from './components/telnetTab.component'
@@ -23,8 +23,8 @@ import { TelnetProfilesService } from './profiles'
         CommonModule,
         FormsModule,
         ToastrModule,
-        TabbyCoreModule,
-        TabbyTerminalModule,
+        AtermCoreModule,
+        AtermTerminalModule,
     ],
     providers: [
         { provide: ConfigProvider, useClass: TelnetConfigProvider, multi: true },

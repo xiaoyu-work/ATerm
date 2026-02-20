@@ -1,15 +1,15 @@
-name: tabby
+name: aterm
 version: '1.0.0'
 summary: A terminal for a modern age
 description: |
-  Tabby is a local, SSH and serial terminal heavily inspired by Hyper.
+  Aterm is a local, SSH and serial terminal heavily inspired by Hyper.
 
 grade: devel
 confinement: devmode
 
 apps:
-  tabby:
-    command: opt/tabby/tabby
+  aterm:
+    command: opt/aterm/aterm
 
 parts:
   app:
@@ -21,5 +21,5 @@ parts:
       yarn
       yarn run build
       ./scripts/build-linux.js
-      mkdir -p $SNAPCRAFT_PART_INSTALL/opt/tabby || true
-      cp -ar dist/linux-unpacked/* $SNAPCRAFT_PART_INSTALL/opt/tabby/
+      mkdir -p $SNAPCRAFT_PART_INSTALL/opt/aterm || true
+      cp -ar dist/linux-unpacked/* $SNAPCRAFT_PART_INSTALL/opt/aterm/

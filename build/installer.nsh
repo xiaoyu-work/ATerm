@@ -1,3 +1,3 @@
 !macro customInit
-  nsExec::Exec '"$LOCALAPPDATA\tabby\Update.exe" --uninstall -s'
+  nsExec::Exec '"$LOCALAPPDATA\aterm\Update.exe" --uninstall -s'
 !macroend

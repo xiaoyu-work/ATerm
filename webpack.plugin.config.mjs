@@ -32,11 +32,11 @@ export default options => {
         sourceMapOptions.append = '\n//# sourceMappingURL=../../../app.asar.unpacked/assets/webpack/[url]'
     }
 
-    if ((process.platform === 'win32' || process.platform === 'linux') && process.env.TABBY_DEV) {
+    if ((process.platform === 'win32' || process.platform === 'linux') && process.env.ATERM_DEV) {
         devtoolPlugin = wp.EvalSourceMapDevToolPlugin
     }
 
-    const isDev = !!process.env.TABBY_DEV
+    const isDev = !!process.env.ATERM_DEV
     const config = {
         target: 'node',
         entry: 'src/index.ts',

@@ -1,7 +1,7 @@
 {
   "name": "aterm-ai",
   "version": "1.0.0",
-  "description": "AI assistant for Tabby terminal — trigger with Ctrl+Space",
+  "description": "AI assistant for Aterm terminal — trigger with Ctrl+Space",
   "keywords": [
     "aterm-builtin-plugin"
   ],

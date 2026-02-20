@@ -97,7 +97,7 @@ export class SSHService {
             await fs.writeFile(tmpFile.path, privateKeyContent)
             const keyHash = crypto.createHash('sha512').update(privateKeyContent).digest('hex')
             // need to pass an default passphrase, otherwise it might get stuck at the passphrase input
-            const curPassphrase = await this.passwordStorage.loadPrivateKeyPassword(keyHash) ?? 'tabby'
+            const curPassphrase = await this.passwordStorage.loadPrivateKeyPassword(keyHash) ?? 'aterm'
             const winSCPcom = path.slice(0, -3) + 'com'
             try {
                 await this.platform.exec(winSCPcom, ['/keygen', tmpFile.path, '-o', tmpFile.path, '--old-passphrase', curPassphrase])

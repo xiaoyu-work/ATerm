@@ -25,7 +25,7 @@ if (process.platform === 'win32' && !('HOME' in process.env)) {
     process.env.HOME = `${process.env.HOMEDRIVE}${process.env.HOMEPATH}`
 }
 
-if (process.env.TABBY_DEV && !process.env.TABBY_FORCE_ANGULAR_PROD) {
+if (process.env.ATERM_DEV && !process.env.ATERM_FORCE_ANGULAR_PROD) {
     console.warn('Running in debug mode')
 } else {
     enableProdMode()
@@ -46,7 +46,7 @@ async function bootstrap (bootstrapData: BootstrapData, plugins: PluginInfo[], s
     const moduleRef = await platformBrowserDynamic([
         { provide: BOOTSTRAP_DATA, useValue: bootstrapData },
     ]).bootstrapModule(module)
-    if (process.env.TABBY_DEV) {
+    if (process.env.ATERM_DEV) {
         const applicationRef = moduleRef.injector.get(ApplicationRef)
         const componentRef = applicationRef.components[0]
         enableDebugTools(componentRef)

@@ -30,7 +30,7 @@
         "dist",
         "node_modules",
         "*/node_modules",
-        "tabby*",
+        "aterm*",
         "platforms"
     ]
 }

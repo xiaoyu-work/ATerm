@@ -31,7 +31,7 @@ export class ReleaseNotesComponent extends BaseTabComponent {
 
     async loadReleases (page) {
         console.log('Loading releases page', page)
-        const response = await axios.get(`https://api.github.com/repos/eugeny/tabby/releases?page=${page}`, {
+        const response = await axios.get(`https://api.github.com/repos/xiaoyu-work/ATerm/releases?page=${page}`, {
             headers: { Accept: 'application/vnd.github.v3+json' },
         })
         this.releases = this.releases.concat(response.data.map(r => ({

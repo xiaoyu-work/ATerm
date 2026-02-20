@@ -3,8 +3,8 @@ import { NgModule } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 
-import TabbyCorePlugin, { ProfileProvider, AppService } from 'aterm-core'
-import TabbyTerminalModule from 'aterm-terminal'
+import AtermCorePlugin, { ProfileProvider, AppService } from 'aterm-core'
+import AtermTerminalModule from 'aterm-terminal'
 
 import { DemoTerminalTabComponent } from './components/terminalTab.component'
 import { DemoProfilesService } from './profiles'
@@ -15,8 +15,8 @@ import { DemoProfilesService } from './profiles'
         // BrowserModule,
         FormsModule,
         NgbModule,
-        TabbyCorePlugin,
-        TabbyTerminalModule,
+        AtermCorePlugin,
+        AtermTerminalModule,
     ],
     providers: [
         { provide: ProfileProvider, useClass: DemoProfilesService, multi: true },

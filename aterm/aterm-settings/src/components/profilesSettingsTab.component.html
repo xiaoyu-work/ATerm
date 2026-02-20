@@ -84,7 +84,7 @@
       <div class="form-line content-box" *ngIf="hostApp.platform === Platform.Windows">
         <div class="header">
           <div class="title" translate>Terminal identification</div>
-          <div class="description" translate>How Tabby presents itself through environment vars</div>
+          <div class="description" translate>How Aterm presents itself through environment vars</div>
         </div>
         <select class="form-control" [(ngModel)]="config.store.terminal.identification" (ngModelChange)="config.save()">
           <option ngValue="wt" translation>Windows Terminal</option>

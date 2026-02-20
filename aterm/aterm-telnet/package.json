@@ -1,7 +1,7 @@
 {
   "name": "aterm-telnet",
   "version": "1.0.231-nightly.0",
-  "description": "Telnet/socket connections for Tabby",
+  "description": "Telnet/socket connections for Aterm",
   "keywords": [
     "aterm-builtin-plugin"
   ],
@@ -15,7 +15,7 @@
     "dist",
     "typings"
   ],
-  "author": "Tabby Developers",
+  "author": "Aterm Developers",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "14.14.31",

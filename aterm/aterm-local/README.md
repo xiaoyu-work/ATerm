@@ -1,11 +1,11 @@
-# Tabby Local Plugin
+# Aterm Local Plugin
 
 * local shells
 
 Using the API:
 
 ```ts
-import { ShellProvider } from 'tabby-local'
+import { ShellProvider } from 'aterm-local'
 ```
 
 Exporting your subclasses:

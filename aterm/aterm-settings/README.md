@@ -1,11 +1,11 @@
-# Tabby Settings Plugin
+# Aterm Settings Plugin
 
 * tabbed settings interface
 
 Using the API:
 
 ```ts
-import { SettingsTabProvider } from 'tabby-settings'
+import { SettingsTabProvider } from 'aterm-settings'
 ```
 
 Exporting your subclasses:

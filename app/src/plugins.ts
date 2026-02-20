@@ -17,7 +17,7 @@ function normalizePath (p: string): string {
     return p
 }
 
-const builtinPluginsPath = process.env.TABBY_DEV ? path.join(path.dirname(remote.app.getAppPath()), 'aterm') : path.join((process as any).resourcesPath, 'builtin-plugins')
+const builtinPluginsPath = process.env.ATERM_DEV ? path.join(path.dirname(remote.app.getAppPath()), 'aterm') : path.join((process as any).resourcesPath, 'builtin-plugins')
 
 const cachedBuiltinModules = {
     '@angular/animations': require('@angular/animations'),
@@ -73,14 +73,14 @@ export function initModuleLookup (userPluginsPath: string): void {
     paths.unshift(path.join(userPluginsPath, 'node_modules'))
     paths.unshift(path.join(remote.app.getAppPath(), 'node_modules'))
 
-    if (process.env.TABBY_DEV) {
+    if (process.env.ATERM_DEV) {
         paths.unshift(path.dirname(remote.app.getAppPath()))
     }
 
     paths.unshift(builtinPluginsPath)
     // paths.unshift(path.join((process as any).resourcesPath, 'app.asar', 'node_modules'))
-    if (process.env.TABBY_PLUGINS) {
-        process.env.TABBY_PLUGINS.split(':').map(x => paths.push(normalizePath(x)))
+    if (process.env.ATERM_PLUGINS) {
+        process.env.ATERM_PLUGINS.split(':').map(x => paths.push(normalizePath(x)))
     }
 
     process.env.NODE_PATH += path.delimiter + paths.join(path.delimiter)

@@ -1,7 +1,7 @@
 {
   "name": "aterm-terminal",
   "version": "1.0.231-nightly.0",
-  "description": "Tabby's terminal emulation core",
+  "description": "Aterm's terminal emulation core",
   "keywords": [
     "aterm-builtin-plugin"
   ],
@@ -16,7 +16,7 @@
     "dist",
     "typings"
   ],
-  "author": "Tabby Developers",
+  "author": "Aterm Developers",
   "license": "MIT",
   "devDependencies": {
     "@xterm/addon-canvas": "^0.7.0",
