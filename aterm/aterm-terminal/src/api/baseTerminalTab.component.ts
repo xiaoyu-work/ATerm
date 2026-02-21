@@ -1,4 +1,4 @@
-import { Observable, Subject, first, auditTime, debounce, interval } from 'rxjs'
+import { Observable, Subject, take, auditTime, debounce, interval } from 'rxjs'
 import { Spinner } from 'cli-spinner'
 import colors from 'ansi-colors'
 import { NgZone, OnInit, OnDestroy, Injector, ViewChild, HostBinding, Input, ElementRef, InjectFlags, Component } from '@angular/core'
@@ -374,11 +374,11 @@ export class BaseTerminalTabComponent<P extends BaseTerminalProfile> extends Bas
         }[this.config.store.terminal.frontend] ?? XTermFrontend
         this.frontend = new cls(this.injector)
 
-        this.frontendReady$.pipe(first()).subscribe(() => {
+        this.frontendReady$.pipe(take(1)).subscribe(() => {
             this.onFrontendReady()
         })
 
-        this.frontend.resize$.pipe(first()).subscribe(async ({ columns, rows }) => {
+        this.frontend.resize$.pipe(take(1)).subscribe(async ({ columns, rows }) => {
             this.size = { columns, rows }
             this.frontendReady.next()
             this.frontendReady.complete()
@@ -410,7 +410,7 @@ export class BaseTerminalTabComponent<P extends BaseTerminalProfile> extends Bas
                 await this.frontend?.attach(this.content.nativeElement, this.profile)
                 this.frontend?.configure(this.profile)
             } else {
-                this.focused$.pipe(first()).subscribe(async () => {
+                this.focused$.pipe(take(1)).subscribe(async () => {
                     await this.frontend?.attach(this.content.nativeElement, this.profile)
                     this.frontend?.configure(this.profile)
                 })

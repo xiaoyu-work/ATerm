@@ -91,6 +91,25 @@ Use this tool for complex queries that require multiple steps. If the request is
     }
     readonly required = ['todos']
 
+    protected override validateToolParamValues (params: WriteTodosToolParams): string | null {
+        if (!params || !Array.isArray(params.todos)) {
+            return '`todos` parameter must be an array'
+        }
+        for (const todo of params.todos) {
+            if (!todo || typeof todo.description !== 'string' || !todo.description.trim()) {
+                return 'Each todo must have a non-empty description string'
+            }
+            if (!['pending', 'in_progress', 'completed', 'cancelled'].includes(todo.status)) {
+                return 'Each todo must have a valid status (pending, in_progress, completed, cancelled)'
+            }
+        }
+        const inProgressCount = params.todos.filter(t => t.status === 'in_progress').length
+        if (inProgressCount > 1) {
+            return 'Only one task can be in_progress at a time.'
+        }
+        return null
+    }
+
     protected createInvocation (params: WriteTodosToolParams, _context: ToolContext): WriteTodosToolInvocation {
         return new WriteTodosToolInvocation(params)
     }

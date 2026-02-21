@@ -36,7 +36,7 @@ export class PowerShellCoreShellProvider extends WindowsBaseShellProvider {
             id: 'powershell-core',
             name: 'PowerShell Core',
             command: pwshPath,
-            args: ['-nologo'],
+            args: ['-NoLogo'],
             icon: require('../icons/powershell-core.svg'),
             env: this.getEnvironment(),
         }]

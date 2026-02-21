@@ -74,10 +74,26 @@ export async function executeCommand (
 ): Promise<ShellResult> {
     return new Promise((resolve) => {
         const isWindows = os.platform() === 'win32'
-        const shell = isWindows ? process.env.COMSPEC || 'cmd.exe' : '/bin/bash'
-        const args = isWindows ? ['/c', command] : ['-c', command]
+        let executable: string
+        let args: string[]
 
-        const child = spawn(shell, args, {
+        if (isWindows) {
+            const comSpec = process.env.ComSpec || process.env.COMSPEC
+            const normalized = (comSpec || '').toLowerCase()
+            if (normalized.endsWith('powershell.exe') || normalized.endsWith('pwsh.exe')) {
+                executable = comSpec as string
+                args = ['-NoProfile', '-Command', command]
+            } else {
+                // Match gemini-cli behavior: default to PowerShell on Windows.
+                executable = 'powershell.exe'
+                args = ['-NoProfile', '-Command', command]
+            }
+        } else {
+            executable = '/bin/bash'
+            args = ['-c', command]
+        }
+
+        const child = spawn(executable, args, {
             cwd,
             stdio: ['ignore', 'pipe', 'pipe'],
             detached: !isWindows,

@@ -11,9 +11,13 @@ import { DeclarativeTool } from '../base/declarativeTool'
 import { BaseToolInvocation } from '../base/baseToolInvocation'
 import { ToolKind, ToolContext, ToolResult, ConfirmationDetails } from '../types'
 import { executeCommand } from '../../shellExecutor'
+import { validatePath } from '../security'
 
 export interface ShellToolParams {
     command: string
+    description?: string
+    dir_path?: string
+    is_background?: boolean
 }
 
 class ShellToolInvocation extends BaseToolInvocation<ShellToolParams> {
@@ -22,7 +26,19 @@ class ShellToolInvocation extends BaseToolInvocation<ShellToolParams> {
     }
 
     getDescription (): string {
-        return `Run: ${this.params.command}`
+        let description = `${this.params.command}`
+        if (this.params.dir_path) {
+            description += ` [in ${this.params.dir_path}]`
+        } else {
+            description += ` [current working directory ${process.cwd()}]`
+        }
+        if (this.params.description) {
+            description += ` (${this.params.description.replace(/\n/g, ' ')})`
+        }
+        if (this.params.is_background) {
+            description += ' [background]'
+        }
+        return description
     }
 
     /**
@@ -30,15 +46,38 @@ class ShellToolInvocation extends BaseToolInvocation<ShellToolParams> {
      * (packages/core/src/tools/shell.ts)
      */
     getConfirmationDetails (_context: ToolContext): ConfirmationDetails | false {
-        return { type: 'exec', title: 'Run command', command: this.params.command }
+        if (this.params.dir_path) {
+            const validation = validatePath(this.params.dir_path, _context.cwd)
+            if ('error' in validation) return false
+            if (validation.outsideCwd) {
+                return {
+                    type: 'path_access',
+                    title: 'Run command outside CWD',
+                    resolvedPath: validation.resolved,
+                }
+            }
+        }
+        return { type: 'exec', title: 'Confirm Shell Command', command: this.params.command }
     }
 
     async execute (context: ToolContext): Promise<ToolResult> {
+        let cwd = context.cwd
+        if (this.params.dir_path) {
+            const validation = validatePath(this.params.dir_path, context.cwd)
+            if ('error' in validation) {
+                return this.error(validation.error)
+            }
+            if (validation.outsideCwd && !context.pathApprovals.isAllowed()) {
+                return this.error(`Path outside CWD requires approval: ${validation.resolved}`)
+            }
+            cwd = validation.resolved
+        }
+
         context.callbacks.onCommandStart(this.params.command)
 
         const result = await executeCommand(
             this.params.command,
-            context.cwd,
+            cwd,
             context.signal,
             (chunk) => context.callbacks.onCommandOutput(chunk),
         )
@@ -51,6 +90,9 @@ class ShellToolInvocation extends BaseToolInvocation<ShellToolParams> {
         }
         if (result.exitCode !== 0) {
             return this.success(`Command exited with code ${result.exitCode}\n${output}`)
+        }
+        if (this.params.is_background) {
+            return this.success('Background mode requested. This host executed the command in foreground and captured the output.\n' + (output || '(no output)'))
         }
         return this.success(output || '(no output)')
     }
@@ -69,6 +111,14 @@ export class ShellTool extends DeclarativeTool<ShellToolParams> {
         description: {
             type: 'string',
             description: 'Brief description of the command for the user. Be specific and concise. Ideally a single sentence.',
+        },
+        dir_path: {
+            type: 'string',
+            description: 'Optional: Directory to run the command in. Relative paths are resolved against the current working directory.',
+        },
+        is_background: {
+            type: 'boolean',
+            description: 'Optional: Whether to run the command in background mode.',
         },
     }
     readonly required = ['command']

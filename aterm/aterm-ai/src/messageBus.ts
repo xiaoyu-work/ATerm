@@ -45,6 +45,7 @@ export interface ToolConfirmationRequest {
 export interface ToolConfirmationResponse {
     callId: string
     outcome: ConfirmationOutcome
+    payload?: Record<string, unknown>
 }
 
 export interface AskUserRequest {

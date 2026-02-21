@@ -1,10 +1,8 @@
 /**
- * Read many files tool — reads and concatenates multiple files by glob patterns.
+ * Read many files tool - reads and concatenates multiple files by glob patterns.
  *
  * Mirrors gemini-cli's ReadManyFilesTool
  * (packages/core/src/tools/read-many-files.ts)
- *
- * Useful for getting an overview of a codebase or reading a collection of files.
  */
 
 import * as fs from 'fs/promises'
@@ -13,7 +11,9 @@ import { DeclarativeTool } from '../base/declarativeTool'
 import { BaseToolInvocation } from '../base/baseToolInvocation'
 import { ToolKind, ToolContext, ToolResult } from '../types'
 import { isPathOutsideCwd } from '../security'
-import { executeCommand } from '../../shellExecutor'
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const glob = require('glob')
 
 /** Max total content size in characters before truncation */
 const MAX_TOTAL_CHARS = 500_000
@@ -31,7 +31,12 @@ const DEFAULT_EXCLUDES = [
 export interface ReadManyFilesToolParams {
     include: string[]
     exclude?: string[]
+    recursive?: boolean
     useDefaultExcludes?: boolean
+    file_filtering_options?: {
+        respect_git_ignore?: boolean
+        respect_gemini_ignore?: boolean
+    }
 }
 
 class ReadManyFilesToolInvocation extends BaseToolInvocation<ReadManyFilesToolParams> {
@@ -50,54 +55,50 @@ class ReadManyFilesToolInvocation extends BaseToolInvocation<ReadManyFilesToolPa
         const useDefaults = this.params.useDefaultExcludes !== false
 
         try {
-            // Collect files matching patterns
-            const allFiles: string[] = []
+            const allFiles = new Set<string>()
+            const ignorePatterns = useDefaults
+                ? [...DEFAULT_EXCLUDES, ...userExcludes]
+                : [...userExcludes]
 
             for (const pattern of patterns) {
-                // Use git ls-files if available, fall back to find
-                const isGit = await fs.access(path.join(cwd, '.git')).then(() => true).catch(() => false)
+                const fullPath = path.resolve(cwd, pattern)
 
-                let command: string
-                if (isGit) {
-                    command = `git ls-files --cached --others --exclude-standard "${pattern}"`
-                } else {
-                    command = `find . -name "${pattern}" -not -path "./.git/*" 2>/dev/null`
+                // If include points to an existing file, include directly.
+                try {
+                    const stat = await fs.stat(fullPath)
+                    if (stat.isFile()) {
+                        allFiles.add(path.relative(cwd, fullPath).replace(/\\/g, '/'))
+                        continue
+                    }
+                } catch {
+                    // Treat include as a glob pattern.
                 }
 
-                const result = await executeCommand(command, cwd, context.signal, undefined, 15000)
-                const files = result.stdout.trim().split('\n').filter(Boolean)
-                allFiles.push(...files)
-            }
+                const normalizedPattern = pattern.replace(/\\/g, '/')
+                const matches: string[] = glob.sync(normalizedPattern, {
+                    cwd,
+                    ignore: ignorePatterns,
+                    nodir: true,
+                    dot: true,
+                    nocase: true,
+                })
 
-            // Deduplicate
-            const uniqueFiles = [...new Set(allFiles)]
-
-            // Apply excludes
-            const excludePatterns = [...userExcludes]
-            if (useDefaults) {
-                excludePatterns.push(...DEFAULT_EXCLUDES)
-            }
-
-            const filteredFiles = uniqueFiles.filter(file => {
-                for (const exc of excludePatterns) {
-                    if (file.includes(exc)) return false
-                    // Simple glob matching for patterns like *.min.js
-                    if (exc.startsWith('*') && file.endsWith(exc.slice(1))) return false
+                for (const file of matches) {
+                    allFiles.add(file.replace(/\\/g, '/'))
                 }
-                return true
-            })
+            }
 
-            // Security check — allow outside-CWD files if session has approved via policy
-            const safeFiles = filteredFiles.filter(file => {
-                const resolved = path.resolve(cwd, file)
-                return context.pathApprovals.isAllowed() || !isPathOutsideCwd(resolved, cwd)
-            })
+            const safeFiles = [...allFiles]
+                .filter(file => {
+                    const resolved = path.resolve(cwd, file)
+                    return context.pathApprovals.isAllowed() || !isPathOutsideCwd(resolved, cwd)
+                })
+                .sort((a, b) => a.localeCompare(b))
 
             if (safeFiles.length === 0) {
                 return this.success(`No files found matching patterns: ${patterns.join(', ')}`)
             }
 
-            // Read and concatenate
             const parts: string[] = []
             let totalChars = 0
             let filesRead = 0
@@ -117,7 +118,7 @@ class ReadManyFilesToolInvocation extends BaseToolInvocation<ReadManyFilesToolPa
                     let fileContent: string
                     if (lines.length > MAX_LINES_PER_FILE) {
                         fileContent = lines.slice(0, MAX_LINES_PER_FILE).join('\n')
-                        fileContent += `\n[WARNING: file truncated — ${lines.length} total lines, showing first ${MAX_LINES_PER_FILE}. Use read_file for full content.]`
+                        fileContent += `\n[WARNING: file truncated - ${lines.length} total lines, showing first ${MAX_LINES_PER_FILE}. Use read_file for full content.]`
                         filesTruncated++
                     } else {
                         fileContent = content
@@ -177,9 +178,21 @@ Use this when the user's query implies needing the content of several files simu
             description: 'Glob patterns for files/directories to exclude. Added to default excludes if useDefaultExcludes is true. Example: ["**/*.log", "temp/"]',
             items: { type: 'string' },
         },
+        recursive: {
+            type: 'boolean',
+            description: 'Optional. Whether to search recursively (primarily controlled by `**` in glob patterns). Defaults to true.',
+        },
         useDefaultExcludes: {
             type: 'boolean',
             description: 'Whether to apply default exclusion patterns (e.g., node_modules, .git, binary files). Defaults to true.',
+        },
+        file_filtering_options: {
+            type: 'object',
+            description: 'Whether to respect ignore patterns from .gitignore or .geminiignore.',
+            properties: {
+                respect_git_ignore: { type: 'boolean' },
+                respect_gemini_ignore: { type: 'boolean' },
+            },
         },
     }
     readonly required = ['include']

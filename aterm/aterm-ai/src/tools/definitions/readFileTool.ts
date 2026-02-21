@@ -53,19 +53,21 @@ class ReadFileToolInvocation extends BaseToolInvocation<ReadFileToolParams> {
             const lines = content.split('\n')
             const totalLines = lines.length
 
-            // Apply offset/limit (1-based offset)
-            const startLine = Math.max(1, this.params.offset || 1)
+            // Apply offset/limit (0-based offset, gemini-cli compatible)
+            const offset = Math.max(0, this.params.offset || 0)
             const maxLines = this.params.limit || 2000
-            const selectedLines = lines.slice(startLine - 1, startLine - 1 + maxLines)
+            const selectedLines = lines.slice(offset, offset + maxLines)
 
             // Format with line numbers (like gemini-cli's read_file)
             const numbered = selectedLines.map((line, i) =>
-                `${String(startLine + i).padStart(6)} | ${line}`,
+                `${String(offset + i + 1).padStart(6)} | ${line}`,
             ).join('\n')
 
             let result = numbered
-            if (startLine + selectedLines.length - 1 < totalLines) {
-                result += `\n\n... (${totalLines} total lines, showing ${startLine}-${startLine + selectedLines.length - 1})`
+            if (offset + selectedLines.length < totalLines) {
+                const shownStart = offset + 1
+                const shownEnd = offset + selectedLines.length
+                result += `\n\n... (${totalLines} total lines, showing ${shownStart}-${shownEnd})`
             }
 
             return this.success(result)
@@ -87,7 +89,7 @@ export class ReadFileTool extends DeclarativeTool<ReadFileToolParams> {
         },
         offset: {
             type: 'integer',
-            description: 'The 1-based line number to start reading from. Requires \'limit\' to be set. Use for paginating through large files.',
+            description: 'The 0-based line number to start reading from. Requires \'limit\' to be set. Use for paginating through large files.',
         },
         limit: {
             type: 'integer',

@@ -5,7 +5,7 @@
 export const PROVIDER_PRESETS: Record<string, { baseUrl: string; defaultModel: string }> = {
     openai: {
         baseUrl: 'https://api.openai.com/v1/',
-        defaultModel: 'gpt-4o-mini',
+        defaultModel: 'gpt-4.1',
     },
     gemini: {
         baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/',
@@ -21,7 +21,7 @@ export const PROVIDER_PRESETS: Record<string, { baseUrl: string; defaultModel: s
     },
     azure: {
         baseUrl: '',
-        defaultModel: 'gpt-4o-mini',
+        defaultModel: 'gpt-4.1',
     },
     custom: {
         baseUrl: '',

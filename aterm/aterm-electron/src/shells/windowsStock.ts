@@ -64,7 +64,7 @@ export class WindowsStockShellsProvider extends WindowsBaseShellProvider {
                 id: 'powershell',
                 name: 'PowerShell',
                 command: await this.getPowerShellPath(),
-                args: ['-nologo'],
+                args: ['-NoLogo'],
                 icon: require('../icons/powershell.svg'),
                 env: this.getEnvironment(),
             },
@@ -81,7 +81,7 @@ export class WindowsStockShellsProvider extends WindowsBaseShellProvider {
             `${process.env.USERPROFILE}\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe`,
             `${process.env.SystemRoot}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`,
             `${process.env.SystemRoot}\\System32\\powershell.exe`,
-            (process.env.SystemRoot ?? 'C:\\Windows') + '\\powerhshell.exe',
+            (process.env.SystemRoot ?? 'C:\\Windows') + '\\powershell.exe',
         ]) {
             try {
                 await fs.stat(psPath)

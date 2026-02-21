@@ -12,9 +12,12 @@ import { DeclarativeTool } from '../base/declarativeTool'
 import { BaseToolInvocation } from '../base/baseToolInvocation'
 import { ToolKind, ToolContext, ToolResult, ConfirmationOutcome } from '../types'
 import { MessageBusEvent, ToolConfirmationRequest, ToolConfirmationResponse } from '../../messageBus'
+import * as fs from 'fs/promises'
+import * as path from 'path'
 
 export interface ExitPlanModeToolParams {
-    summary: string
+    plan_path?: string
+    summary?: string
 }
 
 class ExitPlanModeToolInvocation extends BaseToolInvocation<ExitPlanModeToolParams> {
@@ -23,12 +26,27 @@ class ExitPlanModeToolInvocation extends BaseToolInvocation<ExitPlanModeToolPara
     }
 
     getDescription (): string {
-        return 'Exit plan mode — approve plan'
+        return 'Exit plan mode - approve plan'
     }
 
     async execute (context: ToolContext): Promise<ToolResult> {
+        let summary = (this.params.summary || '').trim()
+
+        if (this.params.plan_path) {
+            const resolved = path.resolve(context.cwd, this.params.plan_path)
+            try {
+                summary = (await fs.readFile(resolved, 'utf-8')).trim()
+            } catch (err: any) {
+                return this.error(`Failed to read plan_path "${this.params.plan_path}": ${err.message}`)
+            }
+        }
+
+        if (!summary) {
+            return this.error('Missing plan content. Provide plan_path (preferred) or summary.')
+        }
+
         // Show plan summary
-        context.callbacks.onContent(`\n📋 Plan Summary:\n${this.params.summary}\n`)
+        context.callbacks.onContent(`\n📋 Plan Summary:\n${summary}\n`)
 
         // Ask for approval via the message bus
         const callId = `plan_${Date.now()}`
@@ -59,12 +77,16 @@ export class ExitPlanModeTool extends DeclarativeTool<ExitPlanModeToolParams> {
     readonly description = 'Signals that the planning phase is complete and requests user approval to start implementation. Call this after you have explored the codebase and formulated your implementation plan. Present a brief summary and the user will be asked to approve before you proceed with execution. If rejected, iterate on the plan.'
     readonly kind = ToolKind.Plan
     readonly parameters = {
+        plan_path: {
+            type: 'string',
+            description: 'Path to a markdown plan file for user approval.',
+        },
         summary: {
             type: 'string',
-            description: 'A brief summary of the plan for the user to review',
+            description: 'Compatibility fallback: inline summary of the plan.',
         },
     }
-    readonly required = ['summary']
+    readonly required = ['plan_path']
 
     protected createInvocation (params: ExitPlanModeToolParams, _context: ToolContext): ExitPlanModeToolInvocation {
         return new ExitPlanModeToolInvocation(params)

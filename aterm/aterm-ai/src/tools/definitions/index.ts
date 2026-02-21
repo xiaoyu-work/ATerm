@@ -19,6 +19,10 @@ import { MemoryTool } from './memoryTool'
 import { WriteTodosTool } from './writeTodosTool'
 import { EnterPlanModeTool } from './enterPlanModeTool'
 import { ExitPlanModeTool } from './exitPlanModeTool'
+import { WebSearchTool } from './webSearchTool'
+import { WebFetchTool } from './webFetchTool'
+import { GetInternalDocsTool } from './getInternalDocsTool'
+import { ActivateSkillTool } from './activateSkillTool'
 
 /**
  * Create a registry with all default tools registered.
@@ -40,6 +44,10 @@ export function createDefaultRegistry (): ToolRegistry {
     registry.register(new WriteTodosTool())
     registry.register(new EnterPlanModeTool())
     registry.register(new ExitPlanModeTool())
+    registry.register(new WebSearchTool())
+    registry.register(new WebFetchTool())
+    registry.register(new GetInternalDocsTool())
+    registry.register(new ActivateSkillTool())
 
     return registry
 }
@@ -58,4 +66,8 @@ export {
     WriteTodosTool,
     EnterPlanModeTool,
     ExitPlanModeTool,
+    WebSearchTool,
+    WebFetchTool,
+    GetInternalDocsTool,
+    ActivateSkillTool,
 }

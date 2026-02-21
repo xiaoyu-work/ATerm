@@ -40,8 +40,8 @@ export interface AgentResult {
 
 /** Tools available in plan mode — read-only only */
 const PLAN_MODE_TOOL_NAMES = new Set([
-    'read_file', 'read_many_files', 'list_directory', 'glob', 'grep_search',
-    'ask_user', 'save_memory', 'write_todos', 'exit_plan_mode',
+    'glob', 'grep_search', 'read_file', 'list_directory',
+    'google_web_search', 'ask_user', 'activate_skill', 'exit_plan_mode',
 ])
 
 /**
@@ -92,6 +92,32 @@ export class AgentLoop {
     private subscriptions: { unsubscribe: () => void }[] = []
     /** Last prompt token count from API response — used for compression decisions */
     private lastPromptTokens = 0
+
+    private getLatestUserText (): string {
+        for (let i = this.messages.length - 1; i >= 0; i--) {
+            const message = this.messages[i]
+            if (message.role !== 'user') continue
+            if (typeof message.content === 'string') {
+                return message.content
+            }
+        }
+        return ''
+    }
+
+    private shouldNudgeToolUse (
+        turn: number,
+        assistantContent: string,
+    ): boolean {
+        if (turn > 0 || this.planMode) return false
+        if (!assistantContent || assistantContent.trim().length === 0) return false
+
+        const userText = this.getLatestUserText()
+        if (!userText) return false
+
+        const actionRegex = /(修|修复|改|排查|检查|看看|读取|查看|运行|执行|调用|fix|debug|inspect|check|read|run|execute|tool)/i
+        const localContextRegex = /([a-zA-Z]:\\|\/|\\|at line:\d+|cmdlet|powershell|terminal|shell|stack trace|error|报错|-nologo)/i
+        return actionRegex.test(userText) || localContextRegex.test(userText)
+    }
 
     constructor (
         private ai: AIService,
@@ -168,6 +194,8 @@ export class AgentLoop {
     async run (messages: ChatMessage[]): Promise<AgentResult> {
         this.messages = messages
         const startIndex = messages.length
+        let invalidStreamRetries = 0
+        let toolUseNudged = false
 
         try {
             for (let turn = 0; turn < this.maxTurns; turn++) {
@@ -190,11 +218,17 @@ export class AgentLoop {
                 // === processGeminiStreamEvents() ===
                 const toolCallRequests: ToolCallRequest[] = []
                 let assistantContent = ''
+                let sawInvalidStream = false
 
                 // Filter tools based on plan mode
                 const availableTools = this.planMode
                     ? this.registry.getSchemasFiltered(PLAN_MODE_TOOL_NAMES)
                     : this.registry.getSchemas()
+
+                // DEBUG: log available tools on first turn
+                if (turn === 0) {
+                    console.log(`[aterm-ai] availableTools=${availableTools.length}: ${availableTools.map(t => t.function.name).join(', ')}`)
+                }
 
                 const stream = this.ai.streamWithTools(
                     this.messages, availableTools, this.signal,
@@ -238,13 +272,54 @@ export class AgentLoop {
                             this.callbacks.onError(event.value)
                             return { messages: this.messages.slice(startIndex), usage: this.usage }
 
+                        case EventType.InvalidStream:
+                            sawInvalidStream = true
+                            break
+
                         case EventType.Finished:
                             break
                     }
                 }
 
-                // No tool calls → agent is done
-                if (toolCallRequests.length === 0) break
+                if (sawInvalidStream) {
+                    if (invalidStreamRetries < 2) {
+                        invalidStreamRetries++
+                        this.messages.push({
+                            role: 'user',
+                            content: 'Please continue.',
+                        })
+                        this.callbacks.onContent('\r\n(Invalid stream received; requesting continuation...)\r\n')
+                        continue
+                    }
+                    this.callbacks.onError('Model returned invalid stream repeatedly.')
+                    return { messages: this.messages.slice(startIndex), usage: this.usage }
+                }
+                invalidStreamRetries = 0
+
+                // DEBUG: log tool call count
+                console.log(`[aterm-ai] turn=${turn}, toolCallRequests=${toolCallRequests.length}, assistantContent=${assistantContent.length} chars`)
+
+                // Always save assistant response to message history for conversation continuity.
+                // Without this, subsequent turns lose context (consecutive user messages, no assistant replies).
+                if (toolCallRequests.length === 0) {
+                    if (!toolUseNudged && this.shouldNudgeToolUse(turn, assistantContent)) {
+                        toolUseNudged = true
+                        this.messages.push({
+                            role: 'user',
+                            content: 'Use the available tools to inspect the real workspace/terminal state before concluding. Prefer read/search/shell tools, then continue.',
+                        })
+                        this.callbacks.onContent('\r\n(Requesting tool-based inspection...)\r\n')
+                        continue
+                    }
+
+                    if (assistantContent) {
+                        this.messages.push({
+                            role: 'assistant',
+                            content: assistantContent,
+                        })
+                    }
+                    break
+                }
 
                 // === Loop detection ===
                 if (this.loopDetector.recordTurn(toolCallRequests)) {

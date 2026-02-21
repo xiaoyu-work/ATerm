@@ -68,7 +68,8 @@ export class AIService {
             const deployment = aiConfig?.deployment || model
             const apiVersion = aiConfig?.apiVersion || '2024-12-01-preview'
             const url = `${baseUrl}/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`
-            return { url, headers, model }
+            // Azure uses deployment in URL, not model in body — omit model by returning empty string
+            return { url, headers, model: '' }
         }
 
         if (apiKey) {
@@ -201,6 +202,11 @@ export class AIService {
         const { maxAttempts, initialDelayMs } = AIService.RETRY_OPTIONS
         let lastError: string | null = null
 
+        // DEBUG: log request summary
+        console.log(`[aterm-ai] streamWithTools: url=${cfg.url}, model=${cfg.model}, tools=${tools.length}, messages=${messages.length}`)
+        if (tools.length > 0) {
+            console.log(`[aterm-ai] tool names: ${tools.map(t => t.function.name).join(', ')}`)
+        }
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
             if (signal?.aborted) break
 
@@ -211,20 +217,25 @@ export class AIService {
 
             // === Connection phase (fetch) ===
             let response: Response
+            const requestBody: Record<string, any> = {
+                messages,
+                tools: tools.length > 0 ? tools : undefined,
+                tool_choice: tools.length > 0 ? 'auto' : undefined,
+                stream: true,
+                stream_options: { include_usage: true },
+                max_tokens: 16384,
+                temperature: 0.7,
+            }
+            // Only include model for non-Azure providers (Azure uses deployment in URL)
+            if (cfg.model) {
+                requestBody.model = cfg.model
+            }
             try {
                 response = await fetch(cfg.url, {
                     method: 'POST',
                     headers: cfg.headers,
                     signal,
-                    body: JSON.stringify({
-                        model: cfg.model,
-                        messages,
-                        tools,
-                        stream: true,
-                        stream_options: { include_usage: true },
-                        max_tokens: 16384,
-                        temperature: 0.7,
-                    }),
+                    body: JSON.stringify(requestBody),
                 })
             } catch (err: any) {
                 if (err.name === 'AbortError' || signal?.aborted) {
@@ -276,6 +287,47 @@ export class AIService {
         const decoder = new TextDecoder()
         let sseBuffer = ''
         const pendingToolCalls: Map<number, ToolCallRequest> = new Map()
+        let sawFinishReason = false
+        let sawContent = false
+
+        const appendToolCalls = (toolCalls: any[]): void => {
+            for (const tc of toolCalls) {
+                const idx = tc.index ?? 0
+                if (!pendingToolCalls.has(idx)) {
+                    pendingToolCalls.set(idx, {
+                        id: tc.id || '',
+                        function: { name: '', arguments: '' },
+                    })
+                }
+                const pending = pendingToolCalls.get(idx)!
+                if (tc.id) {
+                    pending.id = tc.id
+                }
+                if (tc.function?.name) {
+                    pending.function.name += tc.function.name
+                }
+                if (tc.function?.arguments) {
+                    pending.function.arguments += tc.function.arguments
+                }
+            }
+        }
+
+        const appendLegacyFunctionCall = (functionCall: any): void => {
+            if (!functionCall) return
+            if (!pendingToolCalls.has(0)) {
+                pendingToolCalls.set(0, {
+                    id: 'legacy_function_call_0',
+                    function: { name: '', arguments: '' },
+                })
+            }
+            const pending = pendingToolCalls.get(0)!
+            if (functionCall.name) {
+                pending.function.name += functionCall.name
+            }
+            if (functionCall.arguments) {
+                pending.function.arguments += functionCall.arguments
+            }
+        }
 
         try {
             while (true) {
@@ -327,41 +379,57 @@ export class AIService {
                     }
 
                     const choice = chunk.choices?.[0]
-                    const delta = choice?.delta
+                    if (!choice) continue
 
+                    // DEBUG: log finish_reason when present
+                    if (choice.finish_reason) {
+                        sawFinishReason = true
+                        console.log(`[aterm-ai] SSE finish_reason=${choice.finish_reason}, pendingToolCalls=${pendingToolCalls.size}`)
+                    }
+
+                    // Some providers include finalized tool calls on choice.message/tool_calls.
+                    if (Array.isArray(choice.message?.tool_calls)) {
+                        appendToolCalls(choice.message.tool_calls)
+                    }
+                    if (Array.isArray(choice.tool_calls)) {
+                        appendToolCalls(choice.tool_calls)
+                    }
+                    if (choice.message?.function_call) {
+                        appendLegacyFunctionCall(choice.message.function_call)
+                    }
+                    if (choice.function_call) {
+                        appendLegacyFunctionCall(choice.function_call)
+                    }
+                    if (typeof choice.message?.content === 'string' && choice.message.content.length > 0) {
+                        sawContent = true
+                        yield { type: EventType.Content, value: choice.message.content }
+                    }
+
+                    const delta = choice.delta
                     if (!delta) continue
 
                     // Text content chunk
                     if (delta.content) {
+                        sawContent = true
                         yield { type: EventType.Content, value: delta.content }
                     }
 
                     // Tool call fragments — accumulate and splice
                     if (delta.tool_calls) {
-                        for (const tc of delta.tool_calls) {
-                            const idx = tc.index ?? 0
-                            if (!pendingToolCalls.has(idx)) {
-                                pendingToolCalls.set(idx, {
-                                    id: tc.id || '',
-                                    function: { name: '', arguments: '' },
-                                })
-                            }
-                            const pending = pendingToolCalls.get(idx)!
-                            if (tc.id) {
-                                pending.id = tc.id
-                            }
-                            if (tc.function?.name) {
-                                pending.function.name += tc.function.name
-                            }
-                            if (tc.function?.arguments) {
-                                pending.function.arguments += tc.function.arguments
-                            }
-                        }
+                        console.log(`[aterm-ai] SSE got delta.tool_calls:`, JSON.stringify(delta.tool_calls))
+                        appendToolCalls(delta.tool_calls)
+                    }
+                    if (delta.function_call) {
+                        appendLegacyFunctionCall(delta.function_call)
                     }
                 }
             }
         } finally {
             reader.releaseLock()
+        }
+
+        if (!sawFinishReason && !sawContent && pendingToolCalls.size === 0) {
+            yield { type: EventType.InvalidStream, value: null }
         }
 
         // Stream ended without [DONE] — still yield accumulated tool calls

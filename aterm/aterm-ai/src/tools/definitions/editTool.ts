@@ -15,6 +15,7 @@ import { validatePath } from '../security'
 
 export interface EditToolParams {
     file_path: string
+    instruction: string
     old_string: string
     new_string: string
     expected_replacements?: number
@@ -189,6 +190,16 @@ The user has the ability to modify the \`new_string\` content. If modified, this
             type: 'string',
             description: 'The path to the file to modify.',
         },
+        instruction: {
+            type: 'string',
+            description: `A clear, semantic instruction for the code change, acting as a high-quality prompt for an expert LLM assistant. It must be self-contained and explain the goal of the change.
+
+A good instruction should concisely answer:
+1. WHY is the change needed?
+2. WHERE should the change happen?
+3. WHAT is the high-level change?
+4. WHAT is the desired outcome?`,
+        },
         old_string: {
             type: 'string',
             description: 'The exact literal text to replace, preferably unescaped. For single replacements (default), include at least 3 lines of context BEFORE and AFTER the target text, matching whitespace and indentation precisely. If this string does not match exactly, the tool will fail.',
@@ -203,7 +214,7 @@ The user has the ability to modify the \`new_string\` content. If modified, this
             minimum: 1,
         },
     }
-    readonly required = ['file_path', 'old_string', 'new_string']
+    readonly required = ['file_path', 'instruction', 'old_string', 'new_string']
 
     protected createInvocation (params: EditToolParams, _context: ToolContext): EditToolInvocation {
         return new EditToolInvocation(params)

@@ -14,7 +14,8 @@ import { BaseToolInvocation } from '../base/baseToolInvocation'
 import { ToolKind, ToolContext, ToolResult } from '../types'
 
 export interface MemoryToolParams {
-    content: string
+    fact?: string
+    content?: string
 }
 
 class MemoryToolInvocation extends BaseToolInvocation<MemoryToolParams> {
@@ -27,13 +28,18 @@ class MemoryToolInvocation extends BaseToolInvocation<MemoryToolParams> {
     }
 
     async execute (context: ToolContext): Promise<ToolResult> {
+        const fact = (this.params.fact ?? this.params.content ?? '').trim()
+        if (!fact) {
+            return this.error('Missing required parameter: fact')
+        }
+
         const memDir = path.join(context.cwd, '.aterm')
         const memFile = path.join(memDir, 'memory.md')
 
         try {
             await fs.mkdir(memDir, { recursive: true })
             const timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ')
-            const entry = `\n## ${timestamp}\n${this.params.content}\n`
+            const entry = `\n## ${timestamp}\n${fact}\n`
             await fs.appendFile(memFile, entry, 'utf-8')
             return this.success('Saved to memory (.aterm/memory.md)')
         } catch (err: any) {
@@ -54,12 +60,12 @@ NEVER save workspace-specific context, local paths, or commands (e.g. "The entry
 - Do NOT use for session context.`
     readonly kind = ToolKind.Other
     readonly parameters = {
-        content: {
+        fact: {
             type: 'string',
             description: 'The specific fact or piece of information to remember. Should be a clear, self-contained statement.',
         },
     }
-    readonly required = ['content']
+    readonly required = ['fact']
 
     protected createInvocation (params: MemoryToolParams, _context: ToolContext): MemoryToolInvocation {
         return new MemoryToolInvocation(params)

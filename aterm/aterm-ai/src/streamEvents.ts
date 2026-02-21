@@ -16,6 +16,8 @@ export const enum EventType {
     Retry = 'retry',
     /** API or network error */
     Error = 'error',
+    /** Stream terminated without usable content/tool call/finish signal */
+    InvalidStream = 'invalid_stream',
     /** Stream finished */
     Finished = 'finished',
 }

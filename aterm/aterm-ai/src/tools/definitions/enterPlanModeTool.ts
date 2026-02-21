@@ -13,7 +13,7 @@ import { BaseToolInvocation } from '../base/baseToolInvocation'
 import { ToolKind, ToolContext, ToolResult } from '../types'
 
 export interface EnterPlanModeToolParams {
-    reason: string
+    reason?: string
 }
 
 class EnterPlanModeToolInvocation extends BaseToolInvocation<EnterPlanModeToolParams> {
@@ -22,15 +22,19 @@ class EnterPlanModeToolInvocation extends BaseToolInvocation<EnterPlanModeToolPa
     }
 
     getDescription (): string {
-        return `Enter plan mode: ${this.params.reason}`
+        return this.params.reason
+            ? `Enter plan mode: ${this.params.reason}`
+            : 'Enter plan mode'
     }
 
     async execute (context: ToolContext): Promise<ToolResult> {
         context.callbacks.onContent(
-            `\n📋 Plan mode ON: ${this.params.reason}\n(Only read-only tools available. Use exit_plan_mode when ready.)\n`,
+            this.params.reason
+                ? `\n📋 Plan mode ON: ${this.params.reason}\n(Only read-only tools available. Use exit_plan_mode when ready.)\n`
+                : '\n📋 Plan mode ON\n(Only read-only tools available. Use exit_plan_mode when ready.)\n',
         )
         return this.success(
-            'Entered plan mode. You can now only use read-only tools (read_file, list_directory, glob, grep_search, ask_user, save_memory, write_todos). When your plan is ready, call exit_plan_mode with a summary.',
+            'Entered plan mode. You can now only use read-only tools (read_file, list_directory, glob, grep_search, ask_user, save_memory, write_todos). When your plan is ready, write it to a file and call exit_plan_mode with plan_path.',
             { planMode: true },
         )
     }
@@ -47,7 +51,7 @@ export class EnterPlanModeTool extends DeclarativeTool<EnterPlanModeToolParams> 
             description: 'Brief explanation of why planning is needed',
         },
     }
-    readonly required = ['reason']
+    readonly required: string[] = []
 
     protected createInvocation (params: EnterPlanModeToolParams, _context: ToolContext): EnterPlanModeToolInvocation {
         return new EnterPlanModeToolInvocation(params)

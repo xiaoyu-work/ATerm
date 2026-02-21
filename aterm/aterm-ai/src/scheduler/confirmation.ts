@@ -15,6 +15,11 @@ import {
     ToolConfirmationResponse,
 } from '../messageBus'
 
+export interface ConfirmationResolution {
+    outcome: ConfirmationOutcome
+    payload?: Record<string, unknown>
+}
+
 /**
  * Request user confirmation via the message bus.
  *
@@ -28,7 +33,7 @@ export async function resolveConfirmation (
     callId: string,
     details: ConfirmationDetails,
     bus: MessageBus,
-): Promise<ConfirmationOutcome> {
+): Promise<ConfirmationResolution> {
     // Publish confirmation request with structured details
     bus.emit<ToolConfirmationRequest>(MessageBusEvent.TOOL_CONFIRMATION_REQUEST, {
         callId,
@@ -42,5 +47,8 @@ export async function resolveConfirmation (
         (r) => r.callId === callId,
     )
 
-    return response.outcome
+    return {
+        outcome: response.outcome,
+        payload: response.payload,
+    }
 }
