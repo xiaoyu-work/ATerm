@@ -45,27 +45,34 @@ class GlobToolInvocation extends BaseToolInvocation<GlobToolParams> {
             : context.cwd
         // outsideCwd check removed — handled by scheduler before execute()
 
+        const MAX_RESULTS = 200
+
         try {
-            // Use git ls-files for .gitignore respect, fall back to find
+            // Use git ls-files for .gitignore respect, fall back to find/dir
             const isGit = await fs.access(path.join(context.cwd, '.git')).then(() => true).catch(() => false)
 
             let command: string
             if (isGit) {
-                command = `git ls-files --cached --others --exclude-standard "${this.params.pattern}" | head -200`
+                command = `git ls-files --cached --others --exclude-standard "${this.params.pattern}"`
+            } else if (process.platform === 'win32') {
+                // PowerShell-compatible: Get-ChildItem instead of dir/find
+                const escapedPattern = this.params.pattern.replace(/'/g, "''")
+                command = `Get-ChildItem -Recurse -Name -Filter '${escapedPattern}' -ErrorAction SilentlyContinue`
             } else {
-                const isWindows = process.platform === 'win32'
-                if (isWindows) {
-                    command = `dir /s /b "${this.params.pattern}" 2>NUL | head -200`
-                } else {
-                    command = `find . -name "${this.params.pattern}" -not -path "./.git/*" | head -200`
-                }
+                command = `find . -name "${this.params.pattern}" -not -path "./.git/*"`
             }
 
             const result = await executeCommand(command, searchDir, context.signal)
-            const output = result.stdout.trim()
+            let output = result.stdout.trim()
 
             if (!output) {
                 return this.success(`No files found matching pattern: ${this.params.pattern}`)
+            }
+
+            // Truncate to MAX_RESULTS lines (cross-platform, replaces `| head`)
+            const lines = output.split('\n')
+            if (lines.length > MAX_RESULTS) {
+                output = lines.slice(0, MAX_RESULTS).join('\n')
             }
 
             return this.success(output)

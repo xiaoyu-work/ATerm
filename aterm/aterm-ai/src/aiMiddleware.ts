@@ -58,15 +58,38 @@ export class AIMiddleware extends SessionMiddleware {
     }
 
     private renderCapturingPrompt (): void {
+        // For multi-line content, show first line + line count
+        const lines = this.promptBuffer.split('\n')
+        let display = lines[0]
+        if (lines.length > 1) {
+            display += colors.gray(` (${lines.length} lines)`)
+        }
         this.outputToTerminal.next(Buffer.from(
-            '\r\x1b[2K' + colors.cyan('@ ') + this.promptBuffer,
+            '\r\x1b[2K' + colors.cyan('@ ') + display,
         ))
     }
 
     private applyCapturingText (rawText: string): void {
+        // Handle bracketed paste as a single block — don't let \r inside
+        // the paste trigger submission.  The paste() method in the terminal
+        // tab converts \r\n → \r, so pasted multi-line text is full of \r.
+        const pasteMatch = rawText.match(/\x1b\[200~([\s\S]*?)\x1b\[201~/)
+        if (pasteMatch) {
+            const pasted = pasteMatch[1]?.replace(/\r\n?/g, '\n')
+            if (pasted) {
+                const display = this.maybeCollapsePaste(pasted)
+                this.promptBuffer += display
+                this.renderCapturingPrompt()
+            }
+            // Process any text after the paste end marker (e.g. Enter key)
+            const afterPaste = rawText.slice(rawText.indexOf('\x1b[201~') + 6)
+            if (afterPaste) {
+                this.applyCapturingText(afterPaste)
+            }
+            return
+        }
+
         const text = rawText
-            .replace(/\x1b\[200~/g, '')
-            .replace(/\x1b\[201~/g, '')
             .replace(/\x1b\[[0-9;?]*[ -/]*[@-~]/g, '')
             .replace(/\x1bO./g, '')
 
@@ -320,7 +343,7 @@ export class AIMiddleware extends SessionMiddleware {
 
                 this.state = State.CAPTURING
                 this.promptBuffer = ''
-                const pastedPrompt = clean.startsWith(' ') ? clean.slice(1) : clean
+                const pastedPrompt = (clean.startsWith(' ') ? clean.slice(1) : clean).replace(/\r\n?/g, '\n')
                 if (pastedPrompt) {
                     const display = this.maybeCollapsePaste(pastedPrompt)
                     this.promptBuffer += display

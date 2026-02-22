@@ -54,29 +54,42 @@ class GrepToolInvocation extends BaseToolInvocation<GrepToolParams> {
             const isGit = await fs.access(path.join(context.cwd, '.git')).then(() => true).catch(() => false)
             const totalMax = this.params.total_max_matches || 100
             const perFileMax = this.params.max_matches_per_file
+            const escapedPattern = this.params.pattern.replace(/"/g, '\\"')
 
             let command: string
             if (isGit) {
                 const includeArg = this.params.include ? ` -- "${this.params.include}"` : ''
                 const perFileArg = perFileMax ? ` -m ${perFileMax}` : ''
                 const namesArg = this.params.names_only ? ' -l' : ' -n'
-                command = `git grep --untracked${namesArg} -E --ignore-case${perFileArg} "${this.params.pattern.replace(/"/g, '\\"')}"${includeArg} | head -${totalMax}`
+                // Use -e to prevent patterns starting with '-' from being parsed as flags
+                command = `git grep --untracked${namesArg} -E --ignore-case${perFileArg} -e "${escapedPattern}"${includeArg}`
             } else {
                 const includeArg = this.params.include ? ` --include="${this.params.include}"` : ''
                 const perFileArg = perFileMax ? ` -m ${perFileMax}` : ''
                 const namesArg = this.params.names_only ? ' -l' : ' -n -H'
-                command = `grep -r -E -i${namesArg}${perFileArg}${includeArg} "${this.params.pattern.replace(/"/g, '\\"')}" . | head -${totalMax}`
+                command = `grep -r -E -i${namesArg}${perFileArg}${includeArg} -e "${escapedPattern}" .`
             }
 
             const result = await executeCommand(command, searchDir, context.signal, undefined, 10000)
             let output = result.stdout.trim()
 
-            // Apply exclude_pattern filter
-            if (output && this.params.exclude_pattern) {
-                const excludeRe = new RegExp(this.params.exclude_pattern, 'i')
-                output = output.split('\n').filter(line => !excludeRe.test(line)).join('\n')
+            if (!output) {
+                return this.success(`No matches found for pattern: ${this.params.pattern}`)
             }
 
+            // Truncate to totalMax lines (cross-platform, replaces `| head`)
+            let lines = output.split('\n')
+            if (lines.length > totalMax) {
+                lines = lines.slice(0, totalMax)
+            }
+
+            // Apply exclude_pattern filter
+            if (this.params.exclude_pattern) {
+                const excludeRe = new RegExp(this.params.exclude_pattern, 'i')
+                lines = lines.filter(line => !excludeRe.test(line))
+            }
+
+            output = lines.join('\n')
             if (!output) {
                 return this.success(`No matches found for pattern: ${this.params.pattern}`)
             }

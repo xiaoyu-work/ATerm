@@ -152,6 +152,14 @@ export class Window {
 
         this.window.loadFile(path.join(app.getAppPath(), 'dist', 'index.html'))
 
+        // Prevent Ctrl+R / Ctrl+Shift+R from reloading the page —
+        // these keys should pass through to the terminal (e.g. reverse-i-search in bash)
+        this.window.webContents.on('before-input-event', (event, input) => {
+            if (input.key === 'r' && input.control && !input.alt && !input.meta) {
+                event.preventDefault()
+            }
+        })
+
         this.window.webContents.setVisualZoomLevelLimits(1, 1)
         this.window.webContents.setZoomFactor(1)
         this.window.webContents.session.setPermissionCheckHandler(() => true)

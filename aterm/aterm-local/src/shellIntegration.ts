@@ -265,9 +265,11 @@ export function getShellIntegration (
             break
         }
         case 'pwsh': {
-            // PowerShell: use -NoExit -Command to source integration
+            // PowerShell: use -NoExit -Command to source integration.
+            // -Command MUST be last because it consumes all remaining args.
             if (!result.args.some(a => a === '-NoExit')) {
-                result.args.unshift('-NoExit', '-Command', PWSH_INTEGRATION.trim())
+                result.args.unshift('-NoExit')
+                result.args.push('-Command', PWSH_INTEGRATION.trim())
             }
             break
         }
