@@ -183,15 +183,15 @@ function createCallbacks (abortController: AbortController): AgentCallbacks {
             const code = key.charCodeAt(0)
             // Ctrl+C = 3, Escape = 27
             if (code === 3 || code === 27) {
-                process.stdout.write(c.red('Cancelled\n'))
+                process.stdout.write(c.red('cancel\n'))
                 return ConfirmationOutcome.Cancel
             }
             const ch = key.toLowerCase()
             if (ch === 'a') {
-                process.stdout.write(c.green('Always Allow\n'))
+                process.stdout.write(c.green('always\n'))
                 return ConfirmationOutcome.ProceedAlways
             }
-            process.stdout.write(c.green('Approved\n'))
+            process.stdout.write(c.green('yes\n'))
             return ConfirmationOutcome.ProceedOnce
         },
 
