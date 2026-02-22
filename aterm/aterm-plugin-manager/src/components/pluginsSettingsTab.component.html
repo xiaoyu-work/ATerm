@@ -13,29 +13,33 @@
         <div class="input-group-text"><i class="fas fa-fw fa-circle-notch fa-spin" *ngIf="!availablePluginsReady"></i><i class="fas fa-fw fa-search" *ngIf="availablePluginsReady"></i></div>
         <input class="form-control" type="text" [(ngModel)]="availableFilter" (ngModelChange)="searchAvailable(availableFilter)" [placeholder]="&quot;Search plugins&quot;|translate">
       </div>
-      <ngb-accordion class="mb-4" *ngIf="availablePlugins$" [closeOthers]="true">
+      <div ngbAccordion class="mb-4" *ngIf="availablePlugins$" [closeOthers]="true">
         <ng-container *ngFor="let plugin of (availablePlugins$|async)">
-          <ngb-panel *ngIf="!isAlreadyInstalled(plugin)">
-            <ng-template ngbPanelTitle>
-              <div class="text-left"><strong class="d-block">{{plugin.name}}</strong><small class="d-block text-muted">{{plugin.description}}</small></div>
-            </ng-template>
-            <ng-template ngbPanelContent>
-              <div class="row">
-                <div class="col-4">
-                  <div class="d-flex flex-column flex-md-row gap-2">
-                    <button class="btn btn-primary btn-block justify-content-center" (click)="installPlugin(plugin)" [disabled]="busy.has(plugin.name)"><i class="fas fa-fw fa-cloud-download" *ngIf="busy.get(plugin.name) != BusyState.Installing"></i><i class="fas fa-fw fa-circle-notch fa-spin" *ngIf="busy.get(plugin.name) == BusyState.Installing"></i><span class="ms-2" translate>Get</span></button>
-                    <button class="btn btn-secondary btn-block justify-content-center" *ngIf="plugin.homepage" (click)="showPluginHomepage(plugin)"><i class="fas fa-fw fa-external-link-alt"></i><span class="ms-2" translate>Homepage</span></button>
+          <div ngbAccordionItem *ngIf="!isAlreadyInstalled(plugin)">
+            <h2 ngbAccordionHeader>
+              <button ngbAccordionButton>
+                <div class="text-left"><strong class="d-block">{{plugin.name}}</strong><small class="d-block text-muted">{{plugin.description}}</small></div>
+              </button>
+            </h2>
+            <div ngbAccordionCollapse>
+              <div ngbAccordionBody>
+                <div class="row">
+                  <div class="col-4">
+                    <div class="d-flex flex-column flex-md-row gap-2">
+                      <button class="btn btn-primary btn-block justify-content-center" (click)="installPlugin(plugin)" [disabled]="busy.has(plugin.name)"><i class="fas fa-fw fa-cloud-download" *ngIf="busy.get(plugin.name) != BusyState.Installing"></i><i class="fas fa-fw fa-circle-notch fa-spin" *ngIf="busy.get(plugin.name) == BusyState.Installing"></i><span class="ms-2" translate>Get</span></button>
+                      <button class="btn btn-secondary btn-block justify-content-center" *ngIf="plugin.homepage" (click)="showPluginHomepage(plugin)"><i class="fas fa-fw fa-external-link-alt"></i><span class="ms-2" translate>Homepage</span></button>
+                    </div>
+                  </div>
+                  <div class="col-8">
+                    <ng-container *ngTemplateOutlet="pluginInfo; context: { plugin }"></ng-container>
                   </div>
                 </div>
-                <div class="col-8">
-                  <ng-container *ngTemplateOutlet="pluginInfo; context: { plugin }"></ng-container>
-                </div>
+                <div class="mt-2">{{plugin.description}}</div>
               </div>
-              <div class="mt-2">{{plugin.description}}</div>
-            </ng-template>
-          </ngb-panel>
+            </div>
+          </div>
         </ng-container>
-      </ngb-accordion>
+      </div>
     </ng-template>
   </li>
   <li ngbNavItem><a ngbNavLink translate>Installed</a>
@@ -44,31 +48,35 @@
         <div class="input-group-text"><i class="fas fa-fw fa-search"></i></div>
         <input class="form-control" type="text" [(ngModel)]="installedFilter" (ngModelChange)="searchInstalled(installedFilter)" [placeholder]="&quot;Search plugins&quot;|translate">
       </div>
-      <ngb-accordion class="mb-4" [closeOthers]="true">
+      <div ngbAccordion class="mb-4" [closeOthers]="true">
         <ng-container *ngFor="let plugin of installedPlugins$">
-          <ngb-panel>
-            <ng-template ngbPanelTitle>
-              <div class="text-left me-auto">
-                <div><strong>{{plugin.name}}</strong><small class="text-muted ms-2" *ngIf="plugin.isBuiltin" translate>Built-in</small><small class="text-warning ms-2" *ngIf="!isPluginEnabled(plugin)" translate>Disabled</small></div><small class="d-block text-muted">{{plugin.description}}</small>
-              </div>
-              <button class="btn btn-primary ms-2" *ngIf="knownUpgrades[plugin.name]" (click)="upgradePlugin(plugin)" [disabled]="busy.has(plugin.name)"><i class="fas fa-fw fa-arrow-up" *ngIf="busy.get(plugin.name) != BusyState.Installing"></i><i class="fas fa-fw fa-circle-notch fa-spin" *ngIf="busy.get(plugin.name) == BusyState.Installing"></i><span translate="Upgrade to {version}" [translateParams]="{version: knownUpgrades[plugin.name]?.version}"></span></button>
-            </ng-template>
-            <ng-template ngbPanelContent>
-              <div class="row">
-                <div class="col-4">
-                  <button class="btn btn-warning btn-block justify-content-center" (click)="togglePlugin(plugin)" *ngIf="isPluginEnabled(plugin)" [disabled]="!canDisablePlugin(plugin)" translate>Disable</button>
-                  <button class="btn btn-success btn-block justify-content-center" (click)="togglePlugin(plugin)" *ngIf="canDisablePlugin(plugin) &amp;&amp; !isPluginEnabled(plugin)" translate>Enable</button>
-                  <button class="btn btn-danger btn-block justify-content-center" (click)="uninstallPlugin(plugin)" *ngIf="!plugin.isBuiltin" [disabled]="busy.has(plugin.name)"><i class="fas fa-fw fa-trash" *ngIf="busy.get(plugin.name) != BusyState.Uninstalling"></i><i class="fas fa-fw fa-circle-notch fa-spin" *ngIf="busy.get(plugin.name) == BusyState.Uninstalling"></i><span translate>Uninstall</span></button>
+          <div ngbAccordionItem>
+            <div ngbAccordionHeader class="d-flex align-items-center">
+              <button ngbAccordionButton class="flex-grow-1">
+                <div class="text-left me-auto">
+                  <div><strong>{{plugin.name}}</strong><small class="text-muted ms-2" *ngIf="plugin.isBuiltin" translate>Built-in</small><small class="text-warning ms-2" *ngIf="!isPluginEnabled(plugin)" translate>Disabled</small></div><small class="d-block text-muted">{{plugin.description}}</small>
                 </div>
-                <div class="col-8">
-                  <ng-container *ngTemplateOutlet="pluginInfo; context: { plugin }"></ng-container>
+              </button>
+              <button class="btn btn-primary ms-2 me-3" *ngIf="knownUpgrades[plugin.name]" (click)="upgradePlugin(plugin); $event.stopPropagation()" [disabled]="busy.has(plugin.name)"><i class="fas fa-fw fa-arrow-up" *ngIf="busy.get(plugin.name) != BusyState.Installing"></i><i class="fas fa-fw fa-circle-notch fa-spin" *ngIf="busy.get(plugin.name) == BusyState.Installing"></i><span translate="Upgrade to {version}" [translateParams]="{version: knownUpgrades[plugin.name]?.version}"></span></button>
+            </div>
+            <div ngbAccordionCollapse>
+              <div ngbAccordionBody>
+                <div class="row">
+                  <div class="col-4">
+                    <button class="btn btn-warning btn-block justify-content-center" (click)="togglePlugin(plugin)" *ngIf="isPluginEnabled(plugin)" [disabled]="!canDisablePlugin(plugin)" translate>Disable</button>
+                    <button class="btn btn-success btn-block justify-content-center" (click)="togglePlugin(plugin)" *ngIf="canDisablePlugin(plugin) &amp;&amp; !isPluginEnabled(plugin)" translate>Enable</button>
+                    <button class="btn btn-danger btn-block justify-content-center" (click)="uninstallPlugin(plugin)" *ngIf="!plugin.isBuiltin" [disabled]="busy.has(plugin.name)"><i class="fas fa-fw fa-trash" *ngIf="busy.get(plugin.name) != BusyState.Uninstalling"></i><i class="fas fa-fw fa-circle-notch fa-spin" *ngIf="busy.get(plugin.name) == BusyState.Uninstalling"></i><span translate>Uninstall</span></button>
+                  </div>
+                  <div class="col-8">
+                    <ng-container *ngTemplateOutlet="pluginInfo; context: { plugin }"></ng-container>
+                  </div>
                 </div>
+                <div class="mt-2">{{plugin.description}}</div>
               </div>
-              <div class="mt-2">{{plugin.description}}</div>
-            </ng-template>
-          </ngb-panel>
+            </div>
+          </div>
         </ng-container>
-      </ngb-accordion>
+      </div>
     </ng-template>
   </li>
 </ul>
