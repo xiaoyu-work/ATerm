@@ -29,7 +29,8 @@ const PASTED_TEXT_PLACEHOLDER_REGEX = /\[Pasted Text: \d+ (?:lines|chars)(?: #\d
 export class AIMiddleware extends SessionMiddleware {
     private state = State.NORMAL
     private promptBuffer = ''
-    private atLineStart = true
+    /** Number of characters user has typed on the current shell line (0 = at line start) */
+    private inputLength = 0
     private bannerShown = false
     /** Stores full pasted content keyed by placeholder ID */
     private pastedContent: Record<string, string> = {}
@@ -125,7 +126,7 @@ export class AIMiddleware extends SessionMiddleware {
             if (char === '\u0003' || char === '\u001b') {
                 this.outputToTerminal.next(Buffer.from('\r\n'))
                 this.state = State.NORMAL
-                this.atLineStart = true
+                this.inputLength = 0
                 this.promptBuffer = ''
                 this.outputToSession.next(Buffer.from('\r'))
                 return
@@ -219,7 +220,7 @@ export class AIMiddleware extends SessionMiddleware {
 
         if (!query) {
             this.state = State.NORMAL
-            this.atLineStart = true
+            this.inputLength = 0
             this.outputToSession.next(Buffer.from('\r'))
             return
         }
@@ -235,7 +236,7 @@ export class AIMiddleware extends SessionMiddleware {
                 '\r\n' + colors.red(`  Error: Failed to write query file: ${e}`) + '\r\n',
             ))
             this.state = State.NORMAL
-            this.atLineStart = true
+            this.inputLength = 0
             this.outputToSession.next(Buffer.from('\r'))
             return
         }
@@ -278,7 +279,7 @@ export class AIMiddleware extends SessionMiddleware {
         this.outputToSession.next(Buffer.from(` __aterm_ai ${queryId}\r`))
 
         this.state = State.NORMAL
-        this.atLineStart = true
+        this.inputLength = 0
     }
 
     // ───────────────────────── Session I/O ─────────────────────────
@@ -298,11 +299,17 @@ export class AIMiddleware extends SessionMiddleware {
             return
         }
 
-        this.atLineStart = true
+        // Reset input counter only when shell output contains a line break
+        // (new prompt after command, Ctrl+C output, etc.)
+        // Pure echo of keystrokes (no newlines) must NOT reset the counter,
+        // otherwise a race between echo and user input breaks @ detection.
+        const str = data.toString('utf-8')
+        if (str.includes('\n') || str.includes('\r')) {
+            this.inputLength = 0
+        }
 
         // Filter __aterm_ai patterns from output (handles ConPTY resize repaint)
         if (this.queryMap.size > 0) {
-            const str = data.toString('utf-8')
             if (str.includes('__aterm_ai')) {
                 let modified = str
                 for (const [id, display] of this.queryMap) {
@@ -353,7 +360,7 @@ export class AIMiddleware extends SessionMiddleware {
             }
             if (this.state === State.NORMAL) {
                 if (data[0] !== 0x1b) {
-                    this.atLineStart = false
+                    this.inputLength += text.length
                 }
                 this.outputToSession.next(data)
             }
@@ -364,12 +371,22 @@ export class AIMiddleware extends SessionMiddleware {
 
         switch (this.state) {
             case State.NORMAL:
-                if (byte === 0x40 /* @ */ && this.atLineStart) {
+                if (byte === 0x40 /* @ */ && this.inputLength === 0) {
                     this.state = State.PENDING
                     this.outputToTerminal.next(Buffer.from(colors.cyan('@')))
                     return
                 }
-                this.atLineStart = (byte === 0x0D)
+                if (byte === 0x0D) {
+                    this.inputLength = 0
+                } else if (byte === 0x7F || byte === 0x08) {
+                    this.inputLength = Math.max(0, this.inputLength - 1)
+                } else if (byte === 0x03) {
+                    this.inputLength = 0
+                } else if (byte === 0x15) {
+                    this.inputLength = 0
+                } else if (byte >= 0x20) {
+                    this.inputLength++
+                }
                 this.outputToSession.next(data)
                 return
 
@@ -394,13 +411,13 @@ export class AIMiddleware extends SessionMiddleware {
                 if (byte === 0x7F || byte === 0x08) {
                     this.outputToTerminal.next(Buffer.from('\b \b'))
                     this.state = State.NORMAL
-                    this.atLineStart = true
+                    this.inputLength = 0
                     return
                 }
                 // Not a space — flush @ + current char to shell
                 this.outputToTerminal.next(Buffer.from('\b \b'))
                 this.state = State.NORMAL
-                this.atLineStart = false
+                this.inputLength = 2
                 this.outputToSession.next(Buffer.from('@'))
                 this.outputToSession.next(data)
                 return
