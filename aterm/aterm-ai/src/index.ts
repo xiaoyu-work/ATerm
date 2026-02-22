@@ -31,4 +31,3 @@ export default class AtermAIModule {}
 
 export { AIService } from './ai.service'
 export { AIDecorator } from './decorator'
-export { ContextCollector } from './contextCollector'

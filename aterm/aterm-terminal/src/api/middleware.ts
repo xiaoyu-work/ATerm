@@ -4,9 +4,11 @@ import { SubscriptionContainer } from 'aterm-core'
 export class SessionMiddleware {
     get outputToSession$ (): Observable<Buffer> { return this.outputToSession }
     get outputToTerminal$ (): Observable<Buffer> { return this.outputToTerminal }
+    get resizeRequested$ (): Observable<{ columns: number, rows: number }> { return this.resizeRequested }
 
     protected outputToSession = new Subject<Buffer>()
     protected outputToTerminal = new Subject<Buffer>()
+    protected resizeRequested = new Subject<{ columns: number, rows: number }>()
 
     feedFromSession (data: Buffer): void {
         this.outputToTerminal.next(data)
@@ -18,13 +20,15 @@ export class SessionMiddleware {
 
     // Optional hook for terminal resize notifications.
     // Middleware can override this to react to UI resizes.
-    onTerminalResize (_columns: number, _rows: number): void {
-        // no-op
+    // Return false to defer the resize (prevent session.resize() from being called).
+    onTerminalResize (_columns: number, _rows: number): boolean {
+        return true
     }
 
     close (): void {
         this.outputToSession.complete()
         this.outputToTerminal.complete()
+        this.resizeRequested.complete()
     }
 }
 
@@ -71,10 +75,14 @@ export class SessionMiddlewareStack extends SessionMiddleware {
         this.stack[this.stack.length - 1].feedFromTerminal(data)
     }
 
-    notifyTerminalResize (columns: number, rows: number): void {
+    notifyTerminalResize (columns: number, rows: number): boolean {
+        let shouldResize = true
         for (const middleware of this.stack) {
-            middleware.onTerminalResize(columns, rows)
+            if (!middleware.onTerminalResize(columns, rows)) {
+                shouldResize = false
+            }
         }
+        return shouldResize
     }
 
     close (): void {
@@ -109,5 +117,13 @@ export class SessionMiddlewareStack extends SessionMiddleware {
             this.stack[0].outputToSession$,
             x => this.outputToSession.next(x),
         )
+
+        // Aggregate resize requests from all middleware
+        for (const mw of this.stack) {
+            this.subs.subscribe(
+                mw.resizeRequested$,
+                req => this.resizeRequested.next(req),
+            )
+        }
     }
 }

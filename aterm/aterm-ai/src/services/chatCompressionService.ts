@@ -11,7 +11,7 @@
  * 4. Use the LLM itself to generate a structured state snapshot
  */
 
-import { AIService, ChatMessage } from '../ai.service'
+import { IAIService, ChatMessage } from '../ai.service'
 import { PromptProvider } from '../promptProvider'
 
 /** Compress when history reaches this fraction of token limit */
@@ -118,7 +118,7 @@ export class ChatCompressionService {
     private tokenLimit = 128_000
 
     constructor (
-        private ai: AIService,
+        private ai: IAIService,
     ) {}
 
     /** Set the token limit based on model capabilities */

@@ -1,34 +1,19 @@
-import { Injectable } from '@angular/core'
-import { ConfigService } from 'aterm-core'
-import { EventType, StreamEvent, ToolCallRequest, TokensSummary } from './streamEvents'
-import { PROVIDER_PRESETS } from './providers'
-
 /**
- * OpenAI-compatible chat completion request/response types.
- * Works with: OpenAI, Gemini, Ollama, DeepSeek, Azure OpenAI, Groq,
- * LiteLLM Proxy, and any OpenAI-compatible endpoint.
+ * Standalone AI service for CLI usage — no Angular dependencies.
+ * Implements the same IAIService interface as the Angular AIService.
  */
 
-export interface ChatMessage {
-    role: 'system' | 'user' | 'assistant' | 'tool'
-    content: string | null
-    tool_calls?: any[]
-    tool_call_id?: string
-}
+import { IAIService, ChatMessage, ToolDefinition } from '../ai.service'
+import { EventType, StreamEvent, ToolCallRequest, TokensSummary } from '../streamEvents'
+import { PROVIDER_PRESETS } from '../providers'
 
-export interface ToolDefinition {
-    type: 'function'
-    function: {
-        name: string
-        description: string
-        parameters: any
-    }
-}
-
-/** Common interface for AI service — implemented by Angular AIService and standalone CLIAIService */
-export interface IAIService {
-    query (userQuery: string, terminalContext: string): Promise<string>
-    streamWithTools (messages: ChatMessage[], tools: ToolDefinition[], signal?: AbortSignal): AsyncGenerator<StreamEvent>
+export interface AIConfig {
+    provider: string
+    baseUrl: string
+    apiKey: string
+    model: string
+    deployment?: string
+    apiVersion?: string
 }
 
 interface ChatCompletionResponse {
@@ -40,41 +25,32 @@ interface ChatCompletionResponse {
     error?: { message: string }
 }
 
-@Injectable()
-export class AIService {
-    constructor (
-        private config: ConfigService,
-    ) {}
+export class CLIAIService implements IAIService {
+    constructor (private config: AIConfig) {}
 
-    /** Resolve API config from settings */
     private resolveConfig (): { url: string; headers: Record<string, string>; model: string; error?: string } {
-        const aiConfig = this.config.store.ai
-        const provider = aiConfig?.provider || 'gemini'
+        const provider = this.config.provider || 'gemini'
         const preset = PROVIDER_PRESETS[provider] || PROVIDER_PRESETS.custom
 
-        let baseUrl = (aiConfig?.baseUrl || preset.baseUrl || '').replace(/\/+$/, '')
+        let baseUrl = (this.config.baseUrl || preset.baseUrl || '').replace(/\/+$/, '')
         if (!baseUrl) {
-            return { url: '', headers: {}, model: '', error: `No API base URL configured for provider "${provider}". Go to Settings → AI.` }
+            return { url: '', headers: {}, model: '', error: `No API base URL configured for provider "${provider}".` }
         }
 
-        const apiKey = aiConfig?.apiKey || ''
-        const model = aiConfig?.model || preset.defaultModel
+        const apiKey = this.config.apiKey || ''
+        const model = this.config.model || preset.defaultModel
 
         if (!apiKey && provider !== 'ollama') {
-            return { url: '', headers: {}, model: '', error: 'No API key configured. Go to Settings → AI to set your API key.' }
+            return { url: '', headers: {}, model: '', error: 'No API key configured.' }
         }
 
         const headers: Record<string, string> = { 'Content-Type': 'application/json' }
 
         if (provider === 'azure') {
-            // Azure OpenAI: api-key header, api-version query param
-            // baseUrl = endpoint e.g. https://xxx.cognitiveservices.azure.com
-            // deployment = deployment name e.g. gpt-4.1
             headers['api-key'] = apiKey
-            const deployment = aiConfig?.deployment || model
-            const apiVersion = aiConfig?.apiVersion || '2024-12-01-preview'
+            const deployment = this.config.deployment || model
+            const apiVersion = this.config.apiVersion || '2024-12-01-preview'
             const url = `${baseUrl}/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`
-            // Azure uses deployment in URL, not model in body — omit model by returning empty string
             return { url, headers, model: '' }
         }
 
@@ -86,9 +62,6 @@ export class AIService {
         return { url: endpoint, headers, model }
     }
 
-    /**
-     * Send a simple query to the configured LLM (non-streaming).
-     */
     async query (userQuery: string, terminalContext: string): Promise<string> {
         const cfg = this.resolveConfig()
         if (cfg.error) {
@@ -128,19 +101,11 @@ export class AIService {
         }
     }
 
-    /**
-     * Retry configuration — maps to gemini-cli's INVALID_CONTENT_RETRY_OPTIONS
-     * (packages/core/src/core/geminiChat.ts:88-91)
-     */
     private static readonly RETRY_OPTIONS = {
-        maxAttempts: 3,       // gemini-cli uses 2 for content, 3 for network
-        initialDelayMs: 500,  // gemini-cli: 500ms
+        maxAttempts: 3,
+        initialDelayMs: 500,
     }
 
-    /**
-     * Network error codes that are safe to retry — maps to gemini-cli's
-     * RETRYABLE_NETWORK_CODES (packages/core/src/utils/retry.ts:50-63)
-     */
     private static readonly RETRYABLE_NETWORK_CODES = new Set([
         'ECONNRESET', 'ETIMEDOUT', 'EPIPE', 'ENOTFOUND',
         'EAI_AGAIN', 'ECONNREFUSED', 'EPROTO',
@@ -150,50 +115,25 @@ export class AIService {
         'ERR_SSL_BAD_RECORD_MAC',
     ])
 
-    /**
-     * Determine if an error is retryable — maps to gemini-cli's
-     * isRetryableError() (packages/core/src/utils/retry.ts:112-143)
-     *
-     * Retries on: network error codes, 429 (rate limit), 5xx (server errors).
-     * Does NOT retry: 400 (bad request), 401/403 (auth), 404 (not found).
-     */
     private isRetryableError (err: any): boolean {
-        // Check network error codes (traverse cause chain like gemini-cli)
         let current = err
         for (let depth = 0; depth < 5; depth++) {
-            if (current?.code && AIService.RETRYABLE_NETWORK_CODES.has(current.code)) {
+            if (current?.code && CLIAIService.RETRYABLE_NETWORK_CODES.has(current.code)) {
                 return true
             }
             if (!current?.cause) break
             current = current.cause
         }
-        // Check "fetch failed" message
         if (err?.message?.toLowerCase().includes('fetch failed')) {
             return true
         }
         return false
     }
 
-    /**
-     * Determine if an HTTP status is retryable — 429 or 5xx
-     */
     private isRetryableStatus (status: number): boolean {
         return status === 429 || (status >= 500 && status < 600)
     }
 
-    /**
-     * Streaming chat completion with tool calling and retry support.
-     * Returns an AsyncGenerator<StreamEvent>.
-     *
-     * Mirrors gemini-cli's GeminiChat.sendMessageStream() with
-     * streamWithRetries() (packages/core/src/core/geminiChat.ts:340-463)
-     *
-     * Retry logic:
-     * - Network errors: retry with linear backoff (delayMs * attempt)
-     * - HTTP 429/5xx: retry with linear backoff
-     * - HTTP 400/401/403/404: no retry (permanent errors)
-     * - AbortError: no retry
-     */
     async *streamWithTools (
         messages: ChatMessage[],
         tools: ToolDefinition[],
@@ -205,18 +145,16 @@ export class AIService {
             return
         }
 
-        const { maxAttempts, initialDelayMs } = AIService.RETRY_OPTIONS
+        const { maxAttempts, initialDelayMs } = CLIAIService.RETRY_OPTIONS
         let lastError: string | null = null
 
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
             if (signal?.aborted) break
 
-            // Yield retry event for UI feedback (maps to gemini-cli's StreamEventType.RETRY)
             if (attempt > 0) {
                 yield { type: EventType.Retry, value: { attempt, maxAttempts } }
             }
 
-            // === Connection phase (fetch) ===
             let response: Response
             const requestBody: Record<string, any> = {
                 messages,
@@ -227,7 +165,6 @@ export class AIService {
                 max_tokens: 16384,
                 temperature: 0.7,
             }
-            // Only include model for non-Azure providers (Azure uses deployment in URL)
             if (cfg.model) {
                 requestBody.model = cfg.model
             }
@@ -243,7 +180,6 @@ export class AIService {
                     yield { type: EventType.Error, value: 'Request aborted' }
                     return
                 }
-                // Network error — check if retryable
                 if (this.isRetryableError(err) && attempt < maxAttempts - 1) {
                     const delayMs = initialDelayMs * (attempt + 1)
                     await new Promise(res => setTimeout(res, delayMs))
@@ -254,7 +190,6 @@ export class AIService {
                 return
             }
 
-            // HTTP error — check if retryable status
             if (!response.ok) {
                 const text = await response.text()
                 if (this.isRetryableStatus(response.status) && attempt < maxAttempts - 1) {
@@ -267,19 +202,13 @@ export class AIService {
                 return
             }
 
-            // === Stream phase (SSE parsing) ===
             yield* this.parseSSEStream(response, signal)
             return
         }
 
-        // All retries exhausted
         yield { type: EventType.Error, value: lastError || 'Request failed after all retries' }
     }
 
-    /**
-     * Parse an SSE stream response into StreamEvents.
-     * Extracted from streamWithTools for retry clarity.
-     */
     private async *parseSSEStream (
         response: Response,
         signal?: AbortSignal,
@@ -362,7 +291,6 @@ export class AIService {
                         continue
                     }
 
-                    // Usage data (maps to gemini-cli's chunk.usageMetadata)
                     if (chunk.usage) {
                         const usage: TokensSummary = {
                             promptTokens: chunk.usage.prompt_tokens ?? 0,
@@ -373,7 +301,6 @@ export class AIService {
                         yield { type: EventType.Usage, value: usage }
                     }
 
-                    // API-level error in chunk (non-SSE error response)
                     if (chunk.error) {
                         yield { type: EventType.Error, value: `API error: ${chunk.error.message || JSON.stringify(chunk.error)}` }
                         return
@@ -386,7 +313,6 @@ export class AIService {
                         sawFinishReason = true
                     }
 
-                    // Some providers include finalized tool calls on choice.message/tool_calls.
                     if (Array.isArray(choice.message?.tool_calls)) {
                         appendToolCalls(choice.message.tool_calls)
                     }
@@ -407,13 +333,11 @@ export class AIService {
                     const delta = choice.delta
                     if (!delta) continue
 
-                    // Text content chunk
                     if (delta.content) {
                         sawContent = true
                         yield { type: EventType.Content, value: delta.content }
                     }
 
-                    // Tool call fragments — accumulate and splice
                     if (delta.tool_calls) {
                         appendToolCalls(delta.tool_calls)
                     }
@@ -430,7 +354,6 @@ export class AIService {
             yield { type: EventType.InvalidStream, value: null }
         }
 
-        // Stream ended without [DONE] — still yield accumulated tool calls
         for (const tc of pendingToolCalls.values()) {
             yield { type: EventType.ToolCall, value: tc }
         }

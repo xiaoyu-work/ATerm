@@ -33,6 +33,30 @@ trap '__aterm_preexec' DEBUG
 if [[ ! "$PS1" == *"133;B"* ]]; then
     PS1="\${PS1}\\[\\e]133;B\\a\\]"
 fi
+
+# Ensure commands with leading space are not saved to history (for AI command hiding)
+case "$HISTCONTROL" in
+    *ignorespace*|*ignoreboth*) ;;
+    *) HISTCONTROL="\${HISTCONTROL:+$HISTCONTROL:}ignorespace" ;;
+esac
+
+# AI assistant function — invoked as " __aterm_ai <queryId>" by middleware.
+# Query file is at $ATERM_AI_TMP/aq-<queryId>.txt
+__aterm_ai() {
+    if [ -n "$ATERM_AI_CLI_PATH" ] && [ -n "$ATERM_AI_TMP" ]; then
+        local qfile="$ATERM_AI_TMP/aq-$1.txt"
+        # Overwrite the echo line in ConPTY buffer with clean "@ <prompt>" display.
+        # Must happen before node starts to survive terminal resize.
+        local fl
+        if [ -f "$qfile" ] && read -r fl < "$qfile" && [ -n "$fl" ]; then
+            if [ \${#fl} -gt 80 ]; then fl="\${fl:0:80}..."; fi
+            printf '\\e[A\\r\\e[2K\\e[36m@ \\e[39m%s\\n' "$fl"
+        fi
+        node "$ATERM_AI_CLI_PATH" --file "$qfile"
+    else
+        echo "aterm-ai: CLI not configured"
+    fi
+}
 `
 
 const ZSH_INTEGRATION = `
@@ -56,6 +80,25 @@ add-zsh-hook preexec __aterm_preexec
 
 # Append 133;B marker to PS1
 PS1="\${PS1}%{$(printf '\\e]133;B\\a')%}"
+
+# Ensure commands with leading space are not saved to history (for AI command hiding)
+setopt HIST_IGNORE_SPACE
+
+# AI assistant function
+__aterm_ai() {
+    if [[ -n "$ATERM_AI_CLI_PATH" ]] && [[ -n "$ATERM_AI_TMP" ]]; then
+        local qfile="$ATERM_AI_TMP/aq-$1.txt"
+        # Overwrite echo line in ConPTY buffer with clean display
+        local fl
+        if [[ -f "$qfile" ]] && read -r fl < "$qfile" && [[ -n "$fl" ]]; then
+            if [[ \${#fl} -gt 80 ]]; then fl="\${fl:0:80}..."; fi
+            printf '\\e[A\\r\\e[2K\\e[36m@ \\e[39m%s\\n' "$fl"
+        fi
+        node "$ATERM_AI_CLI_PATH" --file "$qfile"
+    else
+        echo "aterm-ai: CLI not configured"
+    fi
+}
 `
 
 const FISH_INTEGRATION = `
@@ -76,12 +119,35 @@ end
 function __aterm_preexec --on-event fish_preexec
     printf '\\e]133;C\\a'
 end
+
+# AI assistant function
+function __aterm_ai
+    if set -q ATERM_AI_CLI_PATH; and set -q ATERM_AI_TMP
+        set -l qfile "$ATERM_AI_TMP/aq-$argv[1].txt"
+        # Overwrite echo line in ConPTY buffer with clean display
+        if test -f $qfile
+            set -l fl (head -1 $qfile)
+            if test (string length -- "$fl") -gt 80
+                set fl (string sub -l 80 -- $fl)"..."
+            end
+            if test -n "$fl"
+                printf '\\e[A\\r\\e[2K\\e[36m@ \\e[39m%s\\n' $fl
+            end
+        end
+        node $ATERM_AI_CLI_PATH --file $qfile
+    else
+        echo "aterm-ai: CLI not configured"
+    end
+end
 `
 
 const PWSH_INTEGRATION = `
 # Aterm shell integration — do not edit
 if ($env:__ATERM_SHELL_INTEGRATION_ACTIVE) { return }
 $env:__ATERM_SHELL_INTEGRATION_ACTIVE = "1"
+
+# Ensure UTF-8 output for ConPTY (xterm.js expects UTF-8)
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 $__atermOrigPrompt = $function:prompt
 function prompt {
@@ -91,6 +157,33 @@ function prompt {
     $result = & $__atermOrigPrompt
     [Console]::Write("$([char]0x1b)]133;B$([char]0x07)")
     return $result
+}
+
+# Filter __aterm_ai from PSReadLine history (prevents Up arrow from showing it)
+if (Get-Command Set-PSReadLineOption -ErrorAction SilentlyContinue) {
+    Set-PSReadLineOption -AddToHistoryHandler {
+        param([string]$line)
+        if ($line.Trim() -match '^__aterm_ai') { return $false }
+        return $true
+    }
+}
+
+# AI assistant function
+function __aterm_ai {
+    if ($env:ATERM_AI_CLI_PATH -and $env:ATERM_AI_TMP) {
+        $qfile = Join-Path $env:ATERM_AI_TMP "aq-$($args[0]).txt"
+        # Overwrite echo line in ConPTY buffer with clean display
+        try {
+            $fl = [System.IO.File]::ReadAllText($qfile, [System.Text.Encoding]::UTF8).Split([char]10)[0].TrimEnd([char]13)
+            if ($fl.Length -gt 80) { $fl = $fl.Substring(0, 80) + "..." }
+            if ($fl) {
+                [Console]::Write("$([char]0x1b)[A$([char]13)$([char]0x1b)[2K$([char]0x1b)[36m@ $([char]0x1b)[39m" + $fl + [char]10)
+            }
+        } catch {}
+        & node $env:ATERM_AI_CLI_PATH --file $qfile
+    } else {
+        Write-Host "aterm-ai: CLI not configured"
+    }
 }
 `
 

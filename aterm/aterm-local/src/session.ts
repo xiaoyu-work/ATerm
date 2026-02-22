@@ -1,5 +1,7 @@
 import * as fs from 'mz/fs'
 import * as fsSync from 'fs'
+import * as os from 'os'
+import * as path from 'path'
 import { Injector } from '@angular/core'
 import { HostAppService, ConfigService, WIN_BUILD_CONPTY_SUPPORTED, isWindowsBuild, Platform, BootstrapData, BOOTSTRAP_DATA, LogService } from 'aterm-core'
 import { BaseSession } from 'aterm-terminal'
@@ -110,6 +112,22 @@ export class Session extends BaseSession {
                 const integration = getShellIntegration(options.command, options.args ?? [], env)
                 Object.assign(env, integration.env)
                 options.args = integration.args
+            }
+
+            // Inject AI environment variables for aterm-ai-cli
+            const aiConfig = this.config.store.ai
+            if (aiConfig?.apiKey) {
+                Object.assign(env, {
+                    ATERM_AI_PROVIDER: aiConfig.provider || 'gemini',
+                    ATERM_AI_BASE_URL: aiConfig.baseUrl || '',
+                    ATERM_AI_API_KEY: aiConfig.apiKey,
+                    ATERM_AI_MODEL: aiConfig.model || '',
+                    ATERM_AI_DEPLOYMENT: aiConfig.deployment || '',
+                    ATERM_AI_API_VERSION: aiConfig.apiVersion || '',
+                    ATERM_AI_CLI_PATH: path.join(__dirname, '..', '..', 'aterm-ai', 'dist', 'cli.js'),
+                    ATERM_AI_SESSION_FILE: path.join(os.tmpdir(), `aterm-ai-session-${process.pid}-${Date.now()}.json`),
+                    ATERM_AI_TMP: os.tmpdir(),
+                })
             }
 
             pty = await this.ptyInterface.spawn(options.command, options.args, {

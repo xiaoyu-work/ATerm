@@ -749,8 +749,10 @@ export class BaseTerminalTabComponent<P extends BaseTerminalProfile> extends Bas
             this.size = { columns, rows }
             this.zone.run(() => {
                 if (this.session?.open) {
-                    this.session.middleware.notifyTerminalResize(columns, rows)
-                    this.session.resize(columns, rows)
+                    const shouldResize = this.session.middleware.notifyTerminalResize(columns, rows)
+                    if (shouldResize) {
+                        this.session.resize(columns, rows)
+                    }
                 }
             })
         })
@@ -821,6 +823,13 @@ export class BaseTerminalTabComponent<P extends BaseTerminalProfile> extends Bas
 
         this.attachSessionHandler(this.session.destroyed$, () => {
             this.onSessionDestroyed()
+        })
+
+        // Allow middleware to request deferred resizes
+        this.attachSessionHandler(this.session.middleware.resizeRequested$, ({ columns, rows }) => {
+            if (this.session?.open) {
+                this.session.resize(columns, rows)
+            }
         })
     }
 

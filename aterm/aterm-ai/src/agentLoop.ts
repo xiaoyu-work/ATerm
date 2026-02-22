@@ -11,7 +11,7 @@
  * are delegated to the ToolRegistry, Scheduler, and MessageBus.
  */
 
-import { AIService, ChatMessage } from './ai.service'
+import { IAIService, ChatMessage } from './ai.service'
 import { ContextCollector } from './contextCollector'
 import { EventType, ToolCallRequest, TokensSummary } from './streamEvents'
 import { ToolRegistry } from './tools/toolRegistry'
@@ -29,8 +29,8 @@ import {
 import { createDefaultRegistry } from './tools/definitions'
 import { ChatCompressionService, CompressionStatus } from './services/chatCompressionService'
 
-// Re-export for AIMiddleware compatibility
-export { AgentCallbacks } from './tools/types'
+// Re-export for external consumers
+export type { AgentCallbacks } from './tools/types'
 
 /** Result from AgentLoop.run() */
 export interface AgentResult {
@@ -92,35 +92,8 @@ export class AgentLoop {
     private subscriptions: { unsubscribe: () => void }[] = []
     /** Last prompt token count from API response — used for compression decisions */
     private lastPromptTokens = 0
-
-    private getLatestUserText (): string {
-        for (let i = this.messages.length - 1; i >= 0; i--) {
-            const message = this.messages[i]
-            if (message.role !== 'user') continue
-            if (typeof message.content === 'string') {
-                return message.content
-            }
-        }
-        return ''
-    }
-
-    private shouldNudgeToolUse (
-        turn: number,
-        assistantContent: string,
-    ): boolean {
-        if (turn > 0 || this.planMode) return false
-        if (!assistantContent || assistantContent.trim().length === 0) return false
-
-        const userText = this.getLatestUserText()
-        if (!userText) return false
-
-        const actionRegex = /(修|修复|改|排查|检查|看看|读取|查看|运行|执行|调用|fix|debug|inspect|check|read|run|execute|tool)/i
-        const localContextRegex = /([a-zA-Z]:\\|\/|\\|at line:\d+|cmdlet|powershell|terminal|shell|stack trace|error|报错|-nologo)/i
-        return actionRegex.test(userText) || localContextRegex.test(userText)
-    }
-
     constructor (
-        private ai: AIService,
+        private ai: IAIService,
         private collector: ContextCollector,
         private callbacks: AgentCallbacks,
         private signal: AbortSignal,
@@ -195,7 +168,6 @@ export class AgentLoop {
         this.messages = messages
         const startIndex = messages.length
         let invalidStreamRetries = 0
-        let toolUseNudged = false
 
         try {
             for (let turn = 0; turn < this.maxTurns; turn++) {
@@ -224,11 +196,6 @@ export class AgentLoop {
                 const availableTools = this.planMode
                     ? this.registry.getSchemasFiltered(PLAN_MODE_TOOL_NAMES)
                     : this.registry.getSchemas()
-
-                // DEBUG: log available tools on first turn
-                if (turn === 0) {
-                    console.log(`[aterm-ai] availableTools=${availableTools.length}: ${availableTools.map(t => t.function.name).join(', ')}`)
-                }
 
                 const stream = this.ai.streamWithTools(
                     this.messages, availableTools, this.signal,
@@ -296,21 +263,9 @@ export class AgentLoop {
                 }
                 invalidStreamRetries = 0
 
-                // DEBUG: log tool call count
-                console.log(`[aterm-ai] turn=${turn}, toolCallRequests=${toolCallRequests.length}, assistantContent=${assistantContent.length} chars`)
-
                 // Always save assistant response to message history for conversation continuity.
                 // Without this, subsequent turns lose context (consecutive user messages, no assistant replies).
                 if (toolCallRequests.length === 0) {
-                    if (!toolUseNudged && this.shouldNudgeToolUse(turn, assistantContent)) {
-                        toolUseNudged = true
-                        this.messages.push({
-                            role: 'user',
-                            content: 'Use the available tools to inspect the real workspace/terminal state before concluding. Prefer read/search/shell tools, then continue.',
-                        })
-                        this.callbacks.onContent('\r\n(Requesting tool-based inspection...)\r\n')
-                        continue
-                    }
 
                     if (assistantContent) {
                         this.messages.push({
