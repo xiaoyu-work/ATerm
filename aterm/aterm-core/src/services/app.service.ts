@@ -143,9 +143,12 @@ export class AppService {
         })
 
         tab.destroyed$.subscribe(() => {
-            this.removeTab(tab)
-            this.tabRemoved.next(tab)
-            this.tabClosed.next(tab)
+            // Defer to avoid modifying tabs array during Angular change detection (NG0100)
+            setTimeout(() => {
+                this.removeTab(tab)
+                this.tabRemoved.next(tab)
+                this.tabClosed.next(tab)
+            })
         })
 
         if (tab instanceof SplitTabComponent) {
