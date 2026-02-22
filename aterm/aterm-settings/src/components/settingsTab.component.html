@@ -8,7 +8,7 @@
             <div class="col-12 col-md-6">
               <div class="logo-area">
                 <div class="aterm-logo mt-3"></div>
-                <h1 class="aterm-title">ATerm<sup>α</sup></h1>
+                <h1 class="aterm-title">ATerm</h1>
                 <div class="text-muted">{{homeBase.appVersion}}</div>
                 <button class="btn btn-secondary mt-3 mb-2" *ngIf="!updateAvailable &amp;&amp; hostApp.platform !== Platform.Web" (click)="checkForUpdates()" [disabled]="checkingForUpdate"><i class="fas fa-sync" [class.fa-spin]="checkingForUpdate"></i><span translate>Check for updates</span></button>
                 <button class="btn btn-info mt-3 mb-2" *ngIf="updateAvailable" (click)="updater.update()"><i class="fas fa-sync"></i><span translate>Update</span></button>
@@ -29,11 +29,6 @@
                 <button class="list-group-item list-group-item-action link-card" (click)="homeBase.openGitHub()"><i class="fab fa-fw fa-github"></i>
                   <div>
                     <div>GitHub</div><small class="text-muted" translate>Source code</small>
-                  </div>
-                </button>
-                <button class="list-group-item list-group-item-action link-card" (click)="showReleaseNotes()"><i class="fas fa-fw fa-book"></i>
-                  <div>
-                    <div translate>What's new</div><small class="text-muted" translate>Show release notes</small>
                   </div>
                 </button>
               </div>

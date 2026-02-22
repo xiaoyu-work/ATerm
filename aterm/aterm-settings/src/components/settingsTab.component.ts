@@ -12,13 +12,11 @@ import {
     UpdaterService,
     PlatformService,
     HostWindowService,
-    AppService,
     LocaleService,
     TranslateService,
 } from 'aterm-core'
 
 import { SettingsTabProvider } from '../api'
-import { ReleaseNotesComponent } from './releaseNotesTab.component'
 
 /** @hidden */
 @Component({
@@ -49,7 +47,6 @@ export class SettingsTabComponent extends BaseTabComponent {
         public platform: PlatformService,
         public locale: LocaleService,
         public updater: UpdaterService,
-        private app: AppService,
         @Inject(SettingsTabProvider) public settingsProviders: SettingsTabProvider[],
         translate: TranslateService,
         injector: Injector,
@@ -126,9 +123,4 @@ export class SettingsTabComponent extends BaseTabComponent {
         this.checkingForUpdate = false
     }
 
-    showReleaseNotes () {
-        this.app.openNewTabRaw({
-            type: ReleaseNotesComponent,
-        })
-    }
 }

@@ -1,7 +1,7 @@
 
 <div class="mt-auto mb-auto">
   <div class="aterm-logo"></div>
-  <h1 class="aterm-title">ATerm<sup>α</sup></h1>
+  <h1 class="aterm-title">ATerm</h1>
   <div class="list-group mb-4"><a class="list-group-item list-group-item-action d-flex pt-3 pb-3" *ngFor="let command of commands; trackBy: buttonsTrackBy" (click)="command.run()">
       <div class="d-flex align-self-center" [innerHTML]="sanitizeIcon(command.icon)"></div><span>{{command.label}}</span></a></div>
 </div>

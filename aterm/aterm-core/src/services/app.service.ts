@@ -49,7 +49,7 @@ export class AppService {
 
     get activeTab (): BaseTabComponent|null { return this._activeTab ?? null }
 
-    private lastTabIndex = 0
+    private _lastActiveTab: BaseTabComponent | null = null
     private _activeTab: BaseTabComponent | null = null
     private closedTabsStack: RecoveryToken[] = []
 
@@ -159,10 +159,19 @@ export class AppService {
     }
 
     removeTab (tab: BaseTabComponent): void {
-        const newIndex = Math.min(this.tabs.length - 2, this.tabs.indexOf(tab))
+        const tabIndex = this.tabs.indexOf(tab)
         this.tabs = this.tabs.filter((x) => x !== tab)
         if (tab === this._activeTab) {
-            this.selectTab(this.tabs[newIndex])
+            if (this._lastActiveTab && this.tabs.includes(this._lastActiveTab)) {
+                this.selectTab(this._lastActiveTab)
+            } else if (this.tabs.length) {
+                this.selectTab(this.tabs[Math.min(tabIndex, this.tabs.length - 1)])
+            } else {
+                this.selectTab(null)
+            }
+        }
+        if (this._lastActiveTab === tab) {
+            this._lastActiveTab = null
         }
         this.tabsChanged.next()
     }
@@ -223,9 +232,7 @@ export class AppService {
             return
         }
         if (this._activeTab && this.tabs.includes(this._activeTab)) {
-            this.lastTabIndex = this.tabs.indexOf(this._activeTab)
-        } else {
-            this.lastTabIndex = 0
+            this._lastActiveTab = this._activeTab
         }
         if (this._activeTab) {
             this._activeTab.clearActivity()
@@ -254,10 +261,11 @@ export class AppService {
 
     /** Switches between the current tab and the previously active one */
     toggleLastTab (): void {
-        if (!this.lastTabIndex || this.lastTabIndex >= this.tabs.length) {
-            this.lastTabIndex = 0
+        if (this._lastActiveTab && this.tabs.includes(this._lastActiveTab)) {
+            this.selectTab(this._lastActiveTab)
+        } else if (this.tabs.length) {
+            this.selectTab(this.tabs[0])
         }
-        this.selectTab(this.tabs[this.lastTabIndex])
     }
 
     nextTab (): void {
