@@ -120,6 +120,13 @@ export class AIMiddleware extends SessionMiddleware {
                 if (this.promptBuffer.length > 0) {
                     this.promptBuffer = this.popLastInputChar(this.promptBuffer)
                     changed = true
+                } else {
+                    // Buffer empty — exit AI mode, re-draw shell prompt
+                    this.outputToTerminal.next(Buffer.from('\r\x1b[2K'))
+                    this.state = State.NORMAL
+                    this.inputLength = 0
+                    this.outputToSession.next(Buffer.from('\r'))
+                    return
                 }
                 continue
             }
