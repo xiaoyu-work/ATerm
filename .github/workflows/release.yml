@@ -36,7 +36,6 @@ jobs:
         env:
           ARCH: ${{ matrix.arch }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          KEYGEN_TOKEN: ${{ secrets.KEYGEN_TOKEN }}
           SM_KEYPAIR_ALIAS: ${{ secrets.SM_KEYPAIR_ALIAS }}
           SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
           SM_PUBLISHER_NAME: ${{ secrets.SM_PUBLISHER_NAME }}
@@ -78,7 +77,6 @@ jobs:
         env:
           ARCH: ${{ matrix.arch }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          KEYGEN_TOKEN: ${{ secrets.KEYGEN_TOKEN }}
           CSC_LINK: ${{ secrets.CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -122,7 +120,6 @@ jobs:
         env:
           ARCH: ${{ matrix.arch }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          KEYGEN_TOKEN: ${{ secrets.KEYGEN_TOKEN }}
         run: node scripts/build-linux.mjs
 
       - name: Upload artifacts
