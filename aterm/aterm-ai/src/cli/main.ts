@@ -8,7 +8,7 @@
  * Environment variables:
  *   ATERM_AI_PROVIDER, ATERM_AI_BASE_URL, ATERM_AI_API_KEY,
  *   ATERM_AI_MODEL, ATERM_AI_DEPLOYMENT, ATERM_AI_API_VERSION,
- *   ATERM_AI_SESSION_FILE, ATERM_AI_CONTEXT
+ *   ATERM_AI_SESSION_FILE, ATERM_AI_CONTEXT, ATERM_AI_COLORS
  */
 
 import * as fs from 'fs'
@@ -23,15 +23,37 @@ import { ShellResult } from '../shellExecutor'
 import { PromptProvider } from '../promptProvider'
 import { TokensSummary } from '../streamEvents'
 
-// ─── ANSI color helpers ──────────────────────────────────────────────
+// ─── 24-bit true-color helpers ───────────────────────────────────────
+// Uses \x1b[38;2;R;G;Bm for foreground and \x1b[39m to reset foreground only
+// (avoids \x1b[0m which resets background too, causing code block black bg)
+
+function hexToRgb (hex: string): [number, number, number] {
+    const h = hex.replace('#', '')
+    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]
+}
+
+function trueColor (hex: string): (s: string) => string {
+    const [r, g, b] = hexToRgb(hex)
+    return (s: string) => `\x1b[38;2;${r};${g};${b}m${s}\x1b[39m`
+}
+
+const aiColors: Record<string, string> = (() => {
+    try {
+        return JSON.parse(process.env.ATERM_AI_COLORS || '{}')
+    } catch {
+        return {}
+    }
+})()
+
 const c = {
-    green: (s: string) => `\x1b[32m${s}\x1b[0m`,
-    gray: (s: string) => `\x1b[90m${s}\x1b[0m`,
-    yellow: (s: string) => `\x1b[33m${s}\x1b[0m`,
-    cyan: (s: string) => `\x1b[36m${s}\x1b[0m`,
-    red: (s: string) => `\x1b[31m${s}\x1b[0m`,
-    dim: (s: string) => `\x1b[2m${s}\x1b[0m`,
-    bold: (s: string) => `\x1b[1m${s}\x1b[0m`,
+    green: trueColor(aiColors.content || '#4ade80'),
+    gray: trueColor(aiColors.thinking || '#9ca3af'),
+    yellow: trueColor(aiColors.confirmation || '#facc15'),
+    cyan: trueColor(aiColors.question || '#22d3ee'),
+    red: trueColor(aiColors.error || '#f87171'),
+    dim: trueColor(aiColors.command || '#6b7280'),
+    info: trueColor(aiColors.info || '#6b7280'),
+    bold: (s: string) => `\x1b[1m${s}\x1b[22m`,
 }
 
 // ─── Config from environment ─────────────────────────────────────────
@@ -247,7 +269,7 @@ async function main (): Promise<void> {
     saveSession(session)
 
     // Print usage summary
-    process.stderr.write(c.dim(
+    process.stderr.write(c.info(
         `[tokens: ${result.usage.promptTokens.toLocaleString()} in / ${result.usage.completionTokens.toLocaleString()} out]\n`,
     ))
 }

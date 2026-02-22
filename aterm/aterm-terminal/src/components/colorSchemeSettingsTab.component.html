@@ -26,3 +26,33 @@
   </li>
 </ul>
 <div [ngbNavOutlet]="nav"></div>
+
+<hr class="mt-4 mb-3">
+<h3 class="mb-3" translate>AI Colors</h3>
+<div class="form-line mb-3">
+  <div class="header">
+    <div class="title" translate>Preset</div>
+    <div class="description" translate>Choose a color theme for AI output</div>
+  </div>
+  <div class="btn-group" role="group">
+    <button *ngFor="let preset of aiPresets" class="btn btn-secondary" [class.active]="isActiveAIPreset(preset)" (click)="applyAIPreset(preset)">{{preset.name}}</button>
+  </div>
+</div>
+<div class="mb-3" *ngIf="config.store.ai?.colorTheme">
+  <color-picker [(model)]="config.store.ai.colorTheme.content" (modelChange)="config.save()" title="CT" hint="AI content"></color-picker>
+  <color-picker [(model)]="config.store.ai.colorTheme.thinking" (modelChange)="config.save()" title="TH" hint="Thinking"></color-picker>
+  <color-picker [(model)]="config.store.ai.colorTheme.command" (modelChange)="config.save()" title="CM" hint="Command output"></color-picker>
+  <color-picker [(model)]="config.store.ai.colorTheme.confirmation" (modelChange)="config.save()" title="CF" hint="Confirmation"></color-picker>
+  <color-picker [(model)]="config.store.ai.colorTheme.question" (modelChange)="config.save()" title="QU" hint="Question"></color-picker>
+  <color-picker [(model)]="config.store.ai.colorTheme.error" (modelChange)="config.save()" title="ER" hint="Error"></color-picker>
+  <color-picker [(model)]="config.store.ai.colorTheme.info" (modelChange)="config.save()" title="IN" hint="Info / status"></color-picker>
+</div>
+<div class="p-3 rounded mb-3" *ngIf="config.store.ai?.colorTheme" [style.background-color]="config.store.terminal?.colorScheme?.background || '#171717'" [style.font-family]="'monospace'" [style.font-size]="'12px'" [style.line-height]="'1.6'">
+  <div [style.color]="config.store.ai.colorTheme.content">Hello! I can help you with your code.</div>
+  <div [style.color]="config.store.ai.colorTheme.thinking">(Analyzing the project structure...)</div>
+  <div [style.color]="config.store.ai.colorTheme.command">$ git status</div>
+  <div [style.color]="config.store.ai.colorTheme.confirmation">[exec] npm install — Proceed?</div>
+  <div [style.color]="config.store.ai.colorTheme.question">Which approach do you prefer?</div>
+  <div [style.color]="config.store.ai.colorTheme.error">Error: File not found</div>
+  <div [style.color]="config.store.ai.colorTheme.info">[tokens: 1,234 in / 567 out]</div>
+</div>

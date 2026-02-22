@@ -124,6 +124,7 @@ export class Session extends BaseSession {
                     ATERM_AI_MODEL: aiConfig.model || '',
                     ATERM_AI_DEPLOYMENT: aiConfig.deployment || '',
                     ATERM_AI_API_VERSION: aiConfig.apiVersion || '',
+                    ATERM_AI_COLORS: JSON.stringify(aiConfig.colorTheme || {}),
                     ATERM_AI_CLI_PATH: path.join(__dirname, '..', '..', 'aterm-ai', 'dist', 'cli.js'),
                     ATERM_AI_SESSION_FILE: path.join(os.tmpdir(), `aterm-ai-session-${process.pid}-${Date.now()}.json`),
                     ATERM_AI_TMP: os.tmpdir(),
