@@ -28,6 +28,7 @@ import {
 } from './messageBus'
 import { createDefaultRegistry } from './tools/definitions'
 import { ChatCompressionService, CompressionStatus } from './services/chatCompressionService'
+import { checkNextSpeaker } from './nextSpeakerChecker'
 
 // Re-export for external consumers
 export type { AgentCallbacks } from './tools/types'
@@ -273,6 +274,18 @@ export class AgentLoop {
                             content: assistantContent,
                         })
                     }
+
+                    // === Next Speaker Check — ported from gemini-cli client.ts lines 751-783 ===
+                    // When the model returns text without tool calls, check if it should continue.
+                    if (!this.signal.aborted) {
+                        const nextSpeaker = await checkNextSpeaker(this.messages, this.ai, this.signal)
+                        if (nextSpeaker?.next_speaker === 'model') {
+                            this.messages.push({ role: 'user', content: 'Please continue.' })
+                            this.callbacks.onContent('\r\n')
+                            continue
+                        }
+                    }
+
                     break
                 }
 
@@ -303,6 +316,7 @@ export class AgentLoop {
                     callbacks: this.callbacks,
                     bus: this.bus,
                     pathApprovals: this.pathApprovals,
+                    ai: this.ai,
                 }
 
                 const completedCalls = await this.scheduler.schedule(

@@ -12,6 +12,7 @@ import { DeclarativeTool } from '../base/declarativeTool'
 import { BaseToolInvocation } from '../base/baseToolInvocation'
 import { ToolKind, ToolContext, ToolResult, ConfirmationDetails } from '../types'
 import { validatePath } from '../security'
+import { fixLLMEdit } from '../llmEditFixer'
 
 export interface EditToolParams {
     file_path: string
@@ -79,6 +80,36 @@ class EditToolInvocation extends BaseToolInvocation<EditToolParams> {
                 content = result.content
                 count = result.count
             } else {
+                // === Self-correction — ported from gemini-cli edit.ts attemptSelfCorrection ===
+                if (context.ai) {
+                    const fixResult = await fixLLMEdit(
+                        this.params.instruction || 'Apply the edit.',
+                        this.params.old_string,
+                        this.params.new_string,
+                        `old_string not found in ${this.params.file_path}`,
+                        content,
+                        context.ai,
+                        context.signal,
+                    )
+
+                    if (fixResult?.noChangesRequired) {
+                        return this.success(`No changes needed: ${fixResult.explanation}`)
+                    }
+
+                    if (fixResult && fixResult.search) {
+                        const idx = content.indexOf(fixResult.search)
+                        if (idx !== -1) {
+                            content = content.slice(0, idx) + fixResult.replace + content.slice(idx + fixResult.search.length)
+                            try {
+                                await fs.writeFile(validation.resolved, content, 'utf-8')
+                                return this.success(`Self-corrected and replaced in ${this.params.file_path} (${fixResult.explanation})`)
+                            } catch (err: any) {
+                                return this.error(`Writing file: ${err.message}`)
+                            }
+                        }
+                    }
+                }
+
                 return this.error(`old_string not found in ${this.params.file_path}. Use read_file to examine the current content first.`)
             }
         } else {

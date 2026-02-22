@@ -16,16 +16,28 @@
 import { marked } from 'marked'
 import { markedTerminal } from 'marked-terminal'
 
-// Configure marked with terminal renderer once
-marked.use(markedTerminal())
-
 export class StreamingMarkdownRenderer {
     private buffer = ''
     private fenceOpen = false
     private writer: (rendered: string) => void
 
-    constructor (writer: (rendered: string) => void) {
+    /**
+     * @param writer  callback that receives rendered ANSI text
+     * @param colorFn optional function that wraps text in the user's
+     *                configured AI content color (e.g. trueColor('#4ade80'))
+     */
+    constructor (writer: (rendered: string) => void, colorFn?: (s: string) => string) {
         this.writer = writer
+
+        // Configure marked-terminal with the user's content color so that
+        // paragraph text, list items, etc. use the configured AI color
+        // instead of chalk.reset (which strips all color).
+        const textStyle = colorFn || ((s: string) => s)
+        marked.use(markedTerminal({
+            paragraph: textStyle,
+            listitem: textStyle,
+            text: (s: string) => s, // text inside paragraphs — don't double-color
+        }))
     }
 
     /**

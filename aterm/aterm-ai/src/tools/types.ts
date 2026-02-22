@@ -6,7 +6,7 @@
  * - packages/core/src/scheduler/types.ts (ToolCallStatus, discriminated unions)
  */
 
-import { ToolDefinition } from '../ai.service'
+import { ToolDefinition, IAIService } from '../ai.service'
 import { ContextCollector } from '../contextCollector'
 import { ShellResult } from '../shellExecutor'
 import { MessageBus } from '../messageBus'
@@ -75,6 +75,8 @@ export interface ToolContext {
     bus: MessageBus
     /** Session-level path approval tracker for outside-CWD access */
     pathApprovals: PathApprovalTracker
+    /** AI service — used by edit tool self-correction */
+    ai: IAIService
 }
 
 // ─── Agent Callbacks ─────────────────────────────────────────────────

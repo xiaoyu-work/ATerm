@@ -24,6 +24,10 @@ export enum PolicyDecision {
     Auto = 'auto',
 }
 
+// Session-level auto-edit mode — set when user chooses "always allow" for edits.
+// Mirrors gemini-cli's ApprovalMode.AUTO_EDIT transition.
+let autoEditMode = false
+
 /**
  * Check the policy for a tool invocation.
  *
@@ -32,6 +36,7 @@ export enum PolicyDecision {
  *
  * Decision logic:
  * - No confirmation details → Auto (no user interaction needed)
+ * - edit with autoEditMode → Auto (user chose "always allow")
  * - path_access with session-approved → Auto (user already chose "always")
  * - Otherwise → AskUser
  */
@@ -41,6 +46,11 @@ export function checkPolicy (
     pathApprovals: PathApprovalTracker,
 ): PolicyDecision {
     if (!details) {
+        return PolicyDecision.Auto
+    }
+
+    // Auto-edit mode: user previously chose "always allow" for edits
+    if (autoEditMode && details.type === 'edit') {
         return PolicyDecision.Auto
     }
 
@@ -60,10 +70,7 @@ export function checkPolicy (
  *
  * Handles "always allow" transitions:
  * - path_access + ProceedAlways → pathApprovals.approveAll()
- *
- * Future extensions (matching gemini-cli patterns):
- * - edit + ProceedAlways → setApprovalMode(AUTO_EDIT)
- * - exec + ProceedAlways → addCommandPrefixRule(command)
+ * - edit + ProceedAlways → autoEditMode = true
  */
 export function updatePolicy (
     outcome: ConfirmationOutcome,
@@ -75,6 +82,9 @@ export function updatePolicy (
     switch (details.type) {
         case 'path_access':
             pathApprovals.approveAll()
+            break
+        case 'edit':
+            autoEditMode = true
             break
     }
 }

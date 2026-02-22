@@ -158,9 +158,10 @@ function readLine (): Promise<string> {
 }
 
 // ─── CLI Agent Callbacks ─────────────────────────────────────────────
-const mdRenderer = new StreamingMarkdownRenderer((rendered: string) => {
-    process.stdout.write(rendered)
-})
+const mdRenderer = new StreamingMarkdownRenderer(
+    (rendered: string) => { process.stdout.write(rendered) },
+    c.green, // content color — applied by marked-terminal to paragraphs/list items
+)
 
 function createCallbacks (abortController: AbortController): AgentCallbacks {
     return {
@@ -174,7 +175,7 @@ function createCallbacks (abortController: AbortController): AgentCallbacks {
 
         onConfirmCommand (description: string, type: string): void {
             process.stdout.write('\n' + c.yellow(`[${type}] ${description}`) + '\n')
-            process.stdout.write(c.yellow('Proceed? [Enter=yes / Ctrl+C=cancel] '))
+            process.stdout.write(c.yellow('Proceed? [Enter=yes / a=always / Ctrl+C=cancel] '))
         },
 
         async waitForApproval (): Promise<ConfirmationOutcome> {
@@ -184,6 +185,11 @@ function createCallbacks (abortController: AbortController): AgentCallbacks {
             if (code === 3 || code === 27) {
                 process.stdout.write(c.red('Cancelled\n'))
                 return ConfirmationOutcome.Cancel
+            }
+            const ch = key.toLowerCase()
+            if (ch === 'a') {
+                process.stdout.write(c.green('Always Allow\n'))
+                return ConfirmationOutcome.ProceedAlways
             }
             process.stdout.write(c.green('Approved\n'))
             return ConfirmationOutcome.ProceedOnce
@@ -227,7 +233,6 @@ function createCallbacks (abortController: AbortController): AgentCallbacks {
         onDone (): void {
             // Flush any remaining buffered markdown
             mdRenderer.flush()
-            process.stdout.write('\n')
         },
 
         onError (err: string): void {
