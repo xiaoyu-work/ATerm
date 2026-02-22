@@ -1,4 +1,4 @@
-import { Observable, Subject, take, auditTime, debounce, interval } from 'rxjs'
+import { Observable, Subject, take, auditTime } from 'rxjs'
 import { Spinner } from 'cli-spinner'
 import colors from 'ansi-colors'
 import { NgZone, OnInit, OnDestroy, Injector, ViewChild, HostBinding, Input, ElementRef, InjectFlags, Component } from '@angular/core'
@@ -16,7 +16,6 @@ import { MultifocusService } from '../services/multifocus.service'
 import { getTerminalBackgroundColor } from '../helpers'
 
 
-const INACTIVE_TAB_UNLOAD_DELAY = 1000 * 30
 const OSC_FOCUS_IN = Buffer.from('\x1b[I')
 const OSC_FOCUS_OUT = Buffer.from('\x1b[O')
 
@@ -442,20 +441,6 @@ export class BaseTerminalTabComponent<P extends BaseTerminalProfile> extends Bas
             this.multifocus.cancel()
         })
 
-        this.visibility$
-            .pipe(debounce(visibility => interval(visibility ? 0 : INACTIVE_TAB_UNLOAD_DELAY)))
-            .subscribe(visibility => {
-                if (this.frontend instanceof XTermFrontend) {
-                    if (visibility) {
-                        this.frontend.xterm.refresh(0, this.frontend.xterm.rows - 1)
-                    } else {
-                        this.frontend.xterm.element?.querySelectorAll('canvas').forEach(c => {
-                            c.height = c.width = 0
-                            c.style.height = c.style.width = '0px'
-                        })
-                    }
-                }
-            })
     }
 
     protected onFrontendReady (): void {
