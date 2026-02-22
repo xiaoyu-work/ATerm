@@ -152,10 +152,13 @@ export class Window {
 
         this.window.loadFile(path.join(app.getAppPath(), 'dist', 'index.html'))
 
-        // Prevent Ctrl+R / Ctrl+Shift+R from reloading the page —
+        // Prevent Ctrl+R / Ctrl+Shift+R / F5 from reloading the page —
         // these keys should pass through to the terminal (e.g. reverse-i-search in bash)
         this.window.webContents.on('before-input-event', (event, input) => {
-            if (input.key === 'r' && input.control && !input.alt && !input.meta) {
+            const isReload =
+                (input.key.toLowerCase() === 'r' && input.control && !input.alt && !input.meta) ||
+                (input.key === 'F5')
+            if (isReload) {
                 event.preventDefault()
             }
         })
