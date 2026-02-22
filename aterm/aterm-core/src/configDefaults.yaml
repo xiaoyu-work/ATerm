@@ -50,7 +50,6 @@ version: 1
 vault: null
 encrypted: false
 enableExperimentalFeatures: false
-pluginBlacklist: []
 commandBlacklist: []
 providerBlacklist: []
 profileBlacklist: []

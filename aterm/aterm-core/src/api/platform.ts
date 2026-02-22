@@ -220,14 +220,6 @@ export abstract class PlatformService {
         return false
     }
 
-    async installPlugin (name: string, version: string): Promise<void> {
-        throw new Error('Not implemented')
-    }
-
-    async uninstallPlugin (name: string): Promise<void> {
-        throw new Error('Not implemented')
-    }
-
     getWinSCPPath (): string|null {
         throw new Error('Not implemented')
     }

@@ -287,8 +287,7 @@ export class ConfigService {
             for (const pluginName in this.servicesCache) {
                 if (this.servicesCache[pluginName].includes(service.constructor)) {
                     const id = `${pluginName}:${service.constructor.name}`
-                    return !this.store?.pluginBlacklist?.includes(pluginName)
-                        && !this.store?.providerBlacklist?.includes(id)
+                    return !this.store?.providerBlacklist?.includes(id)
                 }
             }
             return true

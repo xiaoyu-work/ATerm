@@ -28,7 +28,6 @@ export class WelcomeTabComponent extends BaseTabComponent {
 
     async closeAndDisable () {
         this.config.store.enableWelcomeTab = false
-        this.config.store.pluginBlacklist = []
         if (!this.enableGlobalHotkey) {
             this.config.store.hotkeys['toggle-window'] = []
         }

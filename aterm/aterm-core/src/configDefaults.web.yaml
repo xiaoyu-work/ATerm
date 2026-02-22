@@ -1,4 +1,3 @@
-pluginBlacklist: ['local']
 terminal:
   recoverTabs: false
 enableAnalytics: false
