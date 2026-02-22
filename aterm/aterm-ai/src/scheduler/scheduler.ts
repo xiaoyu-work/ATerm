@@ -18,7 +18,6 @@ import {
     CompletedToolCall,
     ScheduledToolCall,
     ConfirmationOutcome,
-    MUTATOR_KINDS,
 } from '../tools/types'
 import { SchedulerStateManager } from './stateManager'
 import { ToolExecutor } from './toolExecutor'
@@ -144,7 +143,7 @@ export class Scheduler {
 
             for (const call of scheduled) {
                 const details = call.invocation.getConfirmationDetails(context)
-                if (!details && !MUTATOR_KINDS.includes(call.invocation.kind)) {
+                if (!details) {
                     autoGroup.push(call)
                 } else {
                     confirmGroup.push(call)

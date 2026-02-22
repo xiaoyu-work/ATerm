@@ -12,6 +12,7 @@ import { BaseToolInvocation } from '../base/baseToolInvocation'
 import { ToolKind, ToolContext, ToolResult, ConfirmationDetails } from '../types'
 import { executeCommand } from '../../shellExecutor'
 import { validatePath } from '../security'
+import { classifyCommand, CommandRisk } from '../commandClassifier'
 
 export interface ShellToolParams {
     command: string
@@ -57,6 +58,12 @@ class ShellToolInvocation extends BaseToolInvocation<ShellToolParams> {
                 }
             }
         }
+        // Safe commands (read-only) skip confirmation
+        const risk = classifyCommand(this.params.command)
+        if (risk === CommandRisk.Safe) {
+            return false
+        }
+
         return { type: 'exec', title: 'Confirm Shell Command', command: this.params.command }
     }
 

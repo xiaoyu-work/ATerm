@@ -2,9 +2,10 @@
  * Glob search tool.
  *
  * Mirrors gemini-cli's GlobTool
- * (packages/core/src/tools/definitions/glob.ts)
+ * (packages/core/src/tools/glob.ts)
  *
- * Logic extracted from AgentLoop.globSearch().
+ * Uses Node.js fs.readdir with recursive walk instead of shelling out,
+ * ensuring cross-platform reliability (no dependency on external commands).
  */
 
 import * as fs from 'fs/promises'
@@ -13,11 +14,83 @@ import { DeclarativeTool } from '../base/declarativeTool'
 import { BaseToolInvocation } from '../base/baseToolInvocation'
 import { ToolKind, ToolContext, ToolResult, ConfirmationDetails } from '../types'
 import { isPathOutsideCwd } from '../security'
-import { executeCommand } from '../../shellExecutor'
+
+const MAX_RESULTS = 200
+
+/** Directories to skip during recursive walk */
+const SKIP_DIRS = new Set([
+    'node_modules', '.git', 'dist', 'build', '.next',
+    '__pycache__', '.venv', 'venv', '.cache', 'coverage',
+    '.tox', '.mypy_cache', 'target', '.output', '.nuxt',
+])
 
 export interface GlobToolParams {
     pattern: string
     dir_path?: string
+}
+
+/**
+ * Converts a simple glob pattern to a RegExp.
+ * Supports: *, **, ?, {a,b} alternatives, and character classes [abc].
+ */
+function globToRegex (pattern: string): RegExp {
+    let regexStr = ''
+    let i = 0
+    while (i < pattern.length) {
+        const char = pattern[i]
+
+        if (char === '*') {
+            if (pattern[i + 1] === '*') {
+                // ** matches any path segment
+                if (pattern[i + 2] === '/' || pattern[i + 2] === '\\') {
+                    regexStr += '(?:.+[\\\\/])?'
+                    i += 3
+                } else {
+                    regexStr += '.*'
+                    i += 2
+                }
+            } else {
+                // * matches anything except path separator
+                regexStr += '[^\\\\/]*'
+                i++
+            }
+        } else if (char === '?') {
+            regexStr += '[^\\\\/]'
+            i++
+        } else if (char === '{') {
+            const closeBrace = pattern.indexOf('}', i)
+            if (closeBrace !== -1) {
+                const alternatives = pattern.slice(i + 1, closeBrace).split(',')
+                regexStr += '(?:' + alternatives.map(a => a.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')'
+                i = closeBrace + 1
+            } else {
+                regexStr += '\\{'
+                i++
+            }
+        } else if (char === '[') {
+            const closeBracket = pattern.indexOf(']', i)
+            if (closeBracket !== -1) {
+                regexStr += pattern.slice(i, closeBracket + 1)
+                i = closeBracket + 1
+            } else {
+                regexStr += '\\['
+                i++
+            }
+        } else if (char === '/' || char === '\\') {
+            regexStr += '[\\\\/]'
+            i++
+        } else {
+            // Escape regex special characters
+            regexStr += char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+            i++
+        }
+    }
+    return new RegExp('^' + regexStr + '$', 'i')
+}
+
+interface FileEntry {
+    relativePath: string
+    mtimeMs: number
 }
 
 class GlobToolInvocation extends BaseToolInvocation<GlobToolParams> {
@@ -39,45 +112,115 @@ class GlobToolInvocation extends BaseToolInvocation<GlobToolParams> {
         return false
     }
 
+    /**
+     * Recursively walk directory and collect files matching the pattern.
+     */
+    private async walkAndMatch (
+        baseDir: string,
+        regex: RegExp,
+        results: FileEntry[],
+        signal: AbortSignal,
+    ): Promise<void> {
+        const walk = async (dir: string): Promise<void> => {
+            if (results.length >= MAX_RESULTS) return
+            if (signal.aborted) return
+
+            let entries: any[]
+            try {
+                entries = await fs.readdir(dir, { withFileTypes: true })
+            } catch {
+                return
+            }
+
+            for (const entry of entries) {
+                if (results.length >= MAX_RESULTS) break
+                if (signal.aborted) break
+
+                const fullPath = path.join(dir, entry.name)
+
+                if (entry.isDirectory()) {
+                    if (SKIP_DIRS.has(entry.name)) continue
+                    await walk(fullPath)
+                } else if (entry.isFile()) {
+                    const relativePath = path.relative(baseDir, fullPath)
+                    // Normalize path separators for matching
+                    const normalizedPath = relativePath.replace(/\\/g, '/')
+
+                    if (regex.test(normalizedPath) || regex.test(entry.name)) {
+                        try {
+                            const stat = await fs.stat(fullPath)
+                            results.push({
+                                relativePath,
+                                mtimeMs: stat.mtimeMs,
+                            })
+                        } catch {
+                            // File may have been deleted between readdir and stat
+                            results.push({
+                                relativePath,
+                                mtimeMs: 0,
+                            })
+                        }
+                    }
+                }
+            }
+        }
+
+        await walk(baseDir)
+    }
+
     async execute (context: ToolContext): Promise<ToolResult> {
         const searchDir = this.params.dir_path
             ? path.resolve(context.cwd, this.params.dir_path)
             : context.cwd
-        // outsideCwd check removed — handled by scheduler before execute()
 
-        const MAX_RESULTS = 200
+        // Validate search directory exists
+        if (this.params.dir_path) {
+            try {
+                const stats = await fs.stat(searchDir)
+                if (!stats.isDirectory()) {
+                    return this.error(`Path is not a directory: ${searchDir}`)
+                }
+            } catch (err: any) {
+                if (err.code === 'ENOENT') {
+                    return this.error(`Path does not exist: ${searchDir}`)
+                }
+                return this.error(`Failed to access path: ${searchDir}: ${err.message}`)
+            }
+        }
 
         try {
-            // Use git ls-files for .gitignore respect, fall back to find/dir
-            const isGit = await fs.access(path.join(context.cwd, '.git')).then(() => true).catch(() => false)
+            const regex = globToRegex(this.params.pattern)
+            const results: FileEntry[] = []
 
-            let command: string
-            if (isGit) {
-                command = `git ls-files --cached --others --exclude-standard "${this.params.pattern}"`
-            } else if (process.platform === 'win32') {
-                // PowerShell-compatible: Get-ChildItem instead of dir/find
-                const escapedPattern = this.params.pattern.replace(/'/g, "''")
-                command = `Get-ChildItem -Recurse -Name -Filter '${escapedPattern}' -ErrorAction SilentlyContinue`
-            } else {
-                command = `find . -name "${this.params.pattern}" -not -path "./.git/*"`
-            }
+            await this.walkAndMatch(searchDir, regex, results, context.signal)
 
-            const result = await executeCommand(command, searchDir, context.signal)
-            let output = result.stdout.trim()
-
-            if (!output) {
+            if (results.length === 0) {
                 return this.success(`No files found matching pattern: ${this.params.pattern}`)
             }
 
-            // Truncate to MAX_RESULTS lines (cross-platform, replaces `| head`)
-            const lines = output.split('\n')
-            if (lines.length > MAX_RESULTS) {
-                output = lines.slice(0, MAX_RESULTS).join('\n')
-            }
+            // Sort: recent files first (within 24h), then alphabetically
+            const oneDayMs = 24 * 60 * 60 * 1000
+            const now = Date.now()
 
+            results.sort((a, b) => {
+                const aRecent = now - a.mtimeMs < oneDayMs
+                const bRecent = now - b.mtimeMs < oneDayMs
+
+                if (aRecent && bRecent) {
+                    return b.mtimeMs - a.mtimeMs
+                } else if (aRecent) {
+                    return -1
+                } else if (bRecent) {
+                    return 1
+                } else {
+                    return a.relativePath.localeCompare(b.relativePath)
+                }
+            })
+
+            const output = results.map(r => r.relativePath).join('\n')
             return this.success(output)
         } catch (err: any) {
-            return this.error(`Searching files: ${err.message}`)
+            return this.error(`Glob search error: ${err.message}`)
         }
     }
 }
@@ -85,7 +228,7 @@ class GlobToolInvocation extends BaseToolInvocation<GlobToolParams> {
 export class GlobTool extends DeclarativeTool<GlobToolParams> {
     readonly name = 'glob'
     readonly displayName = 'Glob'
-    readonly description = 'Efficiently finds files matching specific glob patterns (e.g., `src/**/*.ts`, `**/*.md`), returning absolute paths sorted by modification time (newest first). Ideal for quickly locating files based on their name or path structure, especially in large codebases.'
+    readonly description = 'Efficiently finds files matching specific glob patterns (e.g., `src/**/*.ts`, `**/*.md`), returning paths sorted by modification time (newest first). Ideal for quickly locating files based on their name or path structure, especially in large codebases.'
     readonly kind = ToolKind.Search
     readonly parameters = {
         pattern: {
@@ -98,6 +241,13 @@ export class GlobTool extends DeclarativeTool<GlobToolParams> {
         },
     }
     readonly required = ['pattern']
+
+    protected override validateToolParamValues (params: GlobToolParams): string | null {
+        if (!params.pattern || typeof params.pattern !== 'string' || params.pattern.trim() === '') {
+            return "The 'pattern' parameter cannot be empty."
+        }
+        return null
+    }
 
     protected createInvocation (params: GlobToolParams, _context: ToolContext): GlobToolInvocation {
         return new GlobToolInvocation(params)
