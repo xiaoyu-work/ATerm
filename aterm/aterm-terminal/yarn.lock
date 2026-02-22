@@ -112,6 +112,43 @@ __metadata:
   languageName: node
   linkType: hard
 
+"aterm-terminal@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "aterm-terminal@workspace:."
+  dependencies:
+    "@xterm/addon-canvas": "npm:^0.7.0"
+    "@xterm/addon-clipboard": "npm:^0.2.0"
+    "@xterm/addon-fit": "npm:^0.11.0"
+    "@xterm/addon-image": "npm:^0.9.0"
+    "@xterm/addon-ligatures": "npm:^0.10.0"
+    "@xterm/addon-search": "npm:^0.16.0"
+    "@xterm/addon-serialize": "npm:^0.14.0"
+    "@xterm/addon-unicode11": "npm:^0.9.0"
+    "@xterm/addon-webgl": "npm:^0.19.0"
+    "@xterm/xterm": "npm:^6.0.0"
+    ansi-colors: "npm:^4.1.1"
+    binstring: "npm:^0.2.1"
+    buffer-replace: "npm:^1.0.0"
+    cli-spinner: "npm:^0.2.10"
+    dataurl: "npm:0.1.0"
+    hexer: "npm:^1.5.0"
+    ngx-colors: "npm:^3.6.0"
+    patch-package: "npm:^6.5.0"
+    runes: "npm:^0.4.2"
+    zmodem.js: "npm:^0.1.9"
+  peerDependencies:
+    "@angular/animations": ^19
+    "@angular/common": ^19
+    "@angular/core": ^19
+    "@angular/forms": ^19
+    "@angular/platform-browser": ^19
+    "@ng-bootstrap/ng-bootstrap": ^18
+    aterm-core: "*"
+    aterm-settings: "*"
+    rxjs: ^7
+  languageName: unknown
+  linkType: soft
+
 "balanced-match@npm:^1.0.0":
   version: 1.0.2
   resolution: "balanced-match@npm:1.0.2"
@@ -658,43 +695,6 @@ __metadata:
   checksum: 10c0/afb4c88521b8b136b5f5f95160c98dee7243dc79d5432db7efc27efb219385bbc7d9427398e43dd6cc730a0f87d5085ce1652af7efbe391327bc0a7d0f7fc124
   languageName: node
   linkType: hard
-
-"tabby-terminal@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "tabby-terminal@workspace:."
-  dependencies:
-    "@xterm/addon-canvas": "npm:^0.7.0"
-    "@xterm/addon-clipboard": "npm:^0.2.0"
-    "@xterm/addon-fit": "npm:^0.11.0"
-    "@xterm/addon-image": "npm:^0.9.0"
-    "@xterm/addon-ligatures": "npm:^0.10.0"
-    "@xterm/addon-search": "npm:^0.16.0"
-    "@xterm/addon-serialize": "npm:^0.14.0"
-    "@xterm/addon-unicode11": "npm:^0.9.0"
-    "@xterm/addon-webgl": "npm:^0.19.0"
-    "@xterm/xterm": "npm:^6.0.0"
-    ansi-colors: "npm:^4.1.1"
-    binstring: "npm:^0.2.1"
-    buffer-replace: "npm:^1.0.0"
-    cli-spinner: "npm:^0.2.10"
-    dataurl: "npm:0.1.0"
-    hexer: "npm:^1.5.0"
-    ngx-colors: "npm:^3.6.0"
-    patch-package: "npm:^6.5.0"
-    runes: "npm:^0.4.2"
-    zmodem.js: "npm:^0.1.9"
-  peerDependencies:
-    "@angular/animations": ^19
-    "@angular/common": ^19
-    "@angular/core": ^19
-    "@angular/forms": ^19
-    "@angular/platform-browser": ^19
-    "@ng-bootstrap/ng-bootstrap": ^18
-    rxjs: ^7
-    tabby-core: "*"
-    tabby-settings: "*"
-  languageName: unknown
-  linkType: soft
 
 "tiny-inflate@npm:^1.0.2":
   version: 1.0.3

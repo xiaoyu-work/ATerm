@@ -34,7 +34,6 @@ export const builtinPlugins = [
     'aterm-telnet',
     'aterm-local',
     'aterm-electron',
-    'aterm-plugin-manager',
     'aterm-linkifier',
     'aterm-auto-sudo-password',
     'aterm-ai',

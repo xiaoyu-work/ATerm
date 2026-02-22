@@ -19,9 +19,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tabby-telnet@workspace:.":
+"aterm-telnet@workspace:.":
   version: 0.0.0-use.local
-  resolution: "tabby-telnet@workspace:."
+  resolution: "aterm-telnet@workspace:."
   dependencies:
     "@types/node": "npm:14.14.31"
     ansi-colors: "npm:^4.1.1"
@@ -32,9 +32,9 @@ __metadata:
     "@angular/forms": ^19
     "@angular/platform-browser": ^19
     "@ng-bootstrap/ng-bootstrap": ^18
+    aterm-core: "*"
+    aterm-settings: "*"
+    aterm-terminal: "*"
     rxjs: ^7
-    tabby-core: "*"
-    tabby-settings: "*"
-    tabby-terminal: "*"
   languageName: unknown
   linkType: soft

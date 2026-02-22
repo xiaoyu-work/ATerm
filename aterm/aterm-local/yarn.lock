@@ -12,6 +12,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"aterm-local@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "aterm-local@workspace:."
+  dependencies:
+    ansi-colors: "npm:^4.1.1"
+    dataurl: "npm:0.1.0"
+    runes: "npm:^0.4.2"
+  peerDependencies:
+    "@angular/animations": ^19
+    "@angular/common": ^19
+    "@angular/core": ^19
+    "@angular/forms": ^19
+    "@angular/platform-browser": ^19
+    "@ng-bootstrap/ng-bootstrap": ^18
+    aterm-core: "*"
+    aterm-settings: "*"
+    aterm-terminal: "*"
+    rxjs: ^7
+  languageName: unknown
+  linkType: soft
+
 "dataurl@npm:0.1.0":
   version: 0.1.0
   resolution: "dataurl@npm:0.1.0"
@@ -25,24 +46,3 @@ __metadata:
   checksum: 10c0/b7d1ff09ae15edeaa8c8d5c16547a9431bd55177b70adbad804099c239c0ac96bbcc83ae10e9d017dac364ac700aa5415ec3369492652a6989d66cc6bf1199ff
   languageName: node
   linkType: hard
-
-"tabby-local@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "tabby-local@workspace:."
-  dependencies:
-    ansi-colors: "npm:^4.1.1"
-    dataurl: "npm:0.1.0"
-    runes: "npm:^0.4.2"
-  peerDependencies:
-    "@angular/animations": ^19
-    "@angular/common": ^19
-    "@angular/core": ^19
-    "@angular/forms": ^19
-    "@angular/platform-browser": ^19
-    "@ng-bootstrap/ng-bootstrap": ^18
-    rxjs: ^7
-    tabby-core: "*"
-    tabby-settings: "*"
-    tabby-terminal: "*"
-  languageName: unknown
-  linkType: soft

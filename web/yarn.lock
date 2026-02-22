@@ -88,6 +88,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"aterm-web-container@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "aterm-web-container@workspace:."
+  dependencies:
+    assert: "npm:1.5.0"
+    browserify-zlib: "npm:^0.2.0"
+    buffer: "npm:^6.0.3"
+    constants-browserify: "npm:^1.0.0"
+    crypto-browserify: "npm:^3.12.0"
+    deepmerge: "npm:^4.2.2"
+    events: "npm:^3.3.0"
+    patch-package: "npm:^6.4.7"
+    path-browserify: "npm:^1.0.1"
+    readline-browserify: "npm:^0.0.4"
+    stream-browserify: "npm:^3.0.0"
+    url: "npm:^0.11.0"
+  languageName: unknown
+  linkType: soft
+
 "available-typed-arrays@npm:^1.0.2":
   version: 1.0.4
   resolution: "available-typed-arrays@npm:1.0.4"
@@ -1653,25 +1672,6 @@ __metadata:
   checksum: 10c0/6ae5ff319bfbb021f8a86da8ea1f8db52fac8bd4d499492e30ec17095b58af11f0c55f8577390a749b1c4dde691b6a0315dab78f5f54c9b3d83f8fb5905c1c05
   languageName: node
   linkType: hard
-
-"tabby-web-container@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "tabby-web-container@workspace:."
-  dependencies:
-    assert: "npm:1.5.0"
-    browserify-zlib: "npm:^0.2.0"
-    buffer: "npm:^6.0.3"
-    constants-browserify: "npm:^1.0.0"
-    crypto-browserify: "npm:^3.12.0"
-    deepmerge: "npm:^4.2.2"
-    events: "npm:^3.3.0"
-    patch-package: "npm:^6.4.7"
-    path-browserify: "npm:^1.0.1"
-    readline-browserify: "npm:^0.0.4"
-    stream-browserify: "npm:^3.0.0"
-    url: "npm:^0.11.0"
-  languageName: unknown
-  linkType: soft
 
 "tar@npm:^7.5.4":
   version: 7.5.9

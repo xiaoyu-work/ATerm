@@ -22,7 +22,7 @@ export default () => ({
     },
     resolve: {
         modules: ['.', 'src', 'node_modules', '../../app/node_modules', '../../node_modules'],
-        extensions: ['.ts', '.js'],
+        extensions: ['.ts', '.js', '.json'],
     },
     module: {
         rules: [

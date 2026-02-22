@@ -5,12 +5,12 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"tabby-community-color-schemes@workspace:.":
+"aterm-community-color-schemes@workspace:.":
   version: 0.0.0-use.local
-  resolution: "tabby-community-color-schemes@workspace:."
+  resolution: "aterm-community-color-schemes@workspace:."
   peerDependencies:
     "@angular/core": ^19
-    tabby-core: "*"
-    tabby-terminal: "*"
+    aterm-core: "*"
+    aterm-terminal: "*"
   languageName: unknown
   linkType: soft

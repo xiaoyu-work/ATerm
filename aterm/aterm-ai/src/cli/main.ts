@@ -22,6 +22,7 @@ import { AgentCallbacks, ConfirmationOutcome } from '../tools/types'
 import { ShellResult } from '../shellExecutor'
 import { PromptProvider } from '../promptProvider'
 import { TokensSummary } from '../streamEvents'
+import { StreamingMarkdownRenderer } from './streamingMarkdown'
 
 // ─── 24-bit true-color helpers ───────────────────────────────────────
 // Uses \x1b[38;2;R;G;Bm for foreground and \x1b[39m to reset foreground only
@@ -157,10 +158,14 @@ function readLine (): Promise<string> {
 }
 
 // ─── CLI Agent Callbacks ─────────────────────────────────────────────
+const mdRenderer = new StreamingMarkdownRenderer((rendered: string) => {
+    process.stdout.write(rendered)
+})
+
 function createCallbacks (abortController: AbortController): AgentCallbacks {
     return {
         onContent (text: string): void {
-            process.stdout.write(c.green(text))
+            mdRenderer.push(text)
         },
 
         onThinking (text: string): void {
@@ -193,6 +198,18 @@ function createCallbacks (abortController: AbortController): AgentCallbacks {
             return await readLine()
         },
 
+        onToolStart (toolName: string, description: string): void {
+            process.stdout.write(c.dim(`\n⊷ ${toolName}  ${description}\n`))
+        },
+
+        onToolDone (toolName: string, success: boolean, error?: string): void {
+            if (success) {
+                process.stdout.write(c.dim(`✓ ${toolName}\n`))
+            } else {
+                process.stdout.write(c.red(`✗ ${toolName}  ${error || 'failed'}\n`))
+            }
+        },
+
         onCommandStart (cmd: string): void {
             process.stdout.write(c.dim(`\n$ ${cmd}\n`))
         },
@@ -208,7 +225,8 @@ function createCallbacks (abortController: AbortController): AgentCallbacks {
         },
 
         onDone (): void {
-            // Print newline after AI output
+            // Flush any remaining buffered markdown
+            mdRenderer.flush()
             process.stdout.write('\n')
         },
 

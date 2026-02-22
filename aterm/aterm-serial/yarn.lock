@@ -19,9 +19,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tabby-serial@workspace:.":
+"aterm-serial@workspace:.":
   version: 0.0.0-use.local
-  resolution: "tabby-serial@workspace:."
+  resolution: "aterm-serial@workspace:."
   dependencies:
     "@types/node": "npm:14.14.14"
     ansi-colors: "npm:^4.1.1"
@@ -33,9 +33,9 @@ __metadata:
     "@angular/platform-browser": ^19
     "@angular/platform-browser-dynamic": ^19
     "@ng-bootstrap/ng-bootstrap": ^18
+    aterm-core: "*"
+    aterm-settings: "*"
+    aterm-terminal: "*"
     rxjs: ^7
-    tabby-core: "*"
-    tabby-settings: "*"
-    tabby-terminal: "*"
   languageName: unknown
   linkType: soft

@@ -47,8 +47,8 @@
     "@angular/forms": "^19",
     "@angular/platform-browser": "^19",
     "@ng-bootstrap/ng-bootstrap": "^18",
-    "rxjs": "^7",
     "aterm-core": "*",
-    "aterm-settings": "*"
+    "aterm-settings": "*",
+    "rxjs": "^7"
   }
 }

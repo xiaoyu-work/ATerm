@@ -161,6 +161,7 @@ export class Scheduler {
             for (const call of confirmGroup) {
                 if (context.signal.aborted) {
                     this.stateManager.finalizeCancelled(call.callId, 'Aborted')
+                    context.callbacks.onToolDone(call.toolName, false, 'Aborted')
                     continue
                 }
                 await this.processToolCall(call, context)
@@ -236,6 +237,7 @@ export class Scheduler {
 
             if (outcome === ConfirmationOutcome.Cancel) {
                 this.stateManager.finalizeCancelled(callId, 'User declined')
+                context.callbacks.onToolDone(call.toolName, false, 'User declined')
                 return
             }
 
@@ -272,13 +274,16 @@ export class Scheduler {
         call: ScheduledToolCall,
         context: ToolContext,
     ): Promise<void> {
+        context.callbacks.onToolStart(call.toolName, call.description)
         this.stateManager.updateToExecuting(call.callId)
         const result = await this.executor.execute(call.invocation, context)
 
         if (result.error) {
             this.stateManager.finalizeError(call.callId, result.error)
+            context.callbacks.onToolDone(call.toolName, false, result.error)
         } else {
             this.stateManager.finalizeSuccess(call.callId, result)
+            context.callbacks.onToolDone(call.toolName, true)
         }
     }
 }

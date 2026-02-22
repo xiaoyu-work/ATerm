@@ -87,6 +87,8 @@ export interface AgentCallbacks {
     waitForApproval: () => Promise<ConfirmationOutcome>
     onAskUser: (question: string) => void
     waitForUserResponse: () => Promise<string>
+    onToolStart: (toolName: string, description: string) => void
+    onToolDone: (toolName: string, success: boolean, error?: string) => void
     onCommandStart: (cmd: string) => void
     onCommandOutput: (chunk: string) => void
     onCommandDone: (result: ShellResult) => void
