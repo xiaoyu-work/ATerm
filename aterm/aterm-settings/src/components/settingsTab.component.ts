@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { marker as _ } from '@biesbjerg/ngx-translate-extract-marker'
-import * as yaml from 'js-yaml'
 import { debounce } from 'utils-decorators/dist/esm/debounce/debounce'
 import { Component, Inject, Input, HostBinding, Injector } from '@angular/core'
 import {
@@ -30,12 +29,9 @@ import { SettingsTabProvider } from '../api'
 export class SettingsTabComponent extends BaseTabComponent {
     @Input() activeTab: string
     Platform = Platform
-    configDefaults: any
-    configFile: string
     isShellIntegrationInstalled = false
     checkingForUpdate = false
     updateAvailable = false
-    showConfigDefaults = false
     allLanguages = LocaleService.allLanguages
     @HostBinding('class.pad-window-controls') padWindowControls = false
 
@@ -57,10 +53,7 @@ export class SettingsTabComponent extends BaseTabComponent {
         this.settingsProviders = this.settingsProviders.filter(x => !!x.getComponentType())
         this.settingsProviders.sort((a, b) => a.weight - b.weight + a.title.localeCompare(b.title))
 
-        this.configDefaults = yaml.dump(config.getDefaults())
-
         const onConfigChange = () => {
-            this.configFile = config.readRaw()
             this.padWindowControls = hostApp.platform === Platform.macOS
                 && config.store.appearance.tabsLocation !== 'top'
         }
@@ -95,25 +88,6 @@ export class SettingsTabComponent extends BaseTabComponent {
         this.config.save()
         if (requireRestart) {
             this.config.requestRestart()
-        }
-    }
-
-    saveConfigFile () {
-        if (this.isConfigFileValid()) {
-            this.config.writeRaw(this.configFile)
-        }
-    }
-
-    showConfigFile () {
-        this.platform.showItemInFolder(this.platform.getConfigPath()!)
-    }
-
-    isConfigFileValid () {
-        try {
-            yaml.load(this.configFile)
-            return true
-        } catch {
-            return false
         }
     }
 

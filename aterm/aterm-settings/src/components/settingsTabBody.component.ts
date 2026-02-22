@@ -10,7 +10,7 @@ import { SettingsTabProvider } from '../api'
         :host {
             display: block;
             padding-bottom: 20px;
-            max-width: 600px;
+            max-width: 720px;
         }
     `],
 })

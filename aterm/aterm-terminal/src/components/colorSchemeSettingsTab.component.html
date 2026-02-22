@@ -13,21 +13,6 @@
     <label class="btn btn-secondary" for="colorSchemeModeLight"><span translate>Always light</span></label>
   </div>
 </div>
-<ul class="nav-tabs" ngbNav #nav="ngbNav" [activeId]="defaultTab">
-  <li ngbNavItem="dark"><a ngbNavLink translate>Dark mode</a>
-    <ng-template ngbNavContent>
-      <color-scheme-settings-for-mode configKey="colorScheme"></color-scheme-settings-for-mode>
-    </ng-template>
-  </li>
-  <li ngbNavItem="light"><a ngbNavLink translate>Light mode</a>
-    <ng-template ngbNavContent>
-      <color-scheme-settings-for-mode configKey="lightColorScheme"></color-scheme-settings-for-mode>
-    </ng-template>
-  </li>
-</ul>
-<div [ngbNavOutlet]="nav"></div>
-
-<hr class="mt-4 mb-3">
 <h3 class="mb-3" translate>AI Colors</h3>
 <div class="form-line mb-3">
   <div class="header">

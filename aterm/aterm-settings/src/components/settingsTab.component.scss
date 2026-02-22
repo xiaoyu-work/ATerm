@@ -34,22 +34,36 @@
         flex: 1 0 0;
 
         > .nav {
-            padding: 20px 10px;
-            width: 222px;
+            padding: 24px 0;
+            width: 200px;
             flex: none;
             overflow-y: auto;
             flex-wrap: nowrap;
+            gap: 1px;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+
+            ::ng-deep .nav-link {
+                padding: 8px 24px;
+                font-size: 15px;
+                font-weight: 300;
+                border-radius: 0;
+                transition: color 0.15s;
+
+                &.active {
+                    font-weight: 400;
+                }
+            }
         }
 
         > .tab-content {
             flex: auto;
-            padding: 20px 0;
+            padding: 0;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
 
             > ::ng-deep .tab-pane {
-                padding: 0 30px;
+                padding: 40px;
                 min-height: 100%;
 
                 > settings-tab-body > * {

@@ -10,6 +10,7 @@ export class ShellSettingsTabProvider extends SettingsTabProvider {
     id = 'terminal-shell'
     icon = 'list-ul'
     title = 'Shell'
+    weight = 8
 
     constructor (private hostApp: HostAppService) {
         super()

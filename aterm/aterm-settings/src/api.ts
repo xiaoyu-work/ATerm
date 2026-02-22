@@ -6,7 +6,6 @@ export abstract class SettingsTabProvider {
     icon: string
     title: string
     weight = 0
-    prioritized = false
 
     getComponentType (): any {
         return null

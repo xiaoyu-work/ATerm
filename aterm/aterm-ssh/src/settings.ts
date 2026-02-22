@@ -9,6 +9,7 @@ export class SSHSettingsTabProvider extends SettingsTabProvider {
     id = 'ssh'
     icon = 'globe'
     title = 'SSH'
+    weight = 9
 
     getComponentType (): any {
         return SSHSettingsTabComponent

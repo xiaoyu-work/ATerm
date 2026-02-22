@@ -1,5 +1,5 @@
 import { Component } from '@angular/core'
-import { ConfigService, PlatformService } from 'aterm-core'
+import { ConfigService } from 'aterm-core'
 
 interface AIColorPreset {
     name: string
@@ -25,15 +25,11 @@ const AI_COLOR_PRESETS: AIColorPreset[] = [
     templateUrl: './colorSchemeSettingsTab.component.html',
 })
 export class ColorSchemeSettingsTabComponent {
-    defaultTab = 'dark'
     aiPresets = AI_COLOR_PRESETS
 
     constructor (
-        platform: PlatformService,
         public config: ConfigService,
-    ) {
-        this.defaultTab = platform.getTheme()
-    }
+    ) { }
 
     applyAIPreset (preset: AIColorPreset): void {
         const theme = this.config.store.ai.colorTheme

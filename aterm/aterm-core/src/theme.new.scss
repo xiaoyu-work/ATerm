@@ -127,9 +127,13 @@ body {
 }
 
 .nav-pills {
-    --bs-nav-pills-border-radius: #{$nav-pills-border-radius};
-    --bs-nav-pills-link-active-color: var(--theme-primary-fg);
-    --bs-nav-pills-link-active-bg: var(--theme-primary);
+    --bs-nav-pills-border-radius: 0;
+    --bs-nav-pills-link-active-color: #fff;
+    --bs-nav-pills-link-active-bg: rgba(255, 255, 255, 0.03);
+
+    .nav-link.active {
+        border-right: 2px solid var(--bs-primary, #3B82F6);
+    }
 }
 
 .nav-tabs {

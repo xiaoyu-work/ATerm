@@ -8,6 +8,7 @@ export class AISettingsTabProvider extends SettingsTabProvider {
     id = 'ai'
     icon = 'magic'
     title = 'AI'
+    weight = 5
 
     getComponentType (): any {
         return AISettingsTabComponent

@@ -34,19 +34,29 @@ a, button {
 .form-line {
     display: flex;
     align-items: center;
-    padding: 10px 0;
+    padding: 16px 0;
     margin: 0;
-    min-height: 64px;
+    min-height: auto;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+
+    &:last-child {
+        border-bottom: none;
+    }
 
     .header {
         margin-right: auto;
 
         .title {
+            font-weight: 500;
+            color: var(--theme-fg, #fff);
+            font-size: 14px;
         }
 
         .description {
             font-size: 13px;
-            opacity: .5;
+            color: rgba(255, 255, 255, 0.35);
+            margin-top: 4px;
+            font-weight: 300;
         }
     }
 
@@ -74,19 +84,20 @@ input[type=range] {
         display: block;
         height: 12px;
         width: 12px;
-        background: #aaa;
-        border-radius: 6px;
+        background: var(--bs-primary, #3B82F6);
+        border-radius: 50%;
         cursor: pointer;
-        margin-top: -4px;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
+        margin-top: -5px;
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
         transition: 0.25s background;
 
         &:hover {
-            background: #777;
+            background: var(--bs-primary, #0b5ed7);
+            filter: brightness(1.15);
         }
 
         &:active {
-            background: #666;
+            filter: brightness(0.9);
         }
     }
 
@@ -96,8 +107,9 @@ input[type=range] {
     &::thumb { @include thumb(); }
 
     @mixin track() {
-        height: 4px;
-        background: #111;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 1px;
         margin: 3px 0 0;
         box-sizing: border-box;
     }
@@ -173,7 +185,19 @@ ngb-typeahead-window {
 }
 
 .content-box {
-    max-width: 600px;
+    max-width: 720px;
+
+    h3 {
+        font-size: 14px;
+        font-weight: 500;
+        color: #fff;
+        margin-top: 32px;
+        margin-bottom: 8px;
+
+        &:first-child {
+            margin-top: 0;
+        }
+    }
 }
 
 

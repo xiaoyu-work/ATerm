@@ -58,15 +58,7 @@
       </ng-template>
     </li>
     <ng-container *ngFor="let provider of settingsProviders">
-      <li *ngIf="provider.prioritized" [ngbNavItem]="provider.id"><a class="d-flex align-items-center" ngbNavLink><i class="fas fa-fw me-2 fa-{{provider.icon}}"></i><span>{{provider.title|translate}}</span></a>
-        <ng-template ngbNavContent>
-          <settings-tab-body [provider]="provider"></settings-tab-body>
-        </ng-template>
-      </li>
-    </ng-container>
-    <div class="mb-3"></div>
-    <ng-container *ngFor="let provider of settingsProviders">
-      <li *ngIf="!provider.prioritized" [ngbNavItem]="provider.id"><a class="d-flex align-items-center" ngbNavLink><i class="fas fa-fw me-2 fa-{{provider.icon || &quot;puzzle-piece&quot;}}"></i><span>{{provider.title|translate}}</span></a>
+      <li [ngbNavItem]="provider.id"><a class="d-flex align-items-center" ngbNavLink><i class="fas fa-fw me-2 fa-{{provider.icon || &quot;puzzle-piece&quot;}}"></i><span>{{provider.title|translate}}</span></a>
         <ng-template ngbNavContent>
           <settings-tab-body [provider]="provider"></settings-tab-body>
         </ng-template>
@@ -93,28 +85,6 @@
                 <div>GitHub</div><small class="text-muted" translate>Source code</small>
               </div>
             </button>
-          </div>
-        </div>
-      </ng-template>
-    </li>
-    <li ngbNavItem="config-file"><a class="d-flex align-items-center" ngbNavLink><i class="fas fa-fw fa-code me-2"></i><span translate>Config file</span></a>
-      <ng-template class="test" ngbNavContent>
-        <div class="d-flex flex-column w-100 h-100">
-          <div class="h-100 d-flex">
-            <div class="w-100 d-flex flex-column">
-              <h3 translate>Config file</h3>
-              <textarea class="form-control h-100" [(ngModel)]="configFile"></textarea>
-            </div>
-            <div class="w-100 d-flex flex-column" *ngIf="showConfigDefaults">
-              <h3 translate>Defaults</h3>
-              <textarea class="form-control h-100" [(ngModel)]="configDefaults" readonly></textarea>
-            </div>
-          </div>
-          <div class="mt-3 d-flex">
-            <button class="btn btn-primary" (click)="saveConfigFile()" *ngIf="isConfigFileValid()"><i class="fas fa-check me-2"></i><span translate>Save and apply</span></button>
-            <button class="btn btn-primary" disabled *ngIf="!isConfigFileValid()"><i class="fas fa-exclamation-triangle me-2"></i><span translate>Invalid syntax</span></button>
-            <button class="btn btn-secondary ms-auto" (click)="showConfigDefaults = !showConfigDefaults" translate>Show defaults</button>
-            <button class="btn btn-secondary ms-3" *ngIf="platform.getConfigPath()" (click)="showConfigFile()"><i class="fas fa-external-link-square-alt me-2"></i><span translate>Show config file</span></button>
           </div>
         </div>
       </ng-template>

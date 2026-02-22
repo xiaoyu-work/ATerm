@@ -12,6 +12,7 @@ export class HotkeySettingsTabProvider extends SettingsTabProvider {
     id = 'hotkeys'
     icon = 'keyboard'
     title = this.translate.instant('Hotkeys')
+    weight = 6
 
     constructor (private translate: TranslateService) { super() }
 
@@ -27,6 +28,7 @@ export class WindowSettingsTabProvider extends SettingsTabProvider {
     id = 'window'
     icon = 'window-maximize'
     title = this.translate.instant('Window')
+    weight = 7
 
     constructor (private translate: TranslateService) { super() }
 
@@ -42,6 +44,7 @@ export class VaultSettingsTabProvider extends SettingsTabProvider {
     id = 'vault'
     icon = 'key'
     title = 'Vault'
+    weight = 10
 
     getComponentType (): any {
         return VaultSettingsTabComponent
@@ -55,7 +58,7 @@ export class ProfilesSettingsTabProvider extends SettingsTabProvider {
     id = 'profiles'
     icon = 'window-restore'
     title = this.translate.instant('Profiles & connections')
-    prioritized = true
+    weight = 4
 
     constructor (private translate: TranslateService) { super() }
 
