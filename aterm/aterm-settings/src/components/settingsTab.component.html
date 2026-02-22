@@ -4,36 +4,6 @@
     <li ngbNavItem="application"><a ngbNavLink><i class="fas fa-fw fa-window-maximize me-2"></i><span translate>Application</span></a>
       <ng-template ngbNavContent>
         <div class="content-box">
-          <div class="row">
-            <div class="col-12 col-md-6">
-              <div class="logo-area">
-                <div class="aterm-logo mt-3"></div>
-                <h1 class="aterm-title">ATerm</h1>
-                <div class="text-muted">{{homeBase.appVersion}}</div>
-                <button class="btn btn-secondary mt-3 mb-2" *ngIf="!updateAvailable &amp;&amp; hostApp.platform !== Platform.Web" (click)="checkForUpdates()" [disabled]="checkingForUpdate"><i class="fas fa-sync" [class.fa-spin]="checkingForUpdate"></i><span translate>Check for updates</span></button>
-                <button class="btn btn-info mt-3 mb-2" *ngIf="updateAvailable" (click)="updater.update()"><i class="fas fa-sync"></i><span translate>Update</span></button>
-              </div>
-            </div>
-            <div class="col-12 col-md-6">
-              <div class="list-group list-group-light mb-5">
-                <button class="list-group-item list-group-item-action link-card" (click)="homeBase.reportBug()"><i class="fas fa-fw fa-bug"></i>
-                  <div>
-                    <div translate>Report a problem</div><small class="text-muted" translate>Generate a pre-filled GitHub issue</small>
-                  </div>
-                </button>
-                <button class="list-group-item list-group-item-action link-card" (click)="homeBase.openDiscord()"><i class="fab fa-fw fa-discord"></i>
-                  <div>
-                    <div translate>Community</div><small class="text-muted" translate>On Discord</small>
-                  </div>
-                </button>
-                <button class="list-group-item list-group-item-action link-card" (click)="homeBase.openGitHub()"><i class="fab fa-fw fa-github"></i>
-                  <div>
-                    <div>GitHub</div><small class="text-muted" translate>Source code</small>
-                  </div>
-                </button>
-              </div>
-            </div>
-          </div>
           <h3 translate>Application settings</h3>
           <div class="form-line">
             <div class="header">
@@ -102,6 +72,31 @@
         </ng-template>
       </li>
     </ng-container>
+    <li ngbNavItem="about"><a class="d-flex align-items-center" ngbNavLink><i class="fas fa-fw fa-info-circle me-2"></i><span translate>About</span></a>
+      <ng-template ngbNavContent>
+        <div class="content-box">
+          <div class="logo-area mb-4">
+            <div class="aterm-logo mt-3"></div>
+            <h1 class="aterm-title">ATerm</h1>
+            <div class="text-muted">{{homeBase.appVersion}}</div>
+            <button class="btn btn-secondary mt-3 mb-2" *ngIf="!updateAvailable &amp;&amp; hostApp.platform !== Platform.Web" (click)="checkForUpdates()" [disabled]="checkingForUpdate"><i class="fas fa-sync" [class.fa-spin]="checkingForUpdate"></i><span translate>Check for updates</span></button>
+            <button class="btn btn-info mt-3 mb-2" *ngIf="updateAvailable" (click)="updater.update()"><i class="fas fa-sync"></i><span translate>Update</span></button>
+          </div>
+          <div class="list-group list-group-light">
+            <button class="list-group-item list-group-item-action link-card" (click)="homeBase.reportBug()"><i class="fas fa-fw fa-bug"></i>
+              <div>
+                <div translate>Report a problem</div><small class="text-muted" translate>Generate a pre-filled GitHub issue</small>
+              </div>
+            </button>
+            <button class="list-group-item list-group-item-action link-card" (click)="homeBase.openGitHub()"><i class="fab fa-fw fa-github"></i>
+              <div>
+                <div>GitHub</div><small class="text-muted" translate>Source code</small>
+              </div>
+            </button>
+          </div>
+        </div>
+      </ng-template>
+    </li>
     <li ngbNavItem="config-file"><a class="d-flex align-items-center" ngbNavLink><i class="fas fa-fw fa-code me-2"></i><span translate>Config file</span></a>
       <ng-template class="test" ngbNavContent>
         <div class="d-flex flex-column w-100 h-100">
