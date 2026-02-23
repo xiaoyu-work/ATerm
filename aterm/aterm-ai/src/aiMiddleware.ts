@@ -11,7 +11,7 @@ import * as os from 'os'
 import * as path from 'path'
 import colors from 'ansi-colors'
 import { PlatformService } from 'aterm-core'
-import { SessionMiddleware } from 'aterm-terminal'
+import { BlockTracker, SessionMiddleware } from 'aterm-terminal'
 
 const enum State {
     /** Normal mode — all input goes to shell */
@@ -25,6 +25,8 @@ const enum State {
 const LARGE_PASTE_LINE_THRESHOLD = 5
 const LARGE_PASTE_CHAR_THRESHOLD = 500
 const PASTED_TEXT_PLACEHOLDER_REGEX = /\[Pasted Text: \d+ (?:lines|chars)(?: #\d+)?\]/g
+const ANSI_REGEX = /\x1b\[[0-9;]*[a-zA-Z]|\x1b\].*?(\x07|\x1b\\)|\x1b[()][0-9A-B]|\x1b[>=<]|\x1b\[[\?]?[0-9;]*[a-zA-Z]/g
+const MAX_CONTEXT_LINES = 100
 
 export class AIMiddleware extends SessionMiddleware {
     private state = State.NORMAL
@@ -45,6 +47,10 @@ export class AIMiddleware extends SessionMiddleware {
     private echoTimeout: ReturnType<typeof setTimeout> | null = null
     /** True when a TUI app is using the alternate screen buffer (vim, claude, etc.) */
     private alternateScreenActive = false
+    /** Rolling buffer of cleaned terminal output for AI context */
+    private contextBuffer: string[] = []
+    blockTracker: BlockTracker | null = null
+    maxContextBlocks = 5
 
     constructor (
         private platform: PlatformService,
@@ -250,6 +256,26 @@ export class AIMiddleware extends SessionMiddleware {
             return
         }
 
+        // Write terminal context file for CLI process
+        try {
+            const contextFile = path.join(os.tmpdir(), `ac-${queryId}.json`)
+            const contextData: any = {
+                scrollback: this.contextBuffer.slice(-50).join('\n'),
+            }
+            if (this.blockTracker) {
+                const blocks = this.blockTracker.getRecentBlocks(this.maxContextBlocks)
+                contextData.blocks = blocks.map(b => ({
+                    command: b.command,
+                    output: b.output,
+                    exitCode: b.exitCode,
+                    cwd: b.cwd,
+                }))
+            }
+            fs.writeFileSync(contextFile, JSON.stringify(contextData), 'utf-8')
+        } catch {
+            // Best effort — AI still works without context
+        }
+
         // Show "@ <first line preview>" as the visible command
         const firstLine = query.split('\n')[0]
         const preview = firstLine.length > 80 ? firstLine.slice(0, 80) + '...' : firstLine
@@ -333,6 +359,14 @@ export class AIMiddleware extends SessionMiddleware {
         // otherwise a race between echo and user input breaks @ detection.
         if (raw.includes('\n') || raw.includes('\r')) {
             this.inputLength = 0
+        }
+
+        // Capture cleaned output for AI context
+        const clean = raw.replace(ANSI_REGEX, '')
+        const lines = clean.split(/\r?\n/)
+        this.contextBuffer.push(...lines)
+        if (this.contextBuffer.length > MAX_CONTEXT_LINES) {
+            this.contextBuffer = this.contextBuffer.slice(-MAX_CONTEXT_LINES)
         }
 
         // Filter __aterm_ai patterns from output (handles ConPTY resize repaint)

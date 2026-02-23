@@ -15,7 +15,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as readline from 'readline'
 import { CLIAIService, AIConfig } from './cliAIService'
-import { CLIContextCollector } from './cliContextCollector'
+import { CLIContextCollector, CLIContextData } from './cliContextCollector'
 import { AgentLoop } from '../agentLoop'
 import { ChatMessage } from '../ai.service'
 import { AgentCallbacks, ConfirmationOutcome } from '../tools/types'
@@ -70,6 +70,7 @@ const sessionFile = process.env.ATERM_AI_SESSION_FILE || ''
 
 // Parse query: support --file <path> (temp file from middleware) or inline args
 let query: string
+let contextData: CLIContextData | undefined
 const fileIdx = process.argv.indexOf('--file')
 if (fileIdx !== -1 && process.argv[fileIdx + 1]) {
     const queryFile = process.argv[fileIdx + 1]
@@ -80,6 +81,15 @@ if (fileIdx !== -1 && process.argv[fileIdx + 1]) {
     } catch (err: any) {
         process.stderr.write(c.red(`Failed to read query file: ${err.message}\n`))
         process.exit(1)
+    }
+
+    // Read terminal context file (written by AIMiddleware alongside query file)
+    const contextFile = queryFile.replace(/\baq-/, 'ac-').replace(/\.txt$/, '.json')
+    try {
+        contextData = JSON.parse(fs.readFileSync(contextFile, 'utf-8'))
+        fs.unlinkSync(contextFile)
+    } catch {
+        // Context file may not exist — AI works without it
     }
 } else {
     query = process.argv.slice(2).join(' ')
@@ -245,7 +255,7 @@ function createCallbacks (abortController: AbortController): AgentCallbacks {
 async function main (): Promise<void> {
     const ai = new CLIAIService(config)
     const cwd = process.cwd()
-    const collector = new CLIContextCollector(cwd) as any
+    const collector = new CLIContextCollector(cwd, contextData) as any
     const abortController = new AbortController()
 
     // Ctrl+C handling

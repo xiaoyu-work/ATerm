@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { PlatformService } from 'aterm-core'
+import { ConfigService, PlatformService } from 'aterm-core'
 import { TerminalDecorator, BaseTerminalTabComponent } from 'aterm-terminal'
 import { AIMiddleware } from './aiMiddleware'
 
@@ -13,6 +13,7 @@ import { AIMiddleware } from './aiMiddleware'
 export class AIDecorator extends TerminalDecorator {
     constructor (
         private platform: PlatformService,
+        private config: ConfigService,
     ) {
         super()
     }
@@ -28,6 +29,8 @@ export class AIDecorator extends TerminalDecorator {
                 currentSession = tab.session
 
                 const aiMiddleware = new AIMiddleware(this.platform)
+                aiMiddleware.blockTracker = tab.session.blockTracker
+                aiMiddleware.maxContextBlocks = this.config.store.ai?.maxContextBlocks ?? 5
                 tab.session.middleware.unshift(aiMiddleware)
             } catch (e) {
                 console.error('[aterm-ai] Failed to attach AI middleware:', e)
