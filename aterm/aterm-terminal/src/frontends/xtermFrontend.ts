@@ -412,7 +412,7 @@ export class XTermFrontend extends Frontend {
             foreground: scheme.foreground,
             selectionBackground: scheme.selection ?? '#88888888',
             selectionForeground: scheme.selectionForeground ?? undefined,
-            background: getTerminalBackgroundColor(this.configService, this.themes, scheme) ?? '#00000000',
+            background: getTerminalBackgroundColor(this.configService, this.themes, scheme) ?? scheme.background ?? '#00000000',
             cursor: scheme.cursor,
             cursorAccent: scheme.cursorAccent,
             overviewRulerBorder: scheme.background,
