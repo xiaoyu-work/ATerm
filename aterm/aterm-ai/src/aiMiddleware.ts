@@ -43,6 +43,8 @@ export class AIMiddleware extends SessionMiddleware {
     private suppressingEcho = false
     private echoBuffer = ''
     private echoTimeout: ReturnType<typeof setTimeout> | null = null
+    /** True when a TUI app is using the alternate screen buffer (vim, claude, etc.) */
+    private alternateScreenActive = false
 
     constructor (
         private platform: PlatformService,
@@ -299,6 +301,25 @@ export class AIMiddleware extends SessionMiddleware {
             ))
         }
 
+        // Detect alternate screen buffer switches (used by TUI apps like vim, claude, etc.)
+        // Must check BEFORE any early returns so we always track the state.
+        const raw = data.toString('utf-8')
+        if (raw.includes('\x1b[?1049h')) {
+            this.alternateScreenActive = true
+        }
+        if (raw.includes('\x1b[?1049l')) {
+            this.alternateScreenActive = false
+            this.inputLength = 0
+        }
+
+        // In alternate screen mode, pass through everything untouched.
+        // TUI apps (claude, vim, htop, etc.) rely on precise cursor positioning
+        // and rapid redraws that middleware processing would corrupt.
+        if (this.alternateScreenActive) {
+            this.outputToTerminal.next(data)
+            return
+        }
+
         // Echo suppression: buffer data and check for echo completion
         if (this.suppressingEcho) {
             this.echoBuffer += data.toString('utf-8')
@@ -310,22 +331,21 @@ export class AIMiddleware extends SessionMiddleware {
         // (new prompt after command, Ctrl+C output, etc.)
         // Pure echo of keystrokes (no newlines) must NOT reset the counter,
         // otherwise a race between echo and user input breaks @ detection.
-        const str = data.toString('utf-8')
-        if (str.includes('\n') || str.includes('\r')) {
+        if (raw.includes('\n') || raw.includes('\r')) {
             this.inputLength = 0
         }
 
         // Filter __aterm_ai patterns from output (handles ConPTY resize repaint)
         if (this.queryMap.size > 0) {
-            if (str.includes('__aterm_ai')) {
-                let modified = str
+            if (raw.includes('__aterm_ai')) {
+                let modified = raw
                 for (const [id, display] of this.queryMap) {
                     const pattern = `__aterm_ai ${id}`
                     if (modified.includes(pattern)) {
                         modified = modified.split(pattern).join(`@ ${display}`)
                     }
                 }
-                if (modified !== str) {
+                if (modified !== raw) {
                     this.outputToTerminal.next(Buffer.from(modified))
                     return
                 }
@@ -336,6 +356,13 @@ export class AIMiddleware extends SessionMiddleware {
     }
 
     feedFromTerminal (data: Buffer): void {
+        // In alternate screen mode, pass all input directly to the session.
+        // Don't intercept @ or track inputLength — the TUI app handles everything.
+        if (this.alternateScreenActive) {
+            this.outputToSession.next(data)
+            return
+        }
+
         if (this.state === State.CAPTURING) {
             this.applyCapturingText(data.toString('utf-8'))
             return
