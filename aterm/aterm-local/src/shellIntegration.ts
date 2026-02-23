@@ -45,6 +45,13 @@ esac
 __aterm_ai() {
     if [ -n "$ATERM_AI_CLI_PATH" ] && [ -n "$ATERM_AI_TMP" ]; then
         local qfile="$ATERM_AI_TMP/aq-$1.txt"
+        # Overwrite the echo line in ConPTY buffer with clean "@ <prompt>" display.
+        # Must happen before node starts to survive terminal resize.
+        local fl
+        if [ -f "$qfile" ] && read -r fl < "$qfile" && [ -n "$fl" ]; then
+            if [ \${#fl} -gt 80 ]; then fl="\${fl:0:80}..."; fi
+            printf '\\e[A\\r\\e[2K\\e[36m@ \\e[39m%s\\n' "$fl"
+        fi
         node "$ATERM_AI_CLI_PATH" --file "$qfile"
     else
         echo "aterm-ai: CLI not configured"
@@ -81,6 +88,12 @@ setopt HIST_IGNORE_SPACE
 __aterm_ai() {
     if [[ -n "$ATERM_AI_CLI_PATH" ]] && [[ -n "$ATERM_AI_TMP" ]]; then
         local qfile="$ATERM_AI_TMP/aq-$1.txt"
+        # Overwrite echo line in ConPTY buffer with clean display
+        local fl
+        if [[ -f "$qfile" ]] && read -r fl < "$qfile" && [[ -n "$fl" ]]; then
+            if [[ \${#fl} -gt 80 ]]; then fl="\${fl:0:80}..."; fi
+            printf '\\e[A\\r\\e[2K\\e[36m@ \\e[39m%s\\n' "$fl"
+        fi
         node "$ATERM_AI_CLI_PATH" --file "$qfile"
     else
         echo "aterm-ai: CLI not configured"
@@ -111,6 +124,16 @@ end
 function __aterm_ai
     if set -q ATERM_AI_CLI_PATH; and set -q ATERM_AI_TMP
         set -l qfile "$ATERM_AI_TMP/aq-$argv[1].txt"
+        # Overwrite echo line in ConPTY buffer with clean display
+        if test -f $qfile
+            set -l fl (head -1 $qfile)
+            if test (string length -- "$fl") -gt 80
+                set fl (string sub -l 80 -- $fl)"..."
+            end
+            if test -n "$fl"
+                printf '\\e[A\\r\\e[2K\\e[36m@ \\e[39m%s\\n' $fl
+            end
+        end
         node $ATERM_AI_CLI_PATH --file $qfile
     else
         echo "aterm-ai: CLI not configured"
@@ -149,6 +172,14 @@ if (Get-Command Set-PSReadLineOption -ErrorAction SilentlyContinue) {
 function __aterm_ai {
     if ($env:ATERM_AI_CLI_PATH -and $env:ATERM_AI_TMP) {
         $qfile = Join-Path $env:ATERM_AI_TMP "aq-$($args[0]).txt"
+        # Overwrite echo line in ConPTY buffer with clean display
+        try {
+            $fl = [System.IO.File]::ReadAllText($qfile, [System.Text.Encoding]::UTF8).Split([char]10)[0].TrimEnd([char]13)
+            if ($fl.Length -gt 80) { $fl = $fl.Substring(0, 80) + "..." }
+            if ($fl) {
+                [Console]::Write("$([char]0x1b)[A$([char]13)$([char]0x1b)[2K$([char]0x1b)[36m@ $([char]0x1b)[39m" + $fl + [char]10)
+            }
+        } catch {}
         & node $env:ATERM_AI_CLI_PATH --file $qfile
     } else {
         Write-Host "aterm-ai: CLI not configured"
