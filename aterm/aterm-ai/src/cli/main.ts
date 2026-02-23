@@ -205,12 +205,12 @@ function createCallbacks (abortController: AbortController): AgentCallbacks {
         },
 
         onToolStart (toolName: string, description: string): void {
-            process.stdout.write(c.dim(`\n⊷ ${toolName}  ${description}\n`))
+            process.stdout.write(c.cyan(`\n▸ ${toolName}  ${description}\n`))
         },
 
         onToolDone (toolName: string, success: boolean, error?: string): void {
             if (success) {
-                process.stdout.write(c.dim(`✓ ${toolName}\n`))
+                process.stdout.write(c.green(`✔ ${toolName}\n`))
             } else {
                 process.stdout.write(c.red(`✗ ${toolName}  ${error || 'failed'}\n`))
             }
