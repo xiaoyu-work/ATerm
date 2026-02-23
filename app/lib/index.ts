@@ -15,7 +15,6 @@ import './sentry'
 import './lru'
 import { parseArgs } from './cli'
 import { Application } from './app'
-import electronDebug from 'electron-debug'
 import { loadConfig } from './config'
 
 
@@ -54,10 +53,54 @@ process.on('uncaughtException' as any, err => {
 })
 
 if (argv.d) {
-    electronDebug({
-        isEnabled: true,
-        showDevTools: true,
-        devToolsMode: 'undocked',
+    // Manually set up dev tools without electron-debug,
+    // because electron-debug registers CommandOrControl+R as reload
+    // which conflicts with terminal reverse-i-search (Ctrl+R in bash).
+    const { BrowserWindow } = require('electron')
+    const localShortcut = require('electron-localshortcut')
+
+    app.on('browser-window-created', (_event, win) => {
+        win.webContents.once('dom-ready', () => {
+            win.webContents.openDevTools({ mode: 'undocked' })
+        })
+    })
+
+    app.whenReady().then(() => {
+        localShortcut.register('CommandOrControl+Shift+C', () => {
+            const win = BrowserWindow.getFocusedWindow()
+            if (win) {
+                if (win.webContents.isDevToolsOpened()) {
+                    win.webContents.devToolsWebContents?.executeJavaScript('DevToolsAPI.enterInspectElementMode()')
+                } else {
+                    win.webContents.once('devtools-opened', () => {
+                        win.webContents.devToolsWebContents?.executeJavaScript('DevToolsAPI.enterInspectElementMode()')
+                    })
+                    win.webContents.openDevTools()
+                }
+            }
+        })
+        localShortcut.register(process.platform === 'darwin' ? 'Command+Alt+I' : 'Control+Shift+I', () => {
+            const win = BrowserWindow.getFocusedWindow()
+            if (win) {
+                if (win.webContents.isDevToolsOpened()) {
+                    win.webContents.closeDevTools()
+                } else {
+                    win.webContents.openDevTools({ mode: 'undocked' })
+                }
+            }
+        })
+        localShortcut.register('F12', () => {
+            const win = BrowserWindow.getFocusedWindow()
+            if (win) {
+                if (win.webContents.isDevToolsOpened()) {
+                    win.webContents.closeDevTools()
+                } else {
+                    win.webContents.openDevTools({ mode: 'undocked' })
+                }
+            }
+        })
+        // Intentionally NOT registering CommandOrControl+R and F5
+        // to allow terminal apps (bash reverse-i-search) to use Ctrl+R
     })
 }
 

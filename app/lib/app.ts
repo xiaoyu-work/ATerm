@@ -314,7 +314,11 @@ export class Application {
         ]
 
         if (process.env.ATERM_DEV) {
-            template[2].submenu['unshift']({ role: 'reload' })
+            template[2].submenu['unshift']({
+                label: 'Reload',
+                accelerator: 'CmdOrCtrl+Shift+F5',
+                click: (_, win) => win?.webContents.reload(),
+            })
         }
 
         Menu.setApplicationMenu(Menu.buildFromTemplate(template))
