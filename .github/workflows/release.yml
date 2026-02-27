@@ -110,6 +110,9 @@ jobs:
       - name: Enable Corepack (Yarn 4)
         run: corepack enable
 
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libfontconfig-dev
+
       - name: Install dependencies
         run: yarn install --immutable
 

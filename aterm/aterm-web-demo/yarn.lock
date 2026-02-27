@@ -80,9 +80,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tabby-web-demo@workspace:.":
+"aterm-web-demo@workspace:.":
   version: 0.0.0-use.local
-  resolution: "tabby-web-demo@workspace:."
+  resolution: "aterm-web-demo@workspace:."
   dependencies:
     "@types/webpack-env": "npm:^1.16.0"
     svg-inline-loader: "npm:^0.8.2"
