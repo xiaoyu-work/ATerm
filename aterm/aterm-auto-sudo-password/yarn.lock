@@ -12,9 +12,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tabby-auto-sudo-password@workspace:.":
+"aterm-auto-sudo-password@workspace:.":
   version: 0.0.0-use.local
-  resolution: "tabby-auto-sudo-password@workspace:."
+  resolution: "aterm-auto-sudo-password@workspace:."
   dependencies:
     ansi-colors: "npm:^4.1.1"
   languageName: unknown

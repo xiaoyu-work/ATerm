@@ -12,14 +12,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tabby-ai@workspace:.":
+"aterm-ai@workspace:.":
   version: 0.0.0-use.local
-  resolution: "tabby-ai@workspace:."
+  resolution: "aterm-ai@workspace:."
   dependencies:
     ansi-colors: "npm:^4.1.1"
   peerDependencies:
-    tabby-core: "*"
-    tabby-settings: "*"
-    tabby-terminal: "*"
+    aterm-core: "*"
+    aterm-settings: "*"
+    aterm-terminal: "*"
   languageName: unknown
   linkType: soft
