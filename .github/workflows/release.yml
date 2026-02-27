@@ -12,6 +12,7 @@ permissions:
 jobs:
   build-windows:
     runs-on: windows-latest
+    environment: release
     strategy:
       matrix:
         arch: [x64, arm64]
