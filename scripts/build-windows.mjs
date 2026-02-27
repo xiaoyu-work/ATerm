@@ -9,7 +9,7 @@ process.env.ARCH = process.env.ARCH || process.arch
 
 builder({
     dir: true,
-    win: ['nsis', 'zip'],
+    win: ['nsis'],
     arm64: process.env.ARCH === 'arm64',
     config: {
         extraMetadata: {

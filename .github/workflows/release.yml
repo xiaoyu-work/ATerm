@@ -47,8 +47,6 @@ jobs:
           name: windows-${{ matrix.arch }}
           path: |
             dist/aterm-*-setup-*.exe
-            dist/aterm-*-portable-*.zip
-            dist/latest*.yml
 
   build-macos:
     runs-on: macos-latest
@@ -90,8 +88,6 @@ jobs:
           name: macos-${{ matrix.arch }}
           path: |
             dist/aterm-*-macos-*.dmg
-            dist/aterm-*-macos-*.zip
-            dist/latest*.yml
 
   build-linux:
     runs-on: ubuntu-latest
@@ -132,9 +128,7 @@ jobs:
           path: |
             dist/aterm-*-linux-*.deb
             dist/aterm-*-linux-*.rpm
-            dist/aterm-*-linux-*.tar.gz
             dist/aterm-*-linux-*.AppImage
-            dist/latest*.yml
 
   publish:
     needs: [build-windows, build-macos, build-linux]
