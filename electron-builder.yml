@@ -95,10 +95,6 @@ deb:
   fpm:
   - '--replaces'
   - 'terminus-terminal'
-pacman:
-  depends:
-  - gnome-keyring
-  - libsecret
 rpm:
   depends:
   - gnome-keyring
