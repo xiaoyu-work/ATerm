@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   build-windows:
@@ -36,10 +37,23 @@ jobs:
         env:
           ARCH: ${{ matrix.arch }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SM_KEYPAIR_ALIAS: ${{ secrets.SM_KEYPAIR_ALIAS }}
-          SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-          SM_PUBLISHER_NAME: ${{ secrets.SM_PUBLISHER_NAME }}
         run: node scripts/build-windows.mjs
+
+      - name: Sign with Azure Trusted Signing
+        if: ${{ secrets.AZURE_CLIENT_ID != '' }}
+        uses: azure/trusted-signing-action@v0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: https://eus.codesigning.azure.net/
+          trusted-signing-account-name: xiaoyu
+          certificate-profile-name: Aterm
+          files-folder: dist
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
