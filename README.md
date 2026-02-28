@@ -1,5 +1,7 @@
 # ATerm
 
+> *I vibe code with AI all day, but honestly? I'm tired of switching between my terminal and a coding CLI. Sometimes I just want to `cd` somewhere myself without the AI doing it for me. Sometimes I just want to ask a quick question without opening a whole new session. So I took inspiration from coding CLI agents and built a terminal with the same AI agent capabilities baked in. Right there when you need it, out of the way when you don't.*
+
 ATerm.
 
 AI Terminal. Agentic Terminal. AT Terminal. A Terminal.
