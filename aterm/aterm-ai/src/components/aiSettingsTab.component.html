@@ -26,6 +26,9 @@
 
 <!-- OAuth Connection Section (for OAuth providers) -->
 <div *ngIf="isOAuthProvider">
+  <div class="form-line">
+    <div class="text-warning small"><i class="fas fa-exclamation-triangle"></i> OAuth uses unofficial third-party authentication. Your tokens are stored locally. Use at your own risk.</div>
+  </div>
   <!-- Claude: Token Paste -->
   <div *ngIf="config.store.ai.provider === 'claude'">
     <div class="form-line" *ngIf="!isConnected">
