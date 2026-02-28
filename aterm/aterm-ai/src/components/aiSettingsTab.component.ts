@@ -1,4 +1,4 @@
-import { Component, HostBinding, NgZone } from '@angular/core'
+import { Component, HostBinding, NgZone, OnInit } from '@angular/core'
 import { ConfigService, PlatformService } from 'aterm-core'
 import { PROVIDER_PRESETS } from '../providers'
 import { OAuthTokenManager } from '../oauth/tokenManager'
@@ -8,19 +8,23 @@ import { requestDeviceCode, pollForToken } from '../oauth/deviceFlow'
 import { requestMiniMaxDeviceCode, pollMiniMaxToken } from '../oauth/providers/minimaxProvider'
 import { validateClaudeToken, createClaudeToken, syncFromClaudeCodeCLI } from '../oauth/providers/anthropicClaude'
 import { runGeminiOAuthFlow } from '../oauth/providers/googleGemini'
+import { runCodexOAuthFlow } from '../oauth/providers/openaiCodex'
 
 @Component({
     standalone: false,
     templateUrl: './aiSettingsTab.component.html',
 })
-export class AISettingsTabComponent {
+export class AISettingsTabComponent implements OnInit {
     @HostBinding('class.content-box') true
 
     claudeTokenInput = ''
     oauthInProgress = false
     oauthError = ''
     deviceCode: DeviceCodeResponse | null = null
+    fetchedModels: string[] = []
+    modelsFetching = false
     private abortController: AbortController | null = null
+    private modelsCacheKey = ''
 
     constructor (
         public config: ConfigService,
@@ -29,6 +33,10 @@ export class AISettingsTabComponent {
         private zone: NgZone,
     ) {}
 
+    ngOnInit (): void {
+        this.fetchModelsIfNeeded()
+    }
+
     get isOAuthProvider (): boolean {
         return checkOAuthProvider(this.config.store.ai?.provider || '')
     }
@@ -36,6 +44,31 @@ export class AISettingsTabComponent {
     get isConnected (): boolean {
         const provider = this.config.store.ai?.provider || ''
         return this.tokenManager.hasValidToken(provider)
+    }
+
+    get authStatus (): { method: string; ready: boolean } {
+        if (this.isOAuthProvider) {
+            return { method: 'OAuth', ready: this.isConnected }
+        }
+        const provider = this.config.store.ai?.provider || ''
+        if (provider === 'ollama') {
+            return { method: 'None (local)', ready: true }
+        }
+        return { method: 'API Key', ready: !!this.currentApiKey }
+    }
+
+    get currentApiKey (): string {
+        const provider = this.config.store.ai?.provider || ''
+        return this.config.store.ai?.apiKeys?.[provider] || ''
+    }
+
+    set currentApiKey (value: string) {
+        const provider = this.config.store.ai?.provider || ''
+        if (!this.config.store.ai.apiKeys) {
+            this.config.store.ai.apiKeys = {}
+        }
+        this.config.store.ai.apiKeys[provider] = value
+        this.config.save()
     }
 
     onProviderChange (): void {
@@ -48,6 +81,9 @@ export class AISettingsTabComponent {
         // Reset OAuth state when switching providers
         this.cancelOAuth()
         this.oauthError = ''
+        this.fetchedModels = []
+        this.modelsCacheKey = ''
+        this.fetchModelsIfNeeded()
     }
 
     getBaseUrlPlaceholder (): string {
@@ -58,6 +94,112 @@ export class AISettingsTabComponent {
     getModelPlaceholder (): string {
         const provider = this.config.store.ai.provider
         return PROVIDER_PRESETS[provider]?.defaultModel || 'model-name'
+    }
+
+    get availableModels (): string[] {
+        if (this.fetchedModels.length > 0) return this.fetchedModels
+        const provider = this.config.store.ai?.provider || ''
+        return PROVIDER_PRESETS[provider]?.models || []
+    }
+
+    get modelSelectValue (): string {
+        const model = this.config.store.ai?.model || ''
+        if (this.availableModels.includes(model)) return model
+        return '__custom__'
+    }
+
+    onModelSelectChange (value: string): void {
+        if (value === '__custom__') {
+            this.config.store.ai.model = ''
+        } else {
+            this.config.store.ai.model = value
+        }
+        this.config.save()
+    }
+
+    async fetchModelsIfNeeded (): Promise<void> {
+        const provider = this.config.store.ai?.provider || ''
+        const preset = PROVIDER_PRESETS[provider]
+        if (!preset) return
+
+        // Build cache key from provider + auth state
+        const providerApiKey = this.config.store.ai?.apiKeys?.[provider] || ''
+        const cacheKey = `${provider}:${this.isConnected}:${providerApiKey}`
+        if (cacheKey === this.modelsCacheKey) return
+        this.modelsCacheKey = cacheKey
+
+        // Need auth to fetch models
+        const hasApiKey = !!providerApiKey
+        if (!this.isConnected && !hasApiKey) {
+            this.fetchedModels = []
+            return
+        }
+
+        // Skip providers that don't support /models endpoint
+        if (provider === 'azure' || provider === 'custom' || provider === 'copilot') {
+            this.fetchedModels = []
+            return
+        }
+
+        // Resolve base URL and auth
+        let baseUrl = (this.config.store.ai?.baseUrl || preset.baseUrl || '').replace(/\/+$/, '')
+        let authHeader = ''
+
+        if (preset.oauthId) {
+            try {
+                const token = await this.tokenManager.getAccessToken(preset.oauthId)
+                if (token) {
+                    authHeader = `Bearer ${token}`
+                    // Copilot may derive base URL from token
+                    const oauthConfig = getOAuthProvider(preset.oauthId)
+                    if (oauthConfig?.deriveBaseUrl) {
+                        const storedToken = this.tokenManager.getStoredToken(preset.oauthId)
+                        if (storedToken) {
+                            const derived = oauthConfig.deriveBaseUrl(storedToken)
+                            if (derived) baseUrl = derived.replace(/\/+$/, '')
+                        }
+                    }
+                }
+            } catch {
+                // Fall back to static list
+            }
+        } else if (hasApiKey) {
+            authHeader = `Bearer ${providerApiKey}`
+        }
+
+        if (!baseUrl || !authHeader) {
+            this.fetchedModels = []
+            return
+        }
+
+        // Fetch /models
+        const modelsUrl = `${baseUrl}/models`
+        this.modelsFetching = true
+        try {
+            const res = await fetch(modelsUrl, {
+                headers: { Authorization: authHeader },
+                signal: AbortSignal.timeout(10000),
+            })
+            if (!res.ok) {
+                this.fetchedModels = []
+                return
+            }
+            const json = await res.json()
+            const models: string[] = (json.data || [])
+                .map((m: any) => m.id as string)
+                .filter((id: string) => !!id)
+                .sort()
+            this.zone.run(() => {
+                this.fetchedModels = models
+            })
+        } catch {
+            // Fetch failed — fall back to static list
+            this.fetchedModels = []
+        } finally {
+            this.zone.run(() => {
+                this.modelsFetching = false
+            })
+        }
     }
 
     getProviderDisplayName (): string {
@@ -107,6 +249,8 @@ export class AISettingsTabComponent {
             this.zone.run(() => {
                 this.oauthInProgress = false
                 this.deviceCode = null
+                this.modelsCacheKey = ''
+                this.fetchModelsIfNeeded()
             })
         } catch (err: any) {
             this.zone.run(() => {
@@ -125,10 +269,15 @@ export class AISettingsTabComponent {
             if (provider === 'gemini-oauth') {
                 const token = await runGeminiOAuthFlow((url) => this.platform.openExternal(url))
                 this.tokenManager.storeToken(provider, token)
+            } else if (provider === 'codex') {
+                const token = await runCodexOAuthFlow((url) => this.platform.openExternal(url))
+                this.tokenManager.storeToken(provider, token)
             }
 
             this.zone.run(() => {
                 this.oauthInProgress = false
+                this.modelsCacheKey = ''
+                this.fetchModelsIfNeeded()
             })
         } catch (err: any) {
             this.zone.run(() => {
@@ -171,6 +320,8 @@ export class AISettingsTabComponent {
         this.tokenManager.storeToken('claude', createClaudeToken(token))
         this.claudeTokenInput = ''
         this.oauthError = ''
+        this.modelsCacheKey = ''
+        this.fetchModelsIfNeeded()
     }
 
     syncFromClaudeCLI (): void {
@@ -178,6 +329,8 @@ export class AISettingsTabComponent {
         if (token) {
             this.tokenManager.storeToken('claude', token)
             this.oauthError = ''
+            this.modelsCacheKey = ''
+            this.fetchModelsIfNeeded()
         } else {
             this.oauthError = 'Could not find Claude Code CLI credentials. Make sure Claude Code is installed and authenticated.'
         }

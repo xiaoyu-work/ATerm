@@ -81,8 +81,8 @@ function formatToolName (name: string): string {
 export function renderPreamble (options?: PreambleOptions): string {
     if (!options) return ''
     return options.interactive
-        ? 'You are Gemini CLI, an interactive CLI agent specializing in software engineering tasks. Your primary goal is to help users safely and effectively.'
-        : 'You are Gemini CLI, an autonomous CLI agent specializing in software engineering tasks. Your primary goal is to help users safely and effectively.'
+        ? 'You are an interactive CLI AI assistant specializing in software engineering tasks. Your primary goal is to help users safely and effectively.'
+        : 'You are an autonomous CLI AI assistant specializing in software engineering tasks. Your primary goal is to help users safely and effectively.'
 }
 
 export function renderCoreMandates (options?: CoreMandatesOptions): string {

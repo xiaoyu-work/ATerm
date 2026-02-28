@@ -118,34 +118,58 @@ export class Session extends BaseSession {
             const aiConfig = this.config.store.ai
             // Resolve OAuth token if the selected provider uses OAuth
             let oauthAccessToken = ''
+            let copilotBaseUrl = ''
             const oauthId = aiConfig?.oauthTokens && (() => {
                 // Check if current provider has an OAuth token stored
                 const provider = aiConfig.provider || 'gemini'
-                const oauthProviders: Record<string, string> = { copilot: 'copilot', claude: 'claude', 'gemini-oauth': 'gemini-oauth', minimax: 'minimax' }
+                const oauthProviders: Record<string, string> = { copilot: 'copilot', codex: 'codex', claude: 'claude', 'gemini-oauth': 'gemini-oauth', minimax: 'minimax' }
                 return oauthProviders[provider]
             })()
             if (oauthId) {
                 const tokenData = aiConfig.oauthTokens?.[oauthId]
                 if (tokenData?.accessToken) {
-                    oauthAccessToken = tokenData.accessToken
+                    // Copilot: exchange the long-lived GitHub token for a fresh API token
+                    if (oauthId === 'copilot' && tokenData.metadata?.githubToken) {
+                        try {
+                            const res = await fetch('https://api.github.com/copilot_internal/v2/token', {
+                                headers: { Accept: 'application/json', Authorization: `Bearer ${tokenData.metadata.githubToken}` },
+                            })
+                            if (res.ok) {
+                                const json = await res.json()
+                                oauthAccessToken = json.token || tokenData.accessToken
+                                // Derive correct base URL from proxy-ep in token
+                                const epMatch = (json.token || '').match(/(?:^|;)\s*proxy-ep=([^;\s]+)/i)
+                                if (epMatch?.[1]) {
+                                    const host = epMatch[1].trim().replace(/^https?:\/\//, '').replace(/^proxy\./i, 'api.')
+                                    copilotBaseUrl = `https://${host}`
+                                }
+                            } else {
+                                oauthAccessToken = tokenData.accessToken
+                            }
+                        } catch {
+                            oauthAccessToken = tokenData.accessToken
+                        }
+                    } else {
+                        oauthAccessToken = tokenData.accessToken
+                    }
                 }
             }
-            const hasAuth = aiConfig?.apiKey || oauthAccessToken
-            if (hasAuth) {
-                Object.assign(env, {
-                    ATERM_AI_PROVIDER: aiConfig.provider || 'gemini',
-                    ATERM_AI_BASE_URL: aiConfig.baseUrl || '',
-                    ATERM_AI_API_KEY: aiConfig.apiKey || '',
-                    ATERM_AI_OAUTH_TOKEN: oauthAccessToken,
-                    ATERM_AI_MODEL: aiConfig.model || '',
-                    ATERM_AI_DEPLOYMENT: aiConfig.deployment || '',
-                    ATERM_AI_API_VERSION: aiConfig.apiVersion || '',
-                    ATERM_AI_COLORS: JSON.stringify(aiConfig.colorTheme || {}),
-                    ATERM_AI_CLI_PATH: path.join(__dirname, '..', '..', 'aterm-ai', 'dist', 'cli.js'),
-                    ATERM_AI_SESSION_FILE: path.join(os.tmpdir(), `aterm-ai-session-${process.pid}-${Date.now()}.json`),
-                    ATERM_AI_TMP: os.tmpdir(),
-                })
-            }
+            const isOAuthProvider = !!oauthId
+            // Always inject CLI path so the @ command works;
+            // the CLI itself will show auth errors if credentials are missing.
+            Object.assign(env, {
+                ATERM_AI_PROVIDER: aiConfig.provider || 'gemini',
+                ATERM_AI_BASE_URL: copilotBaseUrl || aiConfig.baseUrl || '',
+                ATERM_AI_API_KEY: isOAuthProvider ? '' : (aiConfig.apiKeys?.[aiConfig.provider] || aiConfig.apiKey || ''),
+                ATERM_AI_OAUTH_TOKEN: oauthAccessToken,
+                ATERM_AI_MODEL: aiConfig.model || '',
+                ATERM_AI_DEPLOYMENT: aiConfig.deployment || '',
+                ATERM_AI_API_VERSION: aiConfig.apiVersion || '',
+                ATERM_AI_COLORS: JSON.stringify(aiConfig.colorTheme || {}),
+                ATERM_AI_CLI_PATH: path.join(__dirname, '..', '..', 'aterm-ai', 'dist', 'cli.js'),
+                ATERM_AI_SESSION_FILE: path.join(os.tmpdir(), `aterm-ai-session-${process.pid}-${Date.now()}.json`),
+                ATERM_AI_TMP: os.tmpdir(),
+            })
 
             pty = await this.ptyInterface.spawn(options.command, options.args, {
                 name: 'xterm-256color',

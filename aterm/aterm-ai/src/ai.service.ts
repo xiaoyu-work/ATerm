@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core'
 import { ConfigService } from 'aterm-core'
 import { EventType, StreamEvent, ToolCallRequest, TokensSummary } from './streamEvents'
 import { PROVIDER_PRESETS } from './providers'
+import { formatApiError } from './errorMessages'
 import { OAuthTokenManager } from './oauth/tokenManager'
 import { getOAuthProvider } from './oauth/providerRegistry'
 
@@ -57,9 +58,9 @@ export class AIService {
 
         let baseUrl = (aiConfig?.baseUrl || preset.baseUrl || '').replace(/\/+$/, '')
 
-        // For OAuth providers, try to use the resolved token
+        // For OAuth providers, only use OAuth token; for API Key providers, only use apiKey
         const oauthId = preset.oauthId
-        let apiKey = aiConfig?.apiKey || ''
+        let apiKey = oauthId ? '' : (aiConfig?.apiKeys?.[provider] || aiConfig?.apiKey || '')
 
         if (oauthId && oauthAccessToken) {
             apiKey = oauthAccessToken
@@ -77,16 +78,16 @@ export class AIService {
         }
 
         if (!baseUrl) {
-            return { url: '', headers: {}, model: '', error: `No API base URL configured for provider "${provider}". Go to Settings → AI.` }
+            return { url: '', headers: {}, model: '', error: 'AI not configured. Go to Settings → AI to set up a provider.' }
         }
 
         const model = aiConfig?.model || preset.defaultModel
 
         if (!apiKey && provider !== 'ollama') {
             if (oauthId) {
-                return { url: '', headers: {}, model: '', error: `Not connected to ${preset.oauthId}. Go to Settings → AI to connect.` }
+                return { url: '', headers: {}, model: '', error: 'AI not configured. Go to Settings → AI to connect.' }
             }
-            return { url: '', headers: {}, model: '', error: 'No API key configured. Go to Settings → AI to set your API key.' }
+            return { url: '', headers: {}, model: '', error: 'AI not configured. Go to Settings → AI to set an API key.' }
         }
 
         const headers: Record<string, string> = { 'Content-Type': 'application/json' }
@@ -101,6 +102,12 @@ export class AIService {
 
         if (apiKey) {
             headers['Authorization'] = `Bearer ${apiKey}`
+        }
+
+        // Copilot requires editor identification headers
+        if (provider === 'copilot') {
+            headers['Editor-Version'] = 'vscode/1.96.2'
+            headers['Copilot-Integration-Id'] = 'vscode-chat'
         }
 
         const endpoint = baseUrl.includes('/chat/completions') ? baseUrl : `${baseUrl}/chat/completions`
@@ -148,17 +155,17 @@ export class AIService {
 
             if (!response.ok) {
                 const text = await response.text()
-                return `API error (${response.status}): ${text}`
+                return formatApiError(response.status, text)
             }
 
             const data: ChatCompletionResponse = await response.json()
             if (data.error) {
-                return `API error: ${data.error.message}`
+                return formatApiError(400, JSON.stringify({ error: data.error }))
             }
 
             return data.choices?.[0]?.message?.content || 'No response from AI.'
-        } catch (err: any) {
-            return `Request failed: ${err.message}`
+        } catch {
+            return 'Connection failed. Check your network and try again.'
         }
     }
 
@@ -282,10 +289,10 @@ export class AIService {
                 if (this.isRetryableError(err) && attempt < maxAttempts - 1) {
                     const delayMs = initialDelayMs * (attempt + 1)
                     await new Promise(res => setTimeout(res, delayMs))
-                    lastError = `Network error: ${err.message}`
+                    lastError = 'Connection failed. Retrying...'
                     continue
                 }
-                yield { type: EventType.Error, value: `Request failed: ${err.message}` }
+                yield { type: EventType.Error, value: 'Connection failed. Check your network and try again.' }
                 return
             }
 
@@ -295,10 +302,10 @@ export class AIService {
                 if (this.isRetryableStatus(response.status) && attempt < maxAttempts - 1) {
                     const delayMs = initialDelayMs * (attempt + 1)
                     await new Promise(res => setTimeout(res, delayMs))
-                    lastError = `API error (${response.status}): ${text}`
+                    lastError = formatApiError(response.status, text)
                     continue
                 }
-                yield { type: EventType.Error, value: `API error (${response.status}) [${cfg.url}]: ${text}` }
+                yield { type: EventType.Error, value: formatApiError(response.status, text) }
                 return
             }
 
@@ -308,7 +315,7 @@ export class AIService {
         }
 
         // All retries exhausted
-        yield { type: EventType.Error, value: lastError || 'Request failed after all retries' }
+        yield { type: EventType.Error, value: lastError || 'Connection failed after multiple attempts. Please try again.' }
     }
 
     /**
@@ -410,7 +417,7 @@ export class AIService {
 
                     // API-level error in chunk (non-SSE error response)
                     if (chunk.error) {
-                        yield { type: EventType.Error, value: `API error: ${chunk.error.message || JSON.stringify(chunk.error)}` }
+                        yield { type: EventType.Error, value: formatApiError(chunk.error.code || 400, JSON.stringify({ error: chunk.error })) }
                         return
                     }
 

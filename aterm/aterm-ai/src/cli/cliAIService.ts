@@ -6,6 +6,7 @@
 import { IAIService, ChatMessage, ToolDefinition } from '../ai.service'
 import { EventType, StreamEvent, ToolCallRequest, TokensSummary } from '../streamEvents'
 import { PROVIDER_PRESETS } from '../providers'
+import { formatApiError } from '../errorMessages'
 
 export interface AIConfig {
     provider: string
@@ -36,14 +37,15 @@ export class CLIAIService implements IAIService {
 
         let baseUrl = (this.config.baseUrl || preset.baseUrl || '').replace(/\/+$/, '')
         if (!baseUrl) {
-            return { url: '', headers: {}, model: '', error: `No API base URL configured for provider "${provider}".` }
+            return { url: '', headers: {}, model: '', error: 'AI not configured. Go to Settings → AI to set up a provider.' }
         }
 
-        const apiKey = this.config.oauthToken || this.config.apiKey || ''
+        const isOAuth = !!PROVIDER_PRESETS[provider]?.oauthId
+        const apiKey = isOAuth ? (this.config.oauthToken || '') : (this.config.apiKey || '')
         const model = this.config.model || preset.defaultModel
 
         if (!apiKey && provider !== 'ollama') {
-            return { url: '', headers: {}, model: '', error: 'No API key or OAuth token configured.' }
+            return { url: '', headers: {}, model: '', error: 'AI not configured. Go to Settings → AI to connect or set an API key.' }
         }
 
         const headers: Record<string, string> = { 'Content-Type': 'application/json' }
@@ -58,6 +60,12 @@ export class CLIAIService implements IAIService {
 
         if (apiKey) {
             headers['Authorization'] = `Bearer ${apiKey}`
+        }
+
+        // Copilot requires editor identification headers
+        if (provider === 'copilot') {
+            headers['Editor-Version'] = 'vscode/1.96.2'
+            headers['Copilot-Integration-Id'] = 'vscode-chat'
         }
 
         const endpoint = baseUrl.includes('/chat/completions') ? baseUrl : `${baseUrl}/chat/completions`
@@ -89,17 +97,17 @@ export class CLIAIService implements IAIService {
 
             if (!response.ok) {
                 const text = await response.text()
-                return `API error (${response.status}): ${text}`
+                return formatApiError(response.status, text)
             }
 
             const data: ChatCompletionResponse = await response.json()
             if (data.error) {
-                return `API error: ${data.error.message}`
+                return formatApiError(400, JSON.stringify({ error: data.error }))
             }
 
             return data.choices?.[0]?.message?.content || 'No response from AI.'
-        } catch (err: any) {
-            return `Request failed: ${err.message}`
+        } catch {
+            return 'Connection failed. Check your network and try again.'
         }
     }
 
@@ -185,10 +193,10 @@ export class CLIAIService implements IAIService {
                 if (this.isRetryableError(err) && attempt < maxAttempts - 1) {
                     const delayMs = initialDelayMs * (attempt + 1)
                     await new Promise(res => setTimeout(res, delayMs))
-                    lastError = `Network error: ${err.message}`
+                    lastError = 'Connection failed. Retrying...'
                     continue
                 }
-                yield { type: EventType.Error, value: `Request failed: ${err.message}` }
+                yield { type: EventType.Error, value: 'Connection failed. Check your network and try again.' }
                 return
             }
 
@@ -197,10 +205,10 @@ export class CLIAIService implements IAIService {
                 if (this.isRetryableStatus(response.status) && attempt < maxAttempts - 1) {
                     const delayMs = initialDelayMs * (attempt + 1)
                     await new Promise(res => setTimeout(res, delayMs))
-                    lastError = `API error (${response.status}): ${text}`
+                    lastError = formatApiError(response.status, text)
                     continue
                 }
-                yield { type: EventType.Error, value: `API error (${response.status}) [${cfg.url}]: ${text}` }
+                yield { type: EventType.Error, value: formatApiError(response.status, text) }
                 return
             }
 
@@ -208,7 +216,7 @@ export class CLIAIService implements IAIService {
             return
         }
 
-        yield { type: EventType.Error, value: lastError || 'Request failed after all retries' }
+        yield { type: EventType.Error, value: lastError || 'Connection failed after multiple attempts. Please try again.' }
     }
 
     private async *parseSSEStream (
@@ -304,7 +312,7 @@ export class CLIAIService implements IAIService {
                     }
 
                     if (chunk.error) {
-                        yield { type: EventType.Error, value: `API error: ${chunk.error.message || JSON.stringify(chunk.error)}` }
+                        yield { type: EventType.Error, value: formatApiError(chunk.error.code || 400, JSON.stringify({ error: chunk.error })) }
                         return
                     }
 

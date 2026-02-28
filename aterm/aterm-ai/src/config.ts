@@ -24,8 +24,18 @@ export class AIConfigProvider extends ConfigProvider {
              */
             baseUrl: '',
 
-            /** API key (not needed for Ollama) */
+            /** @deprecated Use apiKeys[provider] instead */
             apiKey: '',
+
+            /** Per-provider API keys */
+            apiKeys: {
+                openai: '',
+                gemini: '',
+                deepseek: '',
+                azure: '',
+                kimi: '',
+                custom: '',
+            },
 
             /** Model name */
             model: 'gemini-2.0-flash',
@@ -61,6 +71,7 @@ export class AIConfigProvider extends ConfigProvider {
              */
             oauthTokens: {
                 copilot: null as any,
+                codex: null as any,
                 claude: null as any,
                 'gemini-oauth': null as any,
                 minimax: null as any,
@@ -80,6 +91,7 @@ export class AIConfigProvider extends ConfigProvider {
                 azure: null as any,
                 custom: null as any,
                 copilot: null as any,
+                codex: null as any,
                 claude: null as any,
                 minimax: null as any,
                 kimi: null as any,

@@ -54,7 +54,7 @@ __aterm_ai() {
         fi
         node "$ATERM_AI_CLI_PATH" --file "$qfile"
     else
-        echo "aterm-ai: CLI not configured"
+        echo "AI not configured. Go to Settings → AI to set up a provider."
     fi
 }
 `
@@ -96,7 +96,7 @@ __aterm_ai() {
         fi
         node "$ATERM_AI_CLI_PATH" --file "$qfile"
     else
-        echo "aterm-ai: CLI not configured"
+        echo "AI not configured. Go to Settings → AI to set up a provider."
     fi
 }
 `
@@ -136,7 +136,7 @@ function __aterm_ai
         end
         node $ATERM_AI_CLI_PATH --file $qfile
     else
-        echo "aterm-ai: CLI not configured"
+        echo "AI not configured. Go to Settings → AI to set up a provider."
     end
 end
 `
@@ -182,7 +182,7 @@ function __aterm_ai {
         } catch {}
         & node $env:ATERM_AI_CLI_PATH --file $qfile
     } else {
-        Write-Host "aterm-ai: CLI not configured"
+        Write-Host "AI not configured. Go to Settings → AI to set up a provider."
     }
 }
 `

@@ -13,15 +13,22 @@ export class OAuthCallbackServer {
     }
 
     /**
-     * Start the server and return the redirect URI.
+     * Start the server on a random port and return the redirect URI.
      * @param callbackPath  The path to listen on (e.g., '/oauth2callback')
      * @returns The full redirect URI (e.g., 'http://127.0.0.1:12345/oauth2callback')
      */
     async start (callbackPath: string): Promise<string> {
+        return this.startOnPort(0, callbackPath)
+    }
+
+    /**
+     * Start the server on a specific port (or 0 for random) and return the redirect URI.
+     */
+    async startOnPort (port: number, callbackPath: string): Promise<string> {
         return new Promise((resolve, reject) => {
             this.server = http.createServer()
             this.server.once('error', reject)
-            this.server.listen(0, '127.0.0.1', () => {
+            this.server.listen(port, '127.0.0.1', () => {
                 const addr = this.server!.address()
                 if (typeof addr === 'object' && addr) {
                     this._port = addr.port
