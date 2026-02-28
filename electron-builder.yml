@@ -47,6 +47,7 @@ nsis:
   installerIcon: "./build/windows/icon.ico"
   allowToChangeInstallationDirectory: true
   shortcutName: ATerm Terminal
+  uninstallDisplayName: ATerm
 mac:
   category: public.app-category.utilities
   icon: "./build/mac/icon.icns"
