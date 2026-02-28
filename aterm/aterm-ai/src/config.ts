@@ -56,6 +56,17 @@ export class AIConfigProvider extends ConfigProvider {
             },
 
             /**
+             * OAuth tokens per provider.
+             * Each key maps to an OAuthToken object or null.
+             */
+            oauthTokens: {
+                copilot: null as any,
+                claude: null as any,
+                'gemini-oauth': null as any,
+                minimax: null as any,
+            },
+
+            /**
              * Historical token usage per provider.
              * Persisted across app restarts.
              * Each key must be pre-declared so ConfigProxy creates property descriptors.
@@ -68,6 +79,10 @@ export class AIConfigProvider extends ConfigProvider {
                 deepseek: null as any,
                 azure: null as any,
                 custom: null as any,
+                copilot: null as any,
+                claude: null as any,
+                minimax: null as any,
+                kimi: null as any,
             },
         },
     }

@@ -62,6 +62,7 @@ const config: AIConfig = {
     provider: process.env.ATERM_AI_PROVIDER || 'gemini',
     baseUrl: process.env.ATERM_AI_BASE_URL || '',
     apiKey: process.env.ATERM_AI_API_KEY || '',
+    oauthToken: process.env.ATERM_AI_OAUTH_TOKEN || '',
     model: process.env.ATERM_AI_MODEL || '',
     deployment: process.env.ATERM_AI_DEPLOYMENT || '',
     apiVersion: process.env.ATERM_AI_API_VERSION || '',

@@ -6,41 +6,163 @@
     <div class="title">Provider</div>
   </div>
   <select class="form-control" [(ngModel)]="config.store.ai.provider" (ngModelChange)="onProviderChange(); config.save()">
-    <option value="openai">OpenAI</option>
-    <option value="gemini">Google Gemini</option>
-    <option value="ollama">Ollama (local)</option>
-    <option value="deepseek">DeepSeek</option>
-    <option value="azure">Azure OpenAI</option>
-    <option value="custom">Custom</option>
+    <optgroup label="OAuth Connect">
+      <option value="copilot">GitHub Copilot</option>
+      <option value="claude">Claude (Anthropic)</option>
+      <option value="gemini-oauth">Google Gemini (OAuth)</option>
+      <option value="minimax">MiniMax</option>
+    </optgroup>
+    <optgroup label="API Key">
+      <option value="openai">OpenAI</option>
+      <option value="gemini">Google Gemini</option>
+      <option value="ollama">Ollama (local)</option>
+      <option value="deepseek">DeepSeek</option>
+      <option value="azure">Azure OpenAI</option>
+      <option value="kimi">Kimi (Moonshot)</option>
+      <option value="custom">Custom</option>
+    </optgroup>
   </select>
 </div>
-<div class="form-line">
-  <div class="header">
-    <div class="title" *ngIf="config.store.ai.provider === &quot;azure&quot;">Azure Endpoint</div>
-    <div class="title" *ngIf="config.store.ai.provider !== &quot;azure&quot;">API Base URL</div>
-    <div class="description" *ngIf="config.store.ai.provider === &quot;azure&quot;">e.g. https://xxxx.cognitiveservices.azure.com</div>
+
+<!-- OAuth Connection Section (for OAuth providers) -->
+<div *ngIf="isOAuthProvider">
+  <!-- Claude: Token Paste -->
+  <div *ngIf="config.store.ai.provider === 'claude'">
+    <div class="form-line" *ngIf="!isConnected">
+      <div class="header">
+        <div class="title">Claude Token</div>
+        <div class="description">Paste your Claude token (starts with sk-ant-) or sync from Claude Code CLI</div>
+      </div>
+      <div class="d-flex gap-2">
+        <input class="form-control" type="password" placeholder="sk-ant-..." [(ngModel)]="claudeTokenInput">
+        <button class="btn btn-primary flex-shrink-0" (click)="saveClaudeToken()" [disabled]="!claudeTokenInput">Save</button>
+      </div>
+    </div>
+    <div class="form-line" *ngIf="!isConnected">
+      <button class="btn btn-outline-secondary btn-sm" (click)="syncFromClaudeCLI()">
+        <i class="fas fa-sync"></i> Sync from Claude Code CLI
+      </button>
+    </div>
+    <div class="form-line" *ngIf="isConnected">
+      <div class="header">
+        <div class="title">Connection</div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-success">Connected</span>
+        <button class="btn btn-outline-danger btn-sm" (click)="disconnect()">Disconnect</button>
+      </div>
+    </div>
   </div>
-  <input class="form-control" type="text" [placeholder]="getBaseUrlPlaceholder()" [(ngModel)]="config.store.ai.baseUrl" (ngModelChange)="config.save()">
-</div>
-<div class="form-line" *ngIf="config.store.ai.provider === &quot;azure&quot;">
-  <div class="header">
-    <div class="title">Deployment Name</div>
+
+  <!-- Device Flow / PKCE Flow (Copilot, Gemini, MiniMax) -->
+  <div *ngIf="config.store.ai.provider !== 'claude'">
+    <div class="form-line" *ngIf="!isConnected && !oauthInProgress">
+      <div class="header">
+        <div class="title">Connection</div>
+      </div>
+      <button class="btn btn-primary" (click)="startOAuthFlow()">
+        Connect with {{ getProviderDisplayName() }}
+      </button>
+    </div>
+
+    <!-- Device Flow In Progress -->
+    <div *ngIf="oauthInProgress && deviceCode">
+      <div class="form-line">
+        <div class="header">
+          <div class="title">Authorization</div>
+          <div class="description">Go to the URL below and enter the code to authorize</div>
+        </div>
+      </div>
+      <div class="form-line">
+        <div class="header">
+          <div class="title">URL</div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <code>{{ deviceCode.verificationUri }}</code>
+          <button class="btn btn-outline-secondary btn-sm" (click)="openDeviceUrl()">
+            <i class="fas fa-external-link-alt"></i> Open
+          </button>
+        </div>
+      </div>
+      <div class="form-line">
+        <div class="header">
+          <div class="title">Code</div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <code class="fs-4 fw-bold">{{ deviceCode.userCode }}</code>
+          <button class="btn btn-outline-secondary btn-sm" (click)="copyDeviceCode()">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+        </div>
+      </div>
+      <div class="form-line">
+        <div class="text-muted">
+          <i class="fas fa-spinner fa-spin"></i> Waiting for authorization...
+          <button class="btn btn-link btn-sm text-danger" (click)="cancelOAuth()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PKCE Flow In Progress (browser opened, waiting for callback) -->
+    <div *ngIf="oauthInProgress && !deviceCode">
+      <div class="form-line">
+        <div class="text-muted">
+          <i class="fas fa-spinner fa-spin"></i> Complete sign-in in your browser...
+          <button class="btn btn-link btn-sm text-danger" (click)="cancelOAuth()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connected -->
+    <div class="form-line" *ngIf="isConnected">
+      <div class="header">
+        <div class="title">Connection</div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-success">Connected</span>
+        <button class="btn btn-outline-danger btn-sm" (click)="disconnect()">Disconnect</button>
+      </div>
+    </div>
   </div>
-  <input class="form-control" type="text" placeholder="gpt-4.1" [(ngModel)]="config.store.ai.deployment" (ngModelChange)="config.save()">
-</div>
-<div class="form-line" *ngIf="config.store.ai.provider !== &quot;ollama&quot;">
-  <div class="header">
-    <div class="title">API Key</div>
+
+  <!-- OAuth Error -->
+  <div class="form-line" *ngIf="oauthError">
+    <div class="text-danger"><i class="fas fa-exclamation-triangle"></i> {{ oauthError }}</div>
   </div>
-  <input class="form-control" type="password" placeholder="sk-..." [(ngModel)]="config.store.ai.apiKey" (ngModelChange)="config.save()">
 </div>
-<div class="form-line" *ngIf="config.store.ai.provider === &quot;azure&quot;">
-  <div class="header">
-    <div class="title">API Version</div>
+
+<!-- API Key Section (for non-OAuth providers) -->
+<div *ngIf="!isOAuthProvider">
+  <div class="form-line">
+    <div class="header">
+      <div class="title" *ngIf="config.store.ai.provider === &quot;azure&quot;">Azure Endpoint</div>
+      <div class="title" *ngIf="config.store.ai.provider !== &quot;azure&quot;">API Base URL</div>
+      <div class="description" *ngIf="config.store.ai.provider === &quot;azure&quot;">e.g. https://xxxx.cognitiveservices.azure.com</div>
+    </div>
+    <input class="form-control" type="text" [placeholder]="getBaseUrlPlaceholder()" [(ngModel)]="config.store.ai.baseUrl" (ngModelChange)="config.save()">
   </div>
-  <input class="form-control" type="text" placeholder="2024-12-01-preview" [(ngModel)]="config.store.ai.apiVersion" (ngModelChange)="config.save()">
+  <div class="form-line" *ngIf="config.store.ai.provider === &quot;azure&quot;">
+    <div class="header">
+      <div class="title">Deployment Name</div>
+    </div>
+    <input class="form-control" type="text" placeholder="gpt-4.1" [(ngModel)]="config.store.ai.deployment" (ngModelChange)="config.save()">
+  </div>
+  <div class="form-line" *ngIf="config.store.ai.provider !== &quot;ollama&quot;">
+    <div class="header">
+      <div class="title">API Key</div>
+    </div>
+    <input class="form-control" type="password" placeholder="sk-..." [(ngModel)]="config.store.ai.apiKey" (ngModelChange)="config.save()">
+  </div>
+  <div class="form-line" *ngIf="config.store.ai.provider === &quot;azure&quot;">
+    <div class="header">
+      <div class="title">API Version</div>
+    </div>
+    <input class="form-control" type="text" placeholder="2024-12-01-preview" [(ngModel)]="config.store.ai.apiVersion" (ngModelChange)="config.save()">
+  </div>
 </div>
-<div class="form-line" *ngIf="config.store.ai.provider !== &quot;azure&quot;">
+
+<!-- Model (shown for all providers except Azure) -->
+<div class="form-line" *ngIf="config.store.ai.provider !== 'azure'">
   <div class="header">
     <div class="title">Model</div>
   </div>

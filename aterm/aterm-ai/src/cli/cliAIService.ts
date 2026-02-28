@@ -14,6 +14,8 @@ export interface AIConfig {
     model: string
     deployment?: string
     apiVersion?: string
+    /** OAuth access token (takes precedence over apiKey) */
+    oauthToken?: string
 }
 
 interface ChatCompletionResponse {
@@ -37,11 +39,11 @@ export class CLIAIService implements IAIService {
             return { url: '', headers: {}, model: '', error: `No API base URL configured for provider "${provider}".` }
         }
 
-        const apiKey = this.config.apiKey || ''
+        const apiKey = this.config.oauthToken || this.config.apiKey || ''
         const model = this.config.model || preset.defaultModel
 
         if (!apiKey && provider !== 'ollama') {
-            return { url: '', headers: {}, model: '', error: 'No API key configured.' }
+            return { url: '', headers: {}, model: '', error: 'No API key or OAuth token configured.' }
         }
 
         const headers: Record<string, string> = { 'Content-Type': 'application/json' }

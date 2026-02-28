@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core'
 import { ConfigService } from 'aterm-core'
 import { EventType, StreamEvent, ToolCallRequest, TokensSummary } from './streamEvents'
 import { PROVIDER_PRESETS } from './providers'
+import { OAuthTokenManager } from './oauth/tokenManager'
+import { getOAuthProvider } from './oauth/providerRegistry'
 
 /**
  * OpenAI-compatible chat completion request/response types.
@@ -44,37 +46,56 @@ interface ChatCompletionResponse {
 export class AIService {
     constructor (
         private config: ConfigService,
+        private tokenManager: OAuthTokenManager,
     ) {}
 
     /** Resolve API config from settings */
-    private resolveConfig (): { url: string; headers: Record<string, string>; model: string; error?: string } {
+    private resolveConfig (oauthAccessToken?: string): { url: string; headers: Record<string, string>; model: string; error?: string } {
         const aiConfig = this.config.store.ai
         const provider = aiConfig?.provider || 'gemini'
         const preset = PROVIDER_PRESETS[provider] || PROVIDER_PRESETS.custom
 
         let baseUrl = (aiConfig?.baseUrl || preset.baseUrl || '').replace(/\/+$/, '')
+
+        // For OAuth providers, try to use the resolved token
+        const oauthId = preset.oauthId
+        let apiKey = aiConfig?.apiKey || ''
+
+        if (oauthId && oauthAccessToken) {
+            apiKey = oauthAccessToken
+            // Some providers derive their base URL from the token
+            const oauthConfig = getOAuthProvider(oauthId)
+            if (oauthConfig?.deriveBaseUrl) {
+                const storedToken = this.tokenManager.getStoredToken(oauthId)
+                if (storedToken) {
+                    const derived = oauthConfig.deriveBaseUrl(storedToken)
+                    if (derived) {
+                        baseUrl = derived.replace(/\/+$/, '')
+                    }
+                }
+            }
+        }
+
         if (!baseUrl) {
             return { url: '', headers: {}, model: '', error: `No API base URL configured for provider "${provider}". Go to Settings → AI.` }
         }
 
-        const apiKey = aiConfig?.apiKey || ''
         const model = aiConfig?.model || preset.defaultModel
 
         if (!apiKey && provider !== 'ollama') {
+            if (oauthId) {
+                return { url: '', headers: {}, model: '', error: `Not connected to ${preset.oauthId}. Go to Settings → AI to connect.` }
+            }
             return { url: '', headers: {}, model: '', error: 'No API key configured. Go to Settings → AI to set your API key.' }
         }
 
         const headers: Record<string, string> = { 'Content-Type': 'application/json' }
 
         if (provider === 'azure') {
-            // Azure OpenAI: api-key header, api-version query param
-            // baseUrl = endpoint e.g. https://xxx.cognitiveservices.azure.com
-            // deployment = deployment name e.g. gpt-4.1
             headers['api-key'] = apiKey
             const deployment = aiConfig?.deployment || model
             const apiVersion = aiConfig?.apiVersion || '2024-12-01-preview'
             const url = `${baseUrl}/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`
-            // Azure uses deployment in URL, not model in body — omit model by returning empty string
             return { url, headers, model: '' }
         }
 
@@ -87,10 +108,23 @@ export class AIService {
     }
 
     /**
+     * Resolve OAuth token before making API calls.
+     * Returns the access token string or null.
+     */
+    private async resolveOAuthToken (): Promise<string | undefined> {
+        const provider = this.config.store.ai?.provider || 'gemini'
+        const preset = PROVIDER_PRESETS[provider]
+        if (!preset?.oauthId) return undefined
+        const token = await this.tokenManager.getAccessToken(preset.oauthId)
+        return token || undefined
+    }
+
+    /**
      * Send a simple query to the configured LLM (non-streaming).
      */
     async query (userQuery: string, terminalContext: string): Promise<string> {
-        const cfg = this.resolveConfig()
+        const oauthToken = await this.resolveOAuthToken()
+        const cfg = this.resolveConfig(oauthToken)
         if (cfg.error) {
             return `Error: ${cfg.error}`
         }
@@ -199,7 +233,8 @@ export class AIService {
         tools: ToolDefinition[],
         signal?: AbortSignal,
     ): AsyncGenerator<StreamEvent> {
-        const cfg = this.resolveConfig()
+        const oauthToken = await this.resolveOAuthToken()
+        const cfg = this.resolveConfig(oauthToken)
         if (cfg.error) {
             yield { type: EventType.Error, value: cfg.error }
             return

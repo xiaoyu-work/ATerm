@@ -11,6 +11,7 @@ import { AIDecorator } from './decorator'
 import { AIConfigProvider } from './config'
 import { AISettingsTabProvider } from './settings'
 import { AISettingsTabComponent } from './components/aiSettingsTab.component'
+import { OAuthTokenManager } from './oauth/tokenManager'
 
 @NgModule({
     imports: [
@@ -22,6 +23,7 @@ import { AISettingsTabComponent } from './components/aiSettingsTab.component'
         { provide: ConfigProvider, useClass: AIConfigProvider, multi: true },
         { provide: SettingsTabProvider, useClass: AISettingsTabProvider, multi: true },
         AIService,
+        OAuthTokenManager,
     ],
     declarations: [
         AISettingsTabComponent,

@@ -116,11 +116,27 @@ export class Session extends BaseSession {
 
             // Inject AI environment variables for aterm-ai-cli
             const aiConfig = this.config.store.ai
-            if (aiConfig?.apiKey) {
+            // Resolve OAuth token if the selected provider uses OAuth
+            let oauthAccessToken = ''
+            const oauthId = aiConfig?.oauthTokens && (() => {
+                // Check if current provider has an OAuth token stored
+                const provider = aiConfig.provider || 'gemini'
+                const oauthProviders: Record<string, string> = { copilot: 'copilot', claude: 'claude', 'gemini-oauth': 'gemini-oauth', minimax: 'minimax' }
+                return oauthProviders[provider]
+            })()
+            if (oauthId) {
+                const tokenData = aiConfig.oauthTokens?.[oauthId]
+                if (tokenData?.accessToken) {
+                    oauthAccessToken = tokenData.accessToken
+                }
+            }
+            const hasAuth = aiConfig?.apiKey || oauthAccessToken
+            if (hasAuth) {
                 Object.assign(env, {
                     ATERM_AI_PROVIDER: aiConfig.provider || 'gemini',
                     ATERM_AI_BASE_URL: aiConfig.baseUrl || '',
-                    ATERM_AI_API_KEY: aiConfig.apiKey,
+                    ATERM_AI_API_KEY: aiConfig.apiKey || '',
+                    ATERM_AI_OAUTH_TOKEN: oauthAccessToken,
                     ATERM_AI_MODEL: aiConfig.model || '',
                     ATERM_AI_DEPLOYMENT: aiConfig.deployment || '',
                     ATERM_AI_API_VERSION: aiConfig.apiVersion || '',
