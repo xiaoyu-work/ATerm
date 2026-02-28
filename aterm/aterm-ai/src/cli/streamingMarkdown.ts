@@ -82,10 +82,31 @@ export class StreamingMarkdownRenderer {
     }
 
     /**
+     * Check whether the text before a given position is inside a list context.
+     * We look backwards for the nearest blank-line-delimited block start and
+     * check whether that block began with a list marker.
+     */
+    private isInsideList (pos: number): boolean {
+        // Walk backwards from pos to find the start of the current block
+        let blockStart = 0
+        for (let j = pos - 1; j > 0; j--) {
+            // A previous \n\n marks the end of the prior block
+            if (this.buffer[j] === '\n' && this.buffer[j - 1] === '\n') {
+                blockStart = j + 1
+                break
+            }
+        }
+        const blockHead = this.buffer.slice(blockStart, pos).trimStart()
+        // List markers: *, -, +, or digit(s) followed by . or )
+        return /^(?:[*\-+]|\d+[.)]) /.test(blockHead)
+    }
+
+    /**
      * Find the next safe block boundary in the buffer.
      * Returns the index past which we can split, or -1 if none found.
      *
-     * A safe boundary is a \n\n that is NOT inside a fenced code block.
+     * A safe boundary is a \n\n that is NOT inside a fenced code block
+     * and NOT inside a list (where loose items are separated by blank lines).
      */
     private findBlockBoundary (): number {
         let i = 0
@@ -101,9 +122,21 @@ export class StreamingMarkdownRenderer {
 
             // Check for block boundary: \n\n outside of code fence
             if (!localFenceOpen && this.buffer.startsWith('\n\n', i)) {
-                // Update fence tracking state up to this point
-                this.fenceOpen = localFenceOpen
-                return i + 2
+                const afterBreak = i + 2
+                // Peek at text after the \n\n — if it continues a list or is
+                // indented continuation, this is NOT a true block boundary.
+                const rest = this.buffer.slice(afterBreak)
+                const nextLineIsList = /^[\t ]*(?:[*\-+]|\d+[.)]) /.test(rest)
+                const insideList = this.isInsideList(i)
+
+                if (!nextLineIsList || !insideList) {
+                    // True block boundary
+                    this.fenceOpen = localFenceOpen
+                    return afterBreak
+                }
+                // Otherwise skip past this \n\n — it's a loose list gap
+                i = afterBreak
+                continue
             }
 
             i++
