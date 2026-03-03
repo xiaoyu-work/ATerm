@@ -8,10 +8,10 @@
   <select class="form-control" [(ngModel)]="config.store.ai.provider" (ngModelChange)="onProviderChange(); config.save()">
     <optgroup label="OAuth Connect">
       <option value="copilot">GitHub Copilot</option>
-      <option value="codex">OpenAI Codex</option>
+      <!-- <option value="codex">OpenAI Codex</option> -->
       <option value="claude">Claude (Anthropic)</option>
-      <option value="gemini-oauth">Google Gemini (OAuth)</option>
-      <option value="minimax">MiniMax</option>
+      <!-- <option value="gemini-oauth">Google Gemini (OAuth)</option> -->
+      <!-- <option value="minimax">MiniMax</option> -->
     </optgroup>
     <optgroup label="API Key">
       <option value="openai">OpenAI</option>

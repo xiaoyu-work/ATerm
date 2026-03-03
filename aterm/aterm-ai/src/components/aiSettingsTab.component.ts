@@ -136,7 +136,7 @@ export class AISettingsTabComponent implements OnInit {
         }
 
         // Skip providers that don't support /models endpoint
-        if (provider === 'azure' || provider === 'custom' || provider === 'copilot') {
+        if (provider === 'azure' || provider === 'custom' || provider === 'copilot' || provider === 'codex') {
             this.fetchedModels = []
             return
         }
@@ -175,9 +175,20 @@ export class AISettingsTabComponent implements OnInit {
         // Fetch /models
         const modelsUrl = `${baseUrl}/models`
         this.modelsFetching = true
+        const fetchHeaders: Record<string, string> = { Authorization: authHeader }
+
+        // Gemini OAuth requires the Google Cloud project header
+        if (provider === 'gemini-oauth' && preset.oauthId) {
+            const storedToken = this.tokenManager.getStoredToken(preset.oauthId)
+            const projectId = storedToken?.metadata?.projectId
+            if (projectId) {
+                fetchHeaders['x-goog-user-project'] = projectId
+            }
+        }
+
         try {
             const res = await fetch(modelsUrl, {
-                headers: { Authorization: authHeader },
+                headers: fetchHeaders,
                 signal: AbortSignal.timeout(10000),
             })
             if (!res.ok) {

@@ -25,6 +25,8 @@ export interface OAuthProviderConfig {
     tokenUrl: string
     /** PKCE: authorization URL */
     authUrl?: string
+    /** Extra query parameters to include in the authorization URL */
+    extraAuthParams?: Record<string, string>
     /** Whether this provider supports token refresh */
     supportsRefresh: boolean
     /** Default model for this provider */

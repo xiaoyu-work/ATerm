@@ -33,6 +33,12 @@ export function buildAuthUrl (
         code_challenge_method: 'S256',
     })
 
+    if (config.extraAuthParams) {
+        for (const [key, value] of Object.entries(config.extraAuthParams)) {
+            params.set(key, value)
+        }
+    }
+
     return `${config.authUrl}?${params.toString()}`
 }
 

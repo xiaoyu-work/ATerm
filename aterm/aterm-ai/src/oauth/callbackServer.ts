@@ -23,8 +23,10 @@ export class OAuthCallbackServer {
 
     /**
      * Start the server on a specific port (or 0 for random) and return the redirect URI.
+     * @param hostname Hostname to use in the redirect URI (default '127.0.0.1').
+     *                 The server always binds to 127.0.0.1 regardless of this value.
      */
-    async startOnPort (port: number, callbackPath: string): Promise<string> {
+    async startOnPort (port: number, callbackPath: string, hostname = '127.0.0.1'): Promise<string> {
         return new Promise((resolve, reject) => {
             this.server = http.createServer()
             this.server.once('error', reject)
@@ -33,7 +35,7 @@ export class OAuthCallbackServer {
                 if (typeof addr === 'object' && addr) {
                     this._port = addr.port
                 }
-                resolve(`http://127.0.0.1:${this._port}${callbackPath}`)
+                resolve(`http://${hostname}:${this._port}${callbackPath}`)
             })
         })
     }

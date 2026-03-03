@@ -104,6 +104,15 @@ export class AIService {
             headers['Authorization'] = `Bearer ${apiKey}`
         }
 
+        // Gemini OAuth requires the Google Cloud project header
+        if (provider === 'gemini-oauth' && oauthId) {
+            const storedToken = this.tokenManager.getStoredToken(oauthId)
+            const projectId = storedToken?.metadata?.projectId
+            if (projectId) {
+                headers['x-goog-user-project'] = projectId
+            }
+        }
+
         // Copilot requires editor identification headers
         if (provider === 'copilot') {
             headers['Editor-Version'] = 'vscode/1.96.2'

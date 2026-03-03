@@ -23,6 +23,10 @@ export const OPENAI_CODEX_CONFIG: OAuthProviderConfig = {
     scopes: ['openid', 'profile', 'email', 'offline_access'],
     authUrl: 'https://auth.openai.com/oauth/authorize',
     tokenUrl: 'https://auth.openai.com/oauth/token',
+    extraAuthParams: {
+        codex_cli_simplified_flow: 'true',
+        id_token_add_organizations: 'true',
+    },
     supportsRefresh: true,
     defaultModel: 'gpt-4.1',
     baseUrl: 'https://api.openai.com/v1/',
@@ -39,8 +43,9 @@ export async function runCodexOAuthFlow (
     const state = crypto.randomBytes(16).toString('hex')
 
     // Start callback server on fixed port 1455
+    // OpenAI's registered redirect uses "localhost" not "127.0.0.1"
     const server = new OAuthCallbackServer()
-    const redirectUri = await server.startOnPort(CALLBACK_PORT, CALLBACK_PATH)
+    const redirectUri = await server.startOnPort(CALLBACK_PORT, CALLBACK_PATH, 'localhost')
 
     try {
         const authUrl = buildAuthUrl(OPENAI_CODEX_CONFIG, challenge, state, redirectUri)
