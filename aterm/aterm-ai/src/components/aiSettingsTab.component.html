@@ -185,6 +185,16 @@
 </div>
 <div class="form-line">
   <div class="header">
+    <div class="title">Agent Backend</div>
+    <div class="description">Engine used to process AI queries and execute tools</div>
+  </div>
+  <select class="form-control" [(ngModel)]="config.store.ai.agentBackend" (ngModelChange)="config.save()">
+    <option value="builtin">Built-in</option>
+    <option value="copilot-sdk">Copilot SDK</option>
+  </select>
+</div>
+<div class="form-line">
+  <div class="header">
     <div class="title">Context Blocks</div>
     <div class="description">Number of recent command blocks to include as AI context</div>
   </div>

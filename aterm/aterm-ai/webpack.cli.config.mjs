@@ -8,12 +8,15 @@ const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 
 export default () => ({
     target: 'node',
-    entry: './src/cli/main.ts',
+    entry: {
+        cli: './src/cli/main.ts',
+        copilotSdkMain: './src/cli/copilotSdkMain.ts',
+    },
     context: __dirname,
     devtool: 'source-map',
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'cli.js',
+        filename: '[name].js',
         libraryTarget: 'commonjs2',
     },
     mode: process.env.ATERM_DEV ? 'development' : 'production',
@@ -59,5 +62,8 @@ export default () => ({
         'net',
         'crypto',
         'util',
+        // @github/copilot-sdk is NOT externalized here — it's loaded via
+        // dynamic import(/* webpackIgnore: true */) in copilotSdkMain.ts
+        // to avoid ERR_REQUIRE_ESM (the SDK is ESM-only).
     ],
 })

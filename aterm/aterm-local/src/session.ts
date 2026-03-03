@@ -157,7 +157,14 @@ export class Session extends BaseSession {
             const isOAuthProvider = !!oauthId
             // Always inject CLI path so the @ command works;
             // the CLI itself will show auth errors if credentials are missing.
+            // Select CLI entry point based on agent backend setting
+            const agentBackend = aiConfig.agentBackend || 'builtin'
+            const cliEntryPoint = agentBackend === 'copilot-sdk'
+                ? path.join(__dirname, '..', '..', 'aterm-ai', 'dist', 'copilotSdkMain.js')
+                : path.join(__dirname, '..', '..', 'aterm-ai', 'dist', 'cli.js')
+
             Object.assign(env, {
+                NODE_NO_WARNINGS: '1',
                 ATERM_AI_PROVIDER: aiConfig.provider || 'gemini',
                 ATERM_AI_BASE_URL: copilotBaseUrl || aiConfig.baseUrl || '',
                 ATERM_AI_API_KEY: isOAuthProvider ? '' : (aiConfig.apiKeys?.[aiConfig.provider] || aiConfig.apiKey || ''),
@@ -166,10 +173,22 @@ export class Session extends BaseSession {
                 ATERM_AI_DEPLOYMENT: aiConfig.deployment || '',
                 ATERM_AI_API_VERSION: aiConfig.apiVersion || '',
                 ATERM_AI_COLORS: JSON.stringify(aiConfig.colorTheme || {}),
-                ATERM_AI_CLI_PATH: path.join(__dirname, '..', '..', 'aterm-ai', 'dist', 'cli.js'),
+                ATERM_AI_CLI_PATH: cliEntryPoint,
                 ATERM_AI_SESSION_FILE: path.join(os.tmpdir(), `aterm-ai-session-${process.pid}-${Date.now()}.json`),
                 ATERM_AI_TMP: os.tmpdir(),
+                ATERM_AI_AGENT_BACKEND: agentBackend,
             })
+
+            // Pass the original GitHub OAuth token for Copilot SDK (not the exchanged API token).
+            // The SDK handles its own token exchange internally.
+            if (agentBackend === 'copilot-sdk' && aiConfig.provider === 'copilot') {
+                const copilotTokenData = aiConfig.oauthTokens?.copilot
+                if (copilotTokenData?.metadata?.githubToken) {
+                    env['ATERM_AI_GITHUB_TOKEN'] = copilotTokenData.metadata.githubToken
+                } else if (copilotTokenData?.accessToken) {
+                    env['ATERM_AI_GITHUB_TOKEN'] = copilotTokenData.accessToken
+                }
+            }
 
             pty = await this.ptyInterface.spawn(options.command, options.args, {
                 name: 'xterm-256color',

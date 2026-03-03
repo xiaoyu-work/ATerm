@@ -11,6 +11,13 @@ export class AIConfigProvider extends ConfigProvider {
             provider: 'gemini',
 
             /**
+             * Agent backend engine.
+             * 'builtin' uses ATerm's own AgentLoop + OpenAI-compatible streaming.
+             * 'copilot-sdk' uses GitHub Copilot SDK's agent runtime with built-in tools.
+             */
+            agentBackend: 'builtin' as 'builtin' | 'copilot-sdk',
+
+            /**
              * API base URL (OpenAI-compatible).
              * Leave empty to use the provider preset's default URL.
              *
