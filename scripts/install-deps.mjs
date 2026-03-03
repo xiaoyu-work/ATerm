@@ -13,20 +13,14 @@ sh.exec(`yarn install --mode=skip-build`, { fatal: true })
 sh.exec(`yarn postinstall`, { fatal: false })
 sh.cd('..')
 
-sh.cd('web')
-sh.exec(`yarn install`, { fatal: true })
-sh.exec(`yarn patch-package`, { fatal: true })
-sh.cd('..')
-
 vars.allPackages.forEach(plugin => {
     log.info('deps', plugin)
-    const pluginDir = plugin === 'web' ? plugin : 'aterm/' + plugin
-    sh.cd(pluginDir)
+    sh.cd('aterm/' + plugin)
     sh.exec(`yarn install`, { fatal: true })
     if (sh.test('-d', 'patches')) {
         sh.exec(`yarn patch-package`, { fatal: false })
     }
-    sh.cd(plugin === 'web' ? '..' : '../..')
+    sh.cd('../..')
 })
 
 if (['darwin', 'linux'].includes(process.platform)) {
