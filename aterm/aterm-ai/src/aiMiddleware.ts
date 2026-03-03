@@ -22,8 +22,8 @@ const enum State {
     CAPTURING,
 }
 
-const LARGE_PASTE_LINE_THRESHOLD = 5
-const LARGE_PASTE_CHAR_THRESHOLD = 500
+const LARGE_PASTE_LINE_THRESHOLD = 1
+const LARGE_PASTE_CHAR_THRESHOLD = 300
 const PASTED_TEXT_PLACEHOLDER_REGEX = /\[Pasted Text: \d+ (?:lines|chars)(?: #\d+)?\]/g
 const ANSI_REGEX = /\x1b\[[0-9;]*[a-zA-Z]|\x1b\].*?(\x07|\x1b\\)|\x1b[()][0-9A-B]|\x1b[>=<]|\x1b\[[\?]?[0-9;]*[a-zA-Z]/g
 const MAX_CONTEXT_LINES = 100
@@ -67,12 +67,10 @@ export class AIMiddleware extends SessionMiddleware {
     }
 
     private renderCapturingPrompt (): void {
-        // For multi-line content, show first line + line count
-        const lines = this.promptBuffer.split('\n')
-        let display = lines[0]
-        if (lines.length > 1) {
-            display += colors.gray(` (${lines.length} lines)`)
-        }
+        // Highlight paste placeholders (all multi-line pastes are collapsed to single-line placeholders)
+        const display = this.promptBuffer.replace(PASTED_TEXT_PLACEHOLDER_REGEX, match =>
+            colors.yellow(match),
+        )
         this.outputToTerminal.next(Buffer.from(
             '\r\x1b[2K' + colors.cyan('@ ') + display,
         ))
@@ -223,21 +221,23 @@ export class AIMiddleware extends SessionMiddleware {
      * special characters in pasted content are handled safely.
      */
     private submitToShell (): void {
-        let query = this.promptBuffer.trim()
+        const rawPrompt = this.promptBuffer.trim()
         this.promptBuffer = ''
 
+        if (!rawPrompt) {
+            this.state = State.NORMAL
+            this.inputLength = 0
+            this.outputToSession.next(Buffer.from('\r'))
+            return
+        }
+
+        // Expand paste placeholders to full content for the actual query
+        let query = rawPrompt
         if (Object.keys(this.pastedContent).length > 0) {
             query = query.replace(PASTED_TEXT_PLACEHOLDER_REGEX, match =>
                 this.pastedContent[match] ?? match,
             )
             this.pastedContent = {}
-        }
-
-        if (!query) {
-            this.state = State.NORMAL
-            this.inputLength = 0
-            this.outputToSession.next(Buffer.from('\r'))
-            return
         }
 
         // Write query to temp file with short ID to keep the shell command short.
@@ -276,13 +276,12 @@ export class AIMiddleware extends SessionMiddleware {
             // Best effort — AI still works without context
         }
 
-        // Show "@ <first line preview>" as the visible command
-        const firstLine = query.split('\n')[0]
-        const preview = firstLine.length > 80 ? firstLine.slice(0, 80) + '...' : firstLine
-        const lineCount = query.split('\n').length
-        const displaySuffix = lineCount > 1 ? colors.gray(` (${lineCount} lines)`) : ''
+        // Show prompt with paste placeholders (single-line to stay cursor-compatible with ConPTY)
+        const display = rawPrompt.replace(PASTED_TEXT_PLACEHOLDER_REGEX, match =>
+            colors.yellow(match),
+        )
         this.outputToTerminal.next(Buffer.from(
-            '\r\x1b[2K' + colors.cyan('@ ') + preview + displaySuffix + '\r\n',
+            '\r\x1b[2K' + colors.cyan('@ ') + display + '\r\n',
         ))
 
         // Start echo suppression before injecting the command
@@ -299,7 +298,7 @@ export class AIMiddleware extends SessionMiddleware {
         }, 2000)
 
         // Store mapping for output filtering (handles resize repaint)
-        this.queryMap.set(queryId, preview)
+        this.queryMap.set(queryId, rawPrompt)
         if (this.queryMap.size > 50) {
             const oldest = this.queryMap.keys().next().value
             if (oldest !== undefined) {
