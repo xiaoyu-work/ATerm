@@ -48,8 +48,6 @@ export const packagesWithDocs = [
 
 export const allPackages = [
     ...builtinPlugins,
-    'web',
-    'aterm-web-demo',
 ]
 
 export const bundledModules = [
