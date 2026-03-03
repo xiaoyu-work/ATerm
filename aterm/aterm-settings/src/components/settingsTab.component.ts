@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import * as os from 'os'
+import * as path from 'path'
+import * as fs from 'fs'
 import { marker as _ } from '@biesbjerg/ngx-translate-extract-marker'
 import { debounce } from 'utils-decorators/dist/esm/debounce/debounce'
 import { Component, Inject, Input, HostBinding, Injector } from '@angular/core'
@@ -32,6 +35,8 @@ export class SettingsTabComponent extends BaseTabComponent {
     isShellIntegrationInstalled = false
     checkingForUpdate = false
     updateAvailable = false
+    cleaningTempFiles = false
+    cleanupResultMessage = ''
     allLanguages = LocaleService.allLanguages
     @HostBinding('class.pad-window-controls') padWindowControls = false
 
@@ -95,6 +100,33 @@ export class SettingsTabComponent extends BaseTabComponent {
         this.checkingForUpdate = true
         this.updateAvailable = await this.updater.check()
         this.checkingForUpdate = false
+    }
+
+    async cleanupAITempFiles () {
+        this.cleaningTempFiles = true
+        this.cleanupResultMessage = ''
+        try {
+            const tmpDir = os.tmpdir()
+            const entries = await fs.promises.readdir(tmpDir)
+            const aiFiles = entries.filter(f =>
+                (f.startsWith('aq-') && f.endsWith('.txt')) ||
+                (f.startsWith('ac-') && f.endsWith('.json')),
+            )
+            let deleted = 0
+            for (const file of aiFiles) {
+                try {
+                    await fs.promises.unlink(path.join(tmpDir, file))
+                    deleted++
+                } catch {
+                    // skip files that can't be deleted
+                }
+            }
+            this.cleanupResultMessage = `Cleaned ${deleted} file(s)`
+        } catch {
+            this.cleanupResultMessage = 'Cleanup failed'
+        }
+        this.cleaningTempFiles = false
+        setTimeout(() => { this.cleanupResultMessage = '' }, 5000)
     }
 
 }

@@ -157,7 +157,7 @@ export class AIService {
                 body: JSON.stringify({
                     model: cfg.model,
                     messages,
-                    max_tokens: 2048,
+                    max_tokens: this.config.store.ai?.maxTokens || 32768,
                     temperature: 0.7,
                 }),
             })
@@ -275,7 +275,7 @@ export class AIService {
                 tool_choice: tools.length > 0 ? 'auto' : undefined,
                 stream: true,
                 stream_options: { include_usage: true },
-                max_tokens: 16384,
+                max_tokens: this.config.store.ai?.maxTokens || 32768,
                 temperature: 0.7,
             }
             // Only include model for non-Azure providers (Azure uses deployment in URL)

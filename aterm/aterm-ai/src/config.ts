@@ -46,6 +46,9 @@ export class AIConfigProvider extends ConfigProvider {
             /** Azure API version (only used when provider is 'azure') */
             apiVersion: '2024-12-01-preview',
 
+            /** Max tokens for streaming tool calls (agent loop). Higher = longer responses. */
+            maxTokens: 32768,
+
             /** Number of recent terminal blocks to include as AI context */
             maxContextBlocks: 5,
 

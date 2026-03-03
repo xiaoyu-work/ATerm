@@ -22,6 +22,35 @@ function extractUrls (text: string): string[] {
     return deduped
 }
 
+/** Max concurrency for parallel fetches */
+const FETCH_CONCURRENCY = 5
+
+/**
+ * Fetch a single URL with timeout. Returns a formatted section string.
+ */
+async function fetchSingle (url: string): Promise<string> {
+    try {
+        const ac = new AbortController()
+        const timer = setTimeout(() => ac.abort(), 15000)
+        const res = await fetch(url, {
+            signal: ac.signal,
+            redirect: 'follow',
+        })
+        clearTimeout(timer)
+
+        if (!res.ok) {
+            return `URL: ${url}\nStatus: HTTP ${res.status}`
+        }
+
+        const contentType = res.headers.get('content-type') || ''
+        const raw = await res.text()
+        const text = raw.replace(/\s+/g, ' ').trim().slice(0, 8000)
+        return `URL: ${url}\nContent-Type: ${contentType || '(unknown)'}\nContent:\n${text || '(empty body)'}`
+    } catch (err: any) {
+        return `URL: ${url}\nError: ${err.message}`
+    }
+}
+
 class WebFetchToolInvocation extends BaseToolInvocation<WebFetchToolParams> {
     constructor (params: WebFetchToolParams) {
         super(params, ToolKind.Fetch)
@@ -41,27 +70,13 @@ class WebFetchToolInvocation extends BaseToolInvocation<WebFetchToolParams> {
             return this.error('No valid URLs found in prompt. Include one or more full http(s):// URLs.')
         }
 
+        // Fetch URLs in parallel with concurrency limit
         const sections: string[] = []
-        for (const url of urls) {
-            try {
-                const ac = new AbortController()
-                const timer = setTimeout(() => ac.abort(), 15000)
-                const res = await fetch(url, { signal: ac.signal })
-                clearTimeout(timer)
-
-                if (!res.ok) {
-                    sections.push(`URL: ${url}\nStatus: HTTP ${res.status}`)
-                    continue
-                }
-
-                const contentType = res.headers.get('content-type') || ''
-                const raw = await res.text()
-                const text = raw.replace(/\s+/g, ' ').trim().slice(0, 8000)
-                sections.push(
-                    `URL: ${url}\nContent-Type: ${contentType || '(unknown)'}\nContent:\n${text || '(empty body)'}`,
-                )
-            } catch (err: any) {
-                sections.push(`URL: ${url}\nError: ${err.message}`)
+        for (let i = 0; i < urls.length; i += FETCH_CONCURRENCY) {
+            const batch = urls.slice(i, i + FETCH_CONCURRENCY)
+            const results = await Promise.allSettled(batch.map(fetchSingle))
+            for (const result of results) {
+                sections.push(result.status === 'fulfilled' ? result.value : `Error: ${result.reason}`)
             }
         }
 
@@ -86,4 +101,3 @@ export class WebFetchTool extends DeclarativeTool<WebFetchToolParams> {
         return new WebFetchToolInvocation(params)
     }
 }
-

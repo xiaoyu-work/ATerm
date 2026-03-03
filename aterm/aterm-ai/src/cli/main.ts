@@ -66,6 +66,7 @@ const config: AIConfig = {
     model: process.env.ATERM_AI_MODEL || '',
     deployment: process.env.ATERM_AI_DEPLOYMENT || '',
     apiVersion: process.env.ATERM_AI_API_VERSION || '',
+    maxTokens: parseInt(process.env.ATERM_AI_MAX_TOKENS || '32768', 10) || 32768,
 }
 const sessionFile = process.env.ATERM_AI_SESSION_FILE || ''
 

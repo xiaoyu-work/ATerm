@@ -355,6 +355,7 @@ export class AgentLoop {
                 this.callbacks.onContent('\r\n(aborted)\r\n')
             } else {
                 this.callbacks.onError(err.message)
+                this.cleanup()
                 return { messages: this.messages.slice(startIndex), usage: this.usage }
             }
         }

@@ -17,6 +17,8 @@ export interface AIConfig {
     apiVersion?: string
     /** OAuth access token (takes precedence over apiKey) */
     oauthToken?: string
+    /** Max tokens for responses. Defaults to 32768. */
+    maxTokens?: number
 }
 
 interface ChatCompletionResponse {
@@ -90,7 +92,7 @@ export class CLIAIService implements IAIService {
                 body: JSON.stringify({
                     model: cfg.model,
                     messages,
-                    max_tokens: 2048,
+                    max_tokens: this.config.maxTokens || 32768,
                     temperature: 0.7,
                 }),
             })
@@ -172,7 +174,7 @@ export class CLIAIService implements IAIService {
                 tool_choice: tools.length > 0 ? 'auto' : undefined,
                 stream: true,
                 stream_options: { include_usage: true },
-                max_tokens: 16384,
+                max_tokens: this.config.maxTokens || 32768,
                 temperature: 0.7,
             }
             if (cfg.model) {

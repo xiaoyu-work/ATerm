@@ -61,7 +61,11 @@ class EditToolInvocation extends BaseToolInvocation<EditToolParams> {
             return this.error(`Reading file: ${err.message}`)
         }
 
-        const expected = this.params.expected_replacements || 1
+        if (!this.params.old_string) {
+            return this.error('old_string must not be empty.')
+        }
+
+        const expected = this.params.expected_replacements ?? 1
         let count = 0
 
         // Count occurrences

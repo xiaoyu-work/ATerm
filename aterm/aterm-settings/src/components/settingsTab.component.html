@@ -41,6 +41,14 @@
             </div>
             <button class="btn btn-secondary" (click)="hostWindow.openDevTools()"><i class="fas fa-bug"></i><span translate>Open DevTools</span></button>
           </div>
+          <h3 translate>Maintenance</h3>
+          <div class="form-line">
+            <div class="header">
+              <div class="title" translate>Clean up AI temp files</div>
+              <div class="description" translate>Remove temporary files (aq-*.txt, ac-*.json) created by AI operations</div>
+            </div>
+            <button class="btn btn-secondary" (click)="cleanupAITempFiles()" [disabled]="cleaningTempFiles"><i class="fas fa-broom" [class.fa-spin]="cleaningTempFiles"></i> <span>{{cleanupResultMessage || ('Clean up' | translate)}}</span></button>
+          </div>
           <h3 translate>Accessibility</h3>
           <div class="form-line">
             <div class="header">
