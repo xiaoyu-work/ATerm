@@ -14,7 +14,7 @@ import {
     getCompressionPrompt,
     renderAgentSkills,
     renderSubAgents,
-} from './geminiPrompt'
+} from './systemPrompt'
 import { discoverAgentSkills, discoverSubAgents } from './agentMetadata'
 
 export interface PromptProviderOptions {
@@ -98,7 +98,7 @@ function applyPromptTemplateSubstitutions (
 }
 
 function isSectionEnabled (key: string): boolean {
-    const value = process.env[`GEMINI_PROMPT_${key.toUpperCase()}`]
+    const value = process.env[`ATERM_PROMPT_${key.toUpperCase()}`]
     const lowered = value?.trim().toLowerCase()
     return lowered !== '0' && lowered !== 'false'
 }
@@ -145,8 +145,8 @@ export class PromptProvider {
             skills: resolvedSkills,
             subAgents: resolvedSubAgents,
         }
-        const systemMdResolution = resolvePathFromEnv(process.env['GEMINI_SYSTEM_MD'])
-        const defaultSystemMdPath = path.resolve(path.join(cwd, '.gemini', 'system.md'))
+        const systemMdResolution = resolvePathFromEnv(process.env['ATERM_SYSTEM_MD'])
+        const defaultSystemMdPath = path.resolve(path.join(cwd, '.aterm', 'system.md'))
         const interactive = resolvedOptions.interactive ?? true
         const planMode = resolvedOptions.planMode ?? false
         const isYoloMode = resolvedOptions.isYoloMode ?? false
@@ -237,7 +237,7 @@ ${resolvedOptions.context}
     }
 
     private maybeWriteSystemMd (prompt: string, defaultPath: string): void {
-        const resolution = resolvePathFromEnv(process.env['GEMINI_WRITE_SYSTEM_MD'])
+        const resolution = resolvePathFromEnv(process.env['ATERM_WRITE_SYSTEM_MD'])
         if ((!resolution.value && !resolution.isSwitch) || resolution.isDisabled) {
             return
         }

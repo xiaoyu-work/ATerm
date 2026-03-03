@@ -1,7 +1,7 @@
 import fs from 'fs'
 import os from 'os'
 import path from 'path'
-import { AgentSkillOptions, SubAgentOptions } from './geminiPrompt'
+import { AgentSkillOptions, SubAgentOptions } from './systemPrompt'
 
 const MAX_SKILL_SCAN_FILES = 300
 

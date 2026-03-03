@@ -1,5 +1,5 @@
 /**
- * Prompt snippets adapted from gemini-cli snippets.ts and snippets.legacy.ts.
+ * System prompt snippets for the aterm AI agent.
  */
 
 const ASK_USER_TOOL_NAME = 'ask_user'
@@ -81,8 +81,8 @@ function formatToolName (name: string): string {
 export function renderPreamble (options?: PreambleOptions): string {
     if (!options) return ''
     return options.interactive
-        ? 'You are an interactive CLI AI assistant specializing in software engineering tasks. Your primary goal is to help users safely and effectively.'
-        : 'You are an autonomous CLI AI assistant specializing in software engineering tasks. Your primary goal is to help users safely and effectively.'
+        ? 'You are an interactive CLI AI assistant specializing in software engineering tasks. Your identity and capabilities are determined by the underlying model configured by the user. Your primary goal is to help users safely and effectively.'
+        : 'You are an autonomous CLI AI assistant specializing in software engineering tasks. Your identity and capabilities are determined by the underlying model configured by the user. Your primary goal is to help users safely and effectively.'
 }
 
 export function renderCoreMandates (options?: CoreMandatesOptions): string {
