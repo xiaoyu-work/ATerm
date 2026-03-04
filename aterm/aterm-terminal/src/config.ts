@@ -122,6 +122,7 @@ export class TerminalConfigProvider extends ConfigProvider {
                 ],
                 paste: [
                     'Ctrl-Shift-V',
+                    'Ctrl-V',
                     'Shift-Insert',
                 ],
                 'select-all': ['Ctrl-Shift-A'],
