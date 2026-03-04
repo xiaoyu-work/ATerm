@@ -187,7 +187,7 @@ function __aterm_ai {
 }
 `
 
-type ShellType = 'bash' | 'zsh' | 'fish' | 'pwsh' | 'unknown'
+type ShellType = 'bash' | 'zsh' | 'fish' | 'pwsh' | 'cmd' | 'unknown'
 
 export function detectShellType (command: string): ShellType {
     const base = path.basename(command).toLowerCase().replace(/\.exe$/i, '')
@@ -195,6 +195,7 @@ export function detectShellType (command: string): ShellType {
     if (base === 'zsh') return 'zsh'
     if (base === 'fish') return 'fish'
     if (base === 'pwsh' || base === 'powershell') return 'pwsh'
+    if (base === 'cmd') return 'cmd'
     return 'unknown'
 }
 
@@ -270,6 +271,24 @@ export function getShellIntegration (
             if (!result.args.some(a => a === '-NoExit')) {
                 result.args.unshift('-NoExit')
                 result.args.push('-Command', PWSH_INTEGRATION.trim())
+            }
+            break
+        }
+        case 'cmd': {
+            // cmd.exe doesn't support shell functions. Create a stub __aterm_ai.cmd
+            // in a temp directory and prepend it to PATH so the user gets a friendly
+            // warning instead of "'__aterm_ai' is not recognized".
+            const tmpDir = path.join(os.tmpdir(), `aterm-cmd-${process.pid}`)
+            try {
+                fs.mkdirSync(tmpDir, { recursive: true })
+                fs.writeFileSync(
+                    path.join(tmpDir, '__aterm_ai.cmd'),
+                    '@echo [AI] cmd.exe does not support AI mode. Please use PowerShell or Git Bash.\r\n',
+                    'utf-8',
+                )
+                result.env.PATH = tmpDir + ';' + (env.PATH || process.env.PATH || '')
+            } catch (e) {
+                console.warn('[aterm-local] Failed to write cmd AI stub:', e)
             }
             break
         }
