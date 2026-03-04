@@ -627,21 +627,14 @@ async function main (): Promise<void> {
 
         mdRenderer.flush()
 
-        // If user denied a tool and gave feedback, use that as the next prompt
+        // If user denied a tool and gave feedback, continue with that
         if (pendingFeedback) {
             nextPrompt = pendingFeedback
             continue
         }
 
-        // Otherwise ask if user wants to continue
-        process.stdout.write(c.cyan('\n> '))
-        const followUp = await readLine()
-        if (followUp.trim()) {
-            nextPrompt = followUp.trim()
-        } else {
-            // Empty input — end conversation
-            break
-        }
+        // Otherwise exit — most @ interactions are single-turn
+        break
     }
 
     // Save session ID for continuity
