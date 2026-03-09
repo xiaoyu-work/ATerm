@@ -9,6 +9,7 @@
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
+import { spawn, ChildProcess } from 'child_process'
 import colors from 'ansi-colors'
 import { PlatformService } from 'aterm-core'
 import { BlockTracker, SessionMiddleware } from 'aterm-terminal'
@@ -33,7 +34,6 @@ export class AIMiddleware extends SessionMiddleware {
     private promptBuffer = ''
     /** Number of characters user has typed on the current shell line (0 = at line start) */
     private inputLength = 0
-    private bannerShown = false
     /** Stores full pasted content keyed by placeholder ID */
     private pastedContent: Record<string, string> = {}
     /** Maps queryId → display text for filtering __aterm_ai from resize repaint */
@@ -51,6 +51,14 @@ export class AIMiddleware extends SessionMiddleware {
     private contextBuffer: string[] = []
     blockTracker: BlockTracker | null = null
     maxContextBlocks = 5
+    /** True for SSH/Telnet/Serial sessions — AI runs locally instead of shell injection */
+    isRemoteSession = false
+    /** Config service reference for computing AI env vars (set by decorator for remote sessions) */
+    configService: any = null
+    /** Local AI CLI child process (active only during AI execution in remote sessions) */
+    private localProcess: ChildProcess | null = null
+    /** Session file path for conversation persistence across queries within one session */
+    private sessionFile = ''
 
     constructor (
         private platform: PlatformService,
@@ -221,6 +229,13 @@ export class AIMiddleware extends SessionMiddleware {
      * special characters in pasted content are handled safely.
      */
     private submitToShell (): void {
+        // For remote sessions, spawn CLI locally instead of injecting shell command
+        if (this.isRemoteSession) {
+            console.log('[aterm-ai] Remote session: spawning CLI locally')
+            this.submitLocally()
+            return
+        }
+
         const rawPrompt = this.promptBuffer.trim()
         this.promptBuffer = ''
 
@@ -319,13 +334,6 @@ export class AIMiddleware extends SessionMiddleware {
     // ───────────────────────── Session I/O ─────────────────────────
 
     feedFromSession (data: Buffer): void {
-        if (!this.bannerShown) {
-            this.bannerShown = true
-            this.outputToTerminal.next(Buffer.from(
-                '\r\n' + colors.cyan('  [AI Ready] ') + colors.gray('Type "@ " + prompt + Enter to chat with AI') + '\r\n',
-            ))
-        }
-
         // Detect alternate screen buffer switches (used by TUI apps like vim, claude, etc.)
         // Must check BEFORE any early returns so we always track the state.
         const raw = data.toString('utf-8')
@@ -393,6 +401,12 @@ export class AIMiddleware extends SessionMiddleware {
         // Don't intercept @ or track inputLength — the TUI app handles everything.
         if (this.alternateScreenActive) {
             this.outputToSession.next(data)
+            return
+        }
+
+        // When local AI process is running (remote sessions), forward all input to it
+        if (this.localProcess) {
+            this.localProcess.stdin?.write(data)
             return
         }
 
@@ -514,10 +528,226 @@ export class AIMiddleware extends SessionMiddleware {
         return id
     }
 
+    // ───────────────────────── Remote session support ─────────────────────────
+
+    /**
+     * Build environment variables for the AI CLI process.
+     * Mirrors the env var logic from aterm-local/src/session.ts.
+     */
+    private async buildAIEnv (): Promise<Record<string, string>> {
+        const aiConfig = this.configService?.store?.ai
+        if (!aiConfig) {
+            return {}
+        }
+
+        const provider = aiConfig.provider || 'gemini'
+
+        // Check if provider uses OAuth (same mapping as local session.ts)
+        const oauthProviders: Record<string, string> = {
+            copilot: 'copilot', codex: 'codex', claude: 'claude',
+            'gemini-oauth': 'gemini-oauth', minimax: 'minimax',
+        }
+        const oauthId = aiConfig.oauthTokens ? (oauthProviders[provider] || '') : ''
+
+        let oauthAccessToken = ''
+        let copilotBaseUrl = ''
+        if (oauthId) {
+            const tokenData = aiConfig.oauthTokens?.[oauthId]
+            if (tokenData?.accessToken) {
+                if (oauthId === 'copilot' && tokenData.metadata?.githubToken) {
+                    try {
+                        const res = await fetch('https://api.github.com/copilot_internal/v2/token', {
+                            headers: { Accept: 'application/json', Authorization: `Bearer ${tokenData.metadata.githubToken}` },
+                        })
+                        if (res.ok) {
+                            const json = await res.json()
+                            oauthAccessToken = json.token || tokenData.accessToken
+                            const epMatch = (json.token || '').match(/(?:^|;)\s*proxy-ep=([^;\s]+)/i)
+                            if (epMatch?.[1]) {
+                                const host = epMatch[1].trim().replace(/^https?:\/\//, '').replace(/^proxy\./i, 'api.')
+                                copilotBaseUrl = `https://${host}`
+                            }
+                        } else {
+                            oauthAccessToken = tokenData.accessToken
+                        }
+                    } catch {
+                        oauthAccessToken = tokenData.accessToken
+                    }
+                } else {
+                    oauthAccessToken = tokenData.accessToken
+                }
+            }
+        }
+
+        const isOAuth = !!oauthId
+        const agentBackend = aiConfig.agentBackend || 'builtin'
+        const cliEntryPoint = agentBackend === 'copilot-sdk'
+            ? path.join(__dirname, 'copilotSdkMain.js')
+            : path.join(__dirname, 'cli.js')
+
+        if (!this.sessionFile) {
+            this.sessionFile = path.join(os.tmpdir(),
+                `aterm-ai-session-remote-${process.pid}-${Date.now()}.json`)
+        }
+
+        const env: Record<string, string> = {
+            NODE_NO_WARNINGS: '1',
+            ATERM_AI_PROVIDER: provider,
+            ATERM_AI_BASE_URL: copilotBaseUrl || aiConfig.baseUrl || '',
+            ATERM_AI_API_KEY: isOAuth ? '' : (aiConfig.apiKeys?.[provider] || aiConfig.apiKey || ''),
+            ATERM_AI_OAUTH_TOKEN: oauthAccessToken,
+            ATERM_AI_MODEL: aiConfig.model || '',
+            ATERM_AI_DEPLOYMENT: aiConfig.deployment || '',
+            ATERM_AI_API_VERSION: aiConfig.apiVersion || '',
+            ATERM_AI_COLORS: JSON.stringify(aiConfig.colorTheme || {}),
+            ATERM_AI_CLI_PATH: cliEntryPoint,
+            ATERM_AI_SESSION_FILE: this.sessionFile,
+            ATERM_AI_TMP: os.tmpdir(),
+            ATERM_AI_AGENT_BACKEND: agentBackend,
+        }
+
+        if (agentBackend === 'copilot-sdk' && provider === 'copilot') {
+            const copilotTokenData = aiConfig.oauthTokens?.copilot
+            if (copilotTokenData?.metadata?.githubToken) {
+                env['ATERM_AI_GITHUB_TOKEN'] = copilotTokenData.metadata.githubToken
+            } else if (copilotTokenData?.accessToken) {
+                env['ATERM_AI_GITHUB_TOKEN'] = copilotTokenData.accessToken
+            }
+        }
+
+        return env
+    }
+
+    /**
+     * Spawn the AI CLI process locally for remote sessions.
+     * The CLI's stdout/stderr go to the terminal; terminal input
+     * is forwarded to the CLI's stdin for interactive confirmations.
+     */
+    private async submitLocally (): Promise<void> {
+        const rawPrompt = this.promptBuffer.trim()
+        this.promptBuffer = ''
+
+        if (!rawPrompt) {
+            this.state = State.NORMAL
+            this.inputLength = 0
+            this.outputToTerminal.next(Buffer.from('\r\n'))
+            return
+        }
+
+        // Expand paste placeholders
+        let query = rawPrompt
+        if (Object.keys(this.pastedContent).length > 0) {
+            query = query.replace(PASTED_TEXT_PLACEHOLDER_REGEX, match =>
+                this.pastedContent[match] ?? match,
+            )
+            this.pastedContent = {}
+        }
+
+        // Write query to temp file
+        const queryId = Math.random().toString(36).slice(2, 8)
+        const queryFile = path.join(os.tmpdir(), `aq-${queryId}.txt`)
+        try {
+            fs.writeFileSync(queryFile, query, 'utf-8')
+        } catch (e) {
+            this.outputToTerminal.next(Buffer.from(
+                '\r\n' + colors.red(`  Error: Failed to write query file: ${e}`) + '\r\n',
+            ))
+            this.state = State.NORMAL
+            this.inputLength = 0
+            return
+        }
+
+        // Write context file
+        try {
+            const contextFile = path.join(os.tmpdir(), `ac-${queryId}.json`)
+            const contextData: any = {
+                scrollback: this.contextBuffer.slice(-50).join('\n'),
+            }
+            if (this.blockTracker) {
+                const blocks = this.blockTracker.getRecentBlocks(this.maxContextBlocks)
+                contextData.blocks = blocks.map(b => ({
+                    command: b.command,
+                    output: b.output,
+                    exitCode: b.exitCode,
+                    cwd: b.cwd,
+                }))
+            }
+            fs.writeFileSync(contextFile, JSON.stringify(contextData), 'utf-8')
+        } catch {
+            // Best effort — AI still works without context
+        }
+
+        // Show prompt display
+        const display = rawPrompt.replace(PASTED_TEXT_PLACEHOLDER_REGEX, match =>
+            colors.yellow(match),
+        )
+        this.outputToTerminal.next(Buffer.from(
+            '\r\x1b[2K' + colors.cyan('@ ') + display + '\r\n',
+        ))
+
+        // Build env vars (async — handles Copilot token exchange)
+        let aiEnv: Record<string, string>
+        try {
+            aiEnv = await this.buildAIEnv()
+        } catch (e) {
+            this.outputToTerminal.next(Buffer.from(
+                colors.red(`  Error building AI config: ${e}`) + '\r\n',
+            ))
+            this.state = State.NORMAL
+            this.inputLength = 0
+            return
+        }
+
+        const cliPath = aiEnv['ATERM_AI_CLI_PATH']
+        if (!cliPath) {
+            this.outputToTerminal.next(Buffer.from(
+                colors.red('  Error: AI CLI path not configured.') + '\r\n',
+            ))
+            this.state = State.NORMAL
+            this.inputLength = 0
+            return
+        }
+
+        // Spawn the CLI process locally
+        const child = spawn(process.execPath, [cliPath, '--file', queryFile], {
+            stdio: ['pipe', 'pipe', 'pipe'],
+            env: { ...process.env, ...aiEnv },
+        })
+
+        this.localProcess = child
+
+        child.stdout?.on('data', (data: Buffer) => {
+            this.outputToTerminal.next(data)
+        })
+
+        child.stderr?.on('data', (data: Buffer) => {
+            this.outputToTerminal.next(data)
+        })
+
+        child.on('close', () => {
+            this.localProcess = null
+            this.outputToTerminal.next(Buffer.from('\r\n'))
+        })
+
+        child.on('error', (err) => {
+            this.localProcess = null
+            this.outputToTerminal.next(Buffer.from(
+                colors.red(`  AI process error: ${err.message}`) + '\r\n',
+            ))
+        })
+
+        this.state = State.NORMAL
+        this.inputLength = 0
+    }
+
     close (): void {
         if (this.echoTimeout) {
             clearTimeout(this.echoTimeout)
             this.echoTimeout = null
+        }
+        if (this.localProcess) {
+            try { this.localProcess.kill() } catch { /* ignore */ }
+            this.localProcess = null
         }
         super.close()
     }

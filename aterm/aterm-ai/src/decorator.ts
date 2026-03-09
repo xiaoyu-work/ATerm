@@ -31,6 +31,16 @@ export class AIDecorator extends TerminalDecorator {
                 const aiMiddleware = new AIMiddleware(this.platform)
                 aiMiddleware.blockTracker = tab.session.blockTracker
                 aiMiddleware.maxContextBlocks = this.config.store.ai?.maxContextBlocks ?? 5
+
+                // For non-local sessions (SSH, Telnet, Serial), configure local AI execution
+                const profileType = tab.profile?.type
+                console.log('[aterm-ai] Attaching AI middleware, profile type:', profileType)
+                if (profileType && profileType !== 'local') {
+                    aiMiddleware.isRemoteSession = true
+                    aiMiddleware.configService = this.config
+                    console.log('[aterm-ai] Remote session detected, using local AI execution')
+                }
+
                 tab.session.middleware.unshift(aiMiddleware)
             } catch (e) {
                 console.error('[aterm-ai] Failed to attach AI middleware:', e)
