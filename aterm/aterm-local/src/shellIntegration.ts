@@ -227,6 +227,10 @@ export function getShellIntegration (
                 // --rcfile replaces default init; our file sources user's config first
                 // Only add if not already using --rcfile or --init-file
                 if (!result.args.some(a => a === '--rcfile' || a === '--init-file')) {
+                    // bash ignores --rcfile when started as a login shell (--login / -l).
+                    // Our init file already replicates login-shell sourcing
+                    // (/etc/profile, ~/.bash_profile, etc.), so remove the flag.
+                    result.args = result.args.filter(a => a !== '--login' && a !== '-l')
                     result.args.unshift('--rcfile', initFile)
                 }
             } catch (e) {
