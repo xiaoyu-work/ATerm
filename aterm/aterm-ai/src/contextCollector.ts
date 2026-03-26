@@ -128,7 +128,8 @@ export class ContextCollector {
         const blockContext = this.formatBlocks(maxBlocks)
         if (blockContext) {
             parts.push('', 'Recent commands (structured blocks):', blockContext)
-        } else if (ctx.scrollback) {
+        }
+        if (ctx.scrollback) {
             parts.push('', 'Recent terminal output:', ctx.scrollback)
         }
 

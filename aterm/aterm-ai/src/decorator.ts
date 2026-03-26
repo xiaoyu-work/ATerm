@@ -31,6 +31,7 @@ export class AIDecorator extends TerminalDecorator {
                 const aiMiddleware = new AIMiddleware(this.platform)
                 aiMiddleware.blockTracker = tab.session.blockTracker
                 aiMiddleware.maxContextBlocks = this.config.store.ai?.maxContextBlocks ?? 5
+                aiMiddleware.seedContextFromOutput(tab.session.getInitialDataBufferSnapshot())
 
                 // For non-local sessions (SSH, Telnet, Serial), configure local AI execution
                 const profileType = tab.profile?.type
@@ -47,14 +48,13 @@ export class AIDecorator extends TerminalDecorator {
             }
         }
 
-        // Defer initial attach to next tick — matches ZModemDecorator pattern.
-        setTimeout(() => {
-            attachToSession()
+        // Attach immediately so startup output released right after decorator setup
+        // is still captured into the AI context buffer.
+        attachToSession()
 
-            this.subscribeUntilDetached(tab, tab.sessionChanged$.subscribe(() => {
-                attachToSession()
-            }))
-        })
+        this.subscribeUntilDetached(tab, tab.sessionChanged$.subscribe(() => {
+            attachToSession()
+        }))
 
         // Additional fallback retries for edge cases (slow session restore)
         setTimeout(() => attachToSession(), 500)

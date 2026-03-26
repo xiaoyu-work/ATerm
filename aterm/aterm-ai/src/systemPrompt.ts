@@ -230,6 +230,7 @@ export function renderOperationalGuidelines (options?: OperationalGuidelinesOpti
 - **Command Execution:** Use ${formatToolName(SHELL_TOOL_NAME)} for shell commands.
 - **Background Processes:** Use \`is_background=true\` for background execution.
 - **Interactive Commands:** Prefer non-interactive variants whenever possible.${interactiveShellHint}
+- **Interactive Clarifications:** When you need the user to answer mid-run, use ${formatToolName(ASK_USER_TOOL_NAME)} instead of ending your response with a plain-text question. Plain-text questions end the current CLI run and return control to the shell.
 - **Memory Tool:** Use ${formatToolName(MEMORY_TOOL_NAME)} only for global user preferences/facts. Never store workspace-local transient state.${memorySuffix}
 - **Confirmation Protocol:** If a tool call is declined or cancelled, respect the decision immediately. Do not re-attempt the action or "negotiate" for the same tool call unless the user explicitly directs you to. Offer an alternative technical path if possible.
 

@@ -66,7 +66,20 @@ export class AIMiddleware extends SessionMiddleware {
         super()
     }
 
+    seedContextFromOutput (data: Buffer): void {
+        this.captureContext(data.toString('utf-8'))
+    }
+
     // ───────────────────────── Helpers ─────────────────────────
+
+    private captureContext (raw: string): void {
+        const clean = raw.replace(ANSI_REGEX, '')
+        const lines = clean.split(/\r?\n/)
+        this.contextBuffer.push(...lines)
+        if (this.contextBuffer.length > MAX_CONTEXT_LINES) {
+            this.contextBuffer = this.contextBuffer.slice(-MAX_CONTEXT_LINES)
+        }
+    }
 
     private popLastInputChar (value: string): string {
         const chars = Array.from(value)
@@ -369,12 +382,7 @@ export class AIMiddleware extends SessionMiddleware {
         }
 
         // Capture cleaned output for AI context
-        const clean = raw.replace(ANSI_REGEX, '')
-        const lines = clean.split(/\r?\n/)
-        this.contextBuffer.push(...lines)
-        if (this.contextBuffer.length > MAX_CONTEXT_LINES) {
-            this.contextBuffer = this.contextBuffer.slice(-MAX_CONTEXT_LINES)
-        }
+        this.captureContext(raw)
 
         // Filter __aterm_ai patterns from output (handles ConPTY resize repaint)
         if (this.queryMap.size > 0) {

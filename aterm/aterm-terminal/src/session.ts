@@ -61,6 +61,10 @@ export abstract class BaseSession {
         this.middleware.feedFromSession(data)
     }
 
+    getInitialDataBufferSnapshot (): Buffer {
+        return Buffer.from(this.initialDataBuffer)
+    }
+
     releaseInitialDataBuffer (): void {
         this.initialDataBufferReleased = true
         this.output.next(this.initialDataBuffer.toString())

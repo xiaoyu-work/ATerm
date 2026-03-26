@@ -154,17 +154,22 @@ function readSingleKey (): Promise<string> {
 
 function readLine (): Promise<string> {
     return new Promise((resolve) => {
+        process.stdin.resume()
         const rl = readline.createInterface({
             input: process.stdin,
             output: process.stdout,
-            terminal: false,
+            terminal: !!process.stdin.isTTY,
         })
+        let resolved = false
         rl.once('line', (line) => {
+            resolved = true
             rl.close()
             resolve(line)
         })
         rl.once('close', () => {
-            resolve('')
+            if (!resolved) {
+                resolve('')
+            }
         })
     })
 }

@@ -36,6 +36,7 @@ import type {
 // Lazy-loaded SDK constructor — populated in main()
 let CopilotClientCtor: typeof CopilotClient
 import { StreamingMarkdownRenderer } from './streamingMarkdown'
+import { CLIContextCollector, CLIContextData } from './cliContextCollector'
 
 // ─── 24-bit true-color helpers ───────────────────────────────────────
 
@@ -79,9 +80,19 @@ const apiVersion = process.env.ATERM_AI_API_VERSION || ''
 const githubToken = process.env.ATERM_AI_GITHUB_TOKEN || ''
 const sessionFile = process.env.ATERM_AI_SESSION_FILE || ''
 
+function buildPromptWithContext (prompt: string, contextData?: CLIContextData): string {
+    if (!contextData) {
+        return prompt
+    }
+    const collector = new CLIContextCollector(process.cwd(), contextData)
+    const context = collector.toPromptString()
+    return `${context}\n\n<user_request>\n${prompt}\n</user_request>`
+}
+
 // ─── Parse query ─────────────────────────────────────────────────────
 
 let query: string
+let contextData: CLIContextData | undefined
 const fileIdx = process.argv.indexOf('--file')
 if (fileIdx !== -1 && process.argv[fileIdx + 1]) {
     const queryFile = process.argv[fileIdx + 1]
@@ -93,9 +104,10 @@ if (fileIdx !== -1 && process.argv[fileIdx + 1]) {
         process.exit(1)
     }
 
-    // Clean up context file too
+    // Read terminal context file written by AIMiddleware alongside query file.
     const contextFile = queryFile.replace(/\baq-/, 'ac-').replace(/\.txt$/, '.json')
     try {
+        contextData = JSON.parse(fs.readFileSync(contextFile, 'utf-8'))
         fs.unlinkSync(contextFile)
     } catch {
         // Context file may not exist
@@ -602,7 +614,7 @@ async function main (): Promise<void> {
     })
 
     // Multi-turn conversation loop
-    let nextPrompt: string | null = query
+    let nextPrompt: string | null = buildPromptWithContext(query, contextData)
     while (nextPrompt) {
         aborted = false
         pendingFeedback = null
