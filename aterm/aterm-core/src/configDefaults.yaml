@@ -7,7 +7,7 @@ appearance:
   dockSpace: 1
   dockHideOnBlur: false
   dockAlwaysOnTop: true
-  flexTabs: false
+  flexTabs: true
   tabsLocation: top
   tabsInFullscreen: false
   cycleTabs: true

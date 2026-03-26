@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { Component, Input, HostListener, HostBinding, ViewChildren, ViewChild } from '@angular/core'
-import { trigger, style, animate, transition, state } from '@angular/animations'
+import { trigger, style, animate, transition } from '@angular/animations'
 import { NgbDropdown, NgbModal } from '@ng-bootstrap/ng-bootstrap'
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop'
 
@@ -20,20 +20,16 @@ import { AppService, Command, CommandLocation, FileTransfer, HostWindowService, 
 
 function makeTabAnimation (dimension: string, size: number) {
     return [
-        state('in', style({
-            'flex-basis': '{{size}}',
-            [dimension]: '{{size}}',
-        }), {
-            params: { size: `${size}px` },
-        }),
+        // No persistent state — let CSS handle resting width/flex-basis
+        // so that flexTabs mode can distribute tabs evenly.
         transition(':enter', [
             style({
                 'flex-basis': '1px',
                 [dimension]: '1px',
             }),
             animate('250ms ease-out', style({
-                'flex-basis': '{{size}}',
-                [dimension]: '{{size}}',
+                'flex-basis': '*',
+                [dimension]: '*',
             })),
         ]),
         transition(':leave', [
@@ -257,5 +253,9 @@ export class AppRootComponent {
                 && this.config.store.appearance.tabsLocation !== 'top'
                 && this.config.store.appearance.tabsLocation !== 'bottom'
         )
+    }
+
+    protected shouldShowTabBarSpacer (): boolean {
+        return this.hasVerticalTabs() || this.hostApp.platform === Platform.macOS
     }
 }

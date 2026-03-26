@@ -122,14 +122,14 @@ $tab-border-radius: 4px;
     }
 
     &>.tabs {
-        flex: 0 1 auto;
+        flex: 1 1 auto;
         display: flex;
         min-width: 0;
     }
 
     &>.btn-space {
         min-width: 1px;
-        flex: 1 0 1%;
+        flex: 0 0 auto;
 
         .tabs-on-top & {
             margin-top: 2px; // for window resizing

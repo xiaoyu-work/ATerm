@@ -218,8 +218,13 @@ export function getShellIntegration (
             const content = [
                 '# Aterm bash init wrapper',
                 '[ -f /etc/profile ] && . /etc/profile',
-                '[ -f ~/.bash_profile ] && . ~/.bash_profile || { [ -f ~/.bash_login ] && . ~/.bash_login || [ -f ~/.profile ] && . ~/.profile; }',
-                '[ -f ~/.bashrc ] && . ~/.bashrc',
+                // Mimic login-shell sourcing order. Only fall back to .bashrc
+                // if no profile file exists (profiles typically source .bashrc).
+                'if [ -f ~/.bash_profile ]; then . ~/.bash_profile',
+                'elif [ -f ~/.bash_login ]; then . ~/.bash_login',
+                'elif [ -f ~/.profile ]; then . ~/.profile',
+                'else [ -f ~/.bashrc ] && . ~/.bashrc',
+                'fi',
                 BASH_INTEGRATION,
             ].join('\n')
             try {

@@ -20,8 +20,8 @@ $tabs-height: 38px;
     overflow: hidden;
 
     &.flex-width {
-        flex: 1000 1 auto;
-        width: auto;
+        flex: 1000 1 auto !important;
+        width: auto !important;
     }
 
     &.vertical {
@@ -35,7 +35,7 @@ $tabs-height: 38px;
         -webkit-app-region: no-drag;
         cursor: -webkit-grab;
 
-        width: calc(22px * var(--spaciness));
+        width: calc(16px * var(--spaciness));
         border-radius: 10px;
         text-align: center;
         transition: 0.25s all;
@@ -59,7 +59,7 @@ $tabs-height: 38px;
     }
 
     .index + .name {
-        margin-left: 10px;
+        margin-left: 4px;
     }
 
     .buttons {

@@ -22,7 +22,13 @@ export class SerialService {
             return (await this.detectBinding().list()).map(x => ({
                 name: x.path,
                 description: `${x.manufacturer ?? ''} ${x.serialNumber ?? ''}`.trim() || undefined,
-            }))
+            })).filter(x => {
+                // Filter out virtual/unused legacy serial ports (e.g. /dev/ttyS*)
+                if (/\/dev\/ttyS\d+$/i.test(x.name) && !x.description) {
+                    return false
+                }
+                return true
+            })
         } catch (err) {
             console.error('Failed to list serial ports', err)
             return []

@@ -653,7 +653,9 @@ async function main (): Promise<void> {
     }
 }
 
-main().catch((err) => {
+main().then(() => {
+    process.exit(0)
+}).catch((err) => {
     process.stderr.write(c.red(`Fatal: ${err.message}\n`))
     process.exit(1)
 })

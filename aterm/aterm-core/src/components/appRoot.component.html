@@ -15,7 +15,7 @@
         <transfers-menu ngbDropdownMenu [(transfers)]="activeTransfers" (transfersChange)="onTransfersChange()"></transfers-menu>
       </div>
     </div>
-    <div class="btn-space background" [class.persistent]="config.store.appearance.frame == &quot;thin&quot;" [class.drag]="config.store.appearance.frame == &quot;thin&quot;             &amp;&amp; ((config.store.appearance.tabsLocation !== &quot;left&quot; &amp;&amp; config.store.appearance.tabsLocation !== &quot;right&quot;) || hostApp.platform !== Platform.macOS)"></div>
+    <div *ngIf="shouldShowTabBarSpacer()" class="btn-space background" [class.persistent]="config.store.appearance.frame == &quot;thin&quot;" [class.drag]="config.store.appearance.frame == &quot;thin&quot;             &amp;&amp; ((config.store.appearance.tabsLocation !== &quot;left&quot; &amp;&amp; config.store.appearance.tabsLocation !== &quot;right&quot;) || hostApp.platform !== Platform.macOS)"></div>
     <div class="btn-group background">
       <div class="d-flex" *ngFor="let button of rightToolbarButtons">
         <button class="btn btn-secondary btn-tab-bar" [ngbTooltip]="button.label" (click)="button.run &amp;&amp; button.run()" [fastHtmlBind]="button.icon"></button>
