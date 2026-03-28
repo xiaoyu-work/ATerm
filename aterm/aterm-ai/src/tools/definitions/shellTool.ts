@@ -80,8 +80,6 @@ class ShellToolInvocation extends BaseToolInvocation<ShellToolParams> {
             cwd = validation.resolved
         }
 
-        context.callbacks.onCommandStart(this.params.command)
-
         const result = await executeCommand(
             this.params.command,
             cwd,
