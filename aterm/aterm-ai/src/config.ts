@@ -15,7 +15,7 @@ export class AIConfigProvider extends ConfigProvider {
              * 'builtin' uses ATerm's own AgentLoop + OpenAI-compatible streaming.
              * 'copilot-sdk' uses GitHub Copilot SDK's agent runtime with built-in tools.
              */
-            agentBackend: 'builtin' as 'builtin' | 'copilot-sdk',
+            agentBackend: 'copilot-sdk' as 'builtin' | 'copilot-sdk',
 
             /**
              * API base URL (OpenAI-compatible).
