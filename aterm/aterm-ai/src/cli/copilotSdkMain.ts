@@ -389,6 +389,9 @@ function bridgeEventsToStdout (session: CopilotSession, mdRenderer: StreamingMar
             case 'tool.execution_start': {
                 closeThinking()
                 const toolName = event.data.toolName
+                if (toolName === 'report_intent') {
+                    break
+                }
                 const args = event.data.arguments
                 let description = ''
                 if (typeof args === 'object' && args !== null) {
@@ -408,6 +411,9 @@ function bridgeEventsToStdout (session: CopilotSession, mdRenderer: StreamingMar
             case 'tool.execution_complete': {
                 const display = toolCallInfo.get(event.data.toolCallId) || ''
                 toolCallInfo.delete(event.data.toolCallId)
+                if (!display) {
+                    break
+                }
                 if (event.data.success) {
                     // Show brief result summary for terminal-type results
                     const result = event.data.result
