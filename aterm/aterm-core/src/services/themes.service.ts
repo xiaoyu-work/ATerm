@@ -155,6 +155,7 @@ export class ThemesService {
         }
 
         vars['--spaciness'] = this.getConfigStoreOrDefaults().appearance.spaciness
+        vars['--dynamic-tab-max-width'] = `${this.getConfigStoreOrDefaults().appearance.maxDynamicTabWidth ?? 260}px`
 
         for (const [bg, fg] of contrastPairs) {
             const colorBg = Color(vars[bg]).hsl()

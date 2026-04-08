@@ -1,14 +1,7 @@
 import type { BrowserWindow, TouchBar } from 'electron'
 import { Injectable, Inject, NgZone } from '@angular/core'
-import { BootstrapData, BOOTSTRAP_DATA, HostWindowService } from 'aterm-core'
+import { BootstrapData, BOOTSTRAP_DATA, HostWindowService, WindowBounds } from 'aterm-core'
 import { ElectronService } from '../services/electron.service'
-
-export interface Bounds {
-    x: number
-    y: number
-    width: number
-    height: number
-}
 
 @Injectable({ providedIn: 'root' })
 export class ElectronHostWindow extends HostWindowService {
@@ -100,7 +93,11 @@ export class ElectronHostWindow extends HostWindowService {
         this.electron.ipcRenderer.send('window-close')
     }
 
-    setBounds (bounds: Bounds): void {
+    getBounds (): WindowBounds {
+        return this.getWindow().getBounds()
+    }
+
+    setBounds (bounds: WindowBounds): void {
         this.electron.ipcRenderer.send('window-set-bounds', bounds)
     }
 

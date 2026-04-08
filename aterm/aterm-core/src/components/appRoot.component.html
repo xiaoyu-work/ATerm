@@ -1,12 +1,8 @@
 
 <title-bar *ngIf="ready &amp;&amp; !hostWindow.isFullscreen &amp;&amp; config.store.appearance.dock == &quot;off&quot; &amp;&amp; isTitleBarNeeded()" (dblclick)="toggleMaximize()" [hideControls]="hostApp.platform !== Platform.Linux &amp;&amp; !hostWindow.isFullscreen" [class.inset]="hostApp.platform == Platform.macOS &amp;&amp; !hostWindow.isFullscreen"></title-bar>
 <div class="content" *ngIf="ready" [class.tabs-on-top]="config.store.appearance.tabsLocation == &quot;top&quot; || config.store.appearance.tabsLocation == &quot;left&quot; || config.store.appearance.tabsLocation == &quot;right&quot;" [class.tabs-on-left]="hasVerticalTabs() &amp;&amp; config.store.appearance.tabsLocation == &quot;left&quot;" [class.tabs-titlebar-enabled]="isTitleBarNeeded()" [class.tabs-on-right]="hasVerticalTabs() &amp;&amp; config.store.appearance.tabsLocation == &quot;right&quot;">
-  <div class="tab-bar" *ngIf="!hostWindow.isFullscreen || config.store.appearance.tabsInFullscreen" [class.tab-bar-no-controls-overlay]="hostApp.platform == Platform.macOS" (dblclick)="!isTitleBarNeeded() &amp;&amp; toggleMaximize()">
-    <div class="inset background" *ngIf="hostApp.platform == Platform.macOS         &amp;&amp; !hostWindow.isFullscreen         &amp;&amp; config.store.appearance.frame == &quot;thin&quot;         &amp;&amp; (config.store.appearance.tabsLocation == &quot;top&quot; || config.store.appearance.tabsLocation == &quot;left&quot;)"></div>
-    <div class="tabs" cdkDropList [cdkDropListOrientation]="(config.store.appearance.tabsLocation == &quot;top&quot; || config.store.appearance.tabsLocation == &quot;bottom&quot;) ? &quot;horizontal&quot; : &quot;vertical&quot;" (cdkDropListDropped)="onTabsReordered($event)" cdkAutoDropGroup="app-tabs">
-      <tab-header *ngFor="let tab of app.tabs; let idx = index" [index]="idx" [tab]="tab" [active]="tab == app.activeTab" [@animateTab]="{value: &quot;in&quot;, params: {size: targetTabSize}}" [@.disabled]="hasVerticalTabs() || !config.store.accessibility.animations" (click)="app.selectTab(tab)" [class.fully-draggable]="hostApp.platform !== Platform.macOS" [ngbTooltip]="tab.customTitle || tab.title"></tab-header>
-    </div>
-    <div class="btn-group background">
+  <ng-template #leftToolbarButtonsTemplate>
+    <div class="btn-group background tab-toolbar-buttons" [class.inline]="shouldInlineLeftToolbarButtons()">
       <div class="d-flex" *ngFor="let button of leftToolbarButtons">
         <button class="btn btn-secondary btn-tab-bar" [ngbTooltip]="button.label" (click)="button.run &amp;&amp; button.run()" [fastHtmlBind]="button.icon"></button>
       </div>
@@ -15,6 +11,15 @@
         <transfers-menu ngbDropdownMenu [(transfers)]="activeTransfers" (transfersChange)="onTransfersChange()"></transfers-menu>
       </div>
     </div>
+  </ng-template>
+  <div class="tab-bar" *ngIf="!hostWindow.isFullscreen || config.store.appearance.tabsInFullscreen" [class.tab-bar-no-controls-overlay]="hostApp.platform == Platform.macOS" (dblclick)="!isTitleBarNeeded() &amp;&amp; toggleMaximize()">
+    <div class="inset background" *ngIf="hostApp.platform == Platform.macOS         &amp;&amp; !hostWindow.isFullscreen         &amp;&amp; config.store.appearance.frame == &quot;thin&quot;         &amp;&amp; (config.store.appearance.tabsLocation == &quot;top&quot; || config.store.appearance.tabsLocation == &quot;left&quot;)"></div>
+    <div class="tabs" cdkDropList [class.tabs-drag-fill]="shouldFillTabsDragSpace()" [cdkDropListOrientation]="(config.store.appearance.tabsLocation == &quot;top&quot; || config.store.appearance.tabsLocation == &quot;bottom&quot;) ? &quot;horizontal&quot; : &quot;vertical&quot;" (cdkDropListDropped)="onTabsReordered($event)" cdkAutoDropGroup="app-tabs">
+      <tab-header *ngFor="let tab of app.tabs; let idx = index" [index]="idx" [tab]="tab" [active]="tab == app.activeTab" [@animateTab]="{value: &quot;in&quot;, params: {size: targetTabSize}}" [@.disabled]="hasVerticalTabs() || !config.store.accessibility.animations" (click)="app.selectTab(tab)" [class.fully-draggable]="hostApp.platform !== Platform.macOS" [ngbTooltip]="tab.customTitle || tab.title"></tab-header>
+      <ng-container *ngIf="shouldInlineLeftToolbarButtons()" [ngTemplateOutlet]="leftToolbarButtonsTemplate"></ng-container>
+    </div>
+    <ng-container *ngIf="!shouldInlineLeftToolbarButtons()" [ngTemplateOutlet]="leftToolbarButtonsTemplate"></ng-container>
+    <div *ngIf="shouldShowToolbarDragSpacer()" class="toolbar-drag-spacer background"></div>
     <div *ngIf="shouldShowTabBarSpacer()" class="btn-space background" [class.persistent]="config.store.appearance.frame == &quot;thin&quot;" [class.drag]="config.store.appearance.frame == &quot;thin&quot;             &amp;&amp; ((config.store.appearance.tabsLocation !== &quot;left&quot; &amp;&amp; config.store.appearance.tabsLocation !== &quot;right&quot;) || hostApp.platform !== Platform.macOS)"></div>
     <div class="btn-group background">
       <div class="d-flex" *ngFor="let button of rightToolbarButtons">

@@ -20,8 +20,9 @@ $tabs-height: 38px;
     overflow: hidden;
 
     &.flex-width {
-        flex: 1000 1 auto !important;
-        width: auto !important;
+        flex: 1000 1 0 !important;
+        width: 0 !important;
+        max-width: calc(var(--dynamic-tab-max-width) * var(--spaciness));
     }
 
     &.vertical {

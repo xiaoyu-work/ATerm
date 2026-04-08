@@ -2,7 +2,6 @@
 import { Component, Inject, Optional } from '@angular/core'
 import { LocalProfile, UACService } from '../api'
 import { FullyDefined, PlatformService, ProfileSettingsComponent } from 'aterm-core'
-import { LocalProfilesService } from '../profiles'
 
 
 /** @hidden */
@@ -10,7 +9,7 @@ import { LocalProfilesService } from '../profiles'
     standalone: false,
     templateUrl: './localProfileSettings.component.html',
 })
-export class LocalProfileSettingsComponent implements ProfileSettingsComponent<LocalProfile, LocalProfilesService> {
+export class LocalProfileSettingsComponent implements ProfileSettingsComponent<LocalProfile> {
     profile: FullyDefined<LocalProfile>
 
     constructor (

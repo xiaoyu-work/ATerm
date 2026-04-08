@@ -3,13 +3,12 @@ import { Component } from '@angular/core'
 
 import { FullyDefined, ProfileSettingsComponent } from 'aterm-core'
 import { TelnetProfile } from '../session'
-import { TelnetProfilesService } from '../profiles'
 
 /** @hidden */
 @Component({
     standalone: false,
     templateUrl: './telnetProfileSettings.component.html',
 })
-export class TelnetProfileSettingsComponent implements ProfileSettingsComponent<TelnetProfile, TelnetProfilesService> {
+export class TelnetProfileSettingsComponent implements ProfileSettingsComponent<TelnetProfile> {
     profile: FullyDefined<TelnetProfile>
 }

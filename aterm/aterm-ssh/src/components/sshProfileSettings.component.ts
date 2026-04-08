@@ -8,14 +8,13 @@ import { LoginScriptsSettingsComponent } from 'aterm-terminal'
 import { PasswordStorageService } from '../services/passwordStorage.service'
 import { ForwardedPortConfig, SSHAlgorithmType, SSHProfile } from '../api'
 import { supportedAlgorithms } from '../algorithms'
-import { SSHProfilesService } from '../profiles'
 
 /** @hidden */
 @Component({
     standalone: false,
     templateUrl: './sshProfileSettings.component.html',
 })
-export class SSHProfileSettingsComponent implements ProfileSettingsComponent<SSHProfile, SSHProfilesService> {
+export class SSHProfileSettingsComponent implements ProfileSettingsComponent<SSHProfile> {
     Platform = Platform
     profile: ProxifiedConfig<FullyDefined<SSHProfile>>
     hasSavedPassword: boolean

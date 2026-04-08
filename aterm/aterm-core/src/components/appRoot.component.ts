@@ -258,4 +258,19 @@ export class AppRootComponent {
     protected shouldShowTabBarSpacer (): boolean {
         return this.hasVerticalTabs() || this.hostApp.platform === Platform.macOS
     }
+
+    protected shouldShowToolbarDragSpacer (): boolean {
+        return this.config.store.appearance.frame === 'thin'
+            && this.config.store.appearance.tabsLocation === 'top'
+            && !this.shouldShowTabBarSpacer()
+    }
+
+    protected shouldInlineLeftToolbarButtons (): boolean {
+        return !this.hasVerticalTabs()
+    }
+
+    protected shouldFillTabsDragSpace (): boolean {
+        return this.config.store.appearance.frame === 'thin'
+            && this.config.store.appearance.tabsLocation === 'top'
+    }
 }

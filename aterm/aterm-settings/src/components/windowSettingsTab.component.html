@@ -154,6 +154,13 @@
     <label class="btn btn-secondary" for="flexTabsFalse"><span translate>Fixed</span></label>
   </div>
 </div>
+<div class="form-line" *ngIf="config.store.appearance.flexTabs">
+  <div class="header">
+    <div class="title" translate>Dynamic tab max width</div>
+    <div class="description"><span translate>Caps flexible tabs when only a few are open.</span> {{config.store.appearance.maxDynamicTabWidth}}px</div>
+  </div>
+  <input type="range" [(ngModel)]="config.store.appearance.maxDynamicTabWidth" (ngModelChange)="saveConfiguration()" min="180" max="420" step="10">
+</div>
 <div class="form-line">
   <div class="header">
     <div class="title" translate>Show tabs in fullscreen mode</div>

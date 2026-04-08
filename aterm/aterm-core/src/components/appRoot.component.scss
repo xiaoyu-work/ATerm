@@ -125,6 +125,18 @@ $tab-border-radius: 4px;
         flex: 1 1 auto;
         display: flex;
         min-width: 0;
+
+        .tab-toolbar-buttons {
+            flex: 0 0 auto;
+            min-width: 0;
+        }
+
+        &.tabs-drag-fill::after {
+            content: '';
+            flex: 1 0 0;
+            min-width: calc(24px * var(--spaciness));
+            -webkit-app-region: drag;
+        }
     }
 
     &>.btn-space {
@@ -143,6 +155,17 @@ $tab-border-radius: 4px;
         //   min-width: 72px; // 2 x 36 px height, ie 2 squares
         // Given WCO on Windows, the min-width of the window buttons is about 138px.
             min-width: 138px;
+        }
+    }
+
+    &>.toolbar-drag-spacer {
+        flex: 0 0 calc(18px * var(--spaciness));
+        min-width: calc(18px * var(--spaciness));
+        height: 100%;
+        -webkit-app-region: drag;
+
+        .tabs-on-top & {
+            margin-top: 2px; // for window resizing
         }
     }
 

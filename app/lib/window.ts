@@ -81,11 +81,12 @@ export class Window {
             acceptFirstMouse: true,
         }
 
-        if (this.windowBounds) {
-            Object.assign(bwOptions, this.windowBounds)
-            const closestDisplay = screen.getDisplayNearestPoint( { x: this.windowBounds.x, y: this.windowBounds.y } )
+        const initialBounds = this.windowBounds
+        if (initialBounds) {
+            Object.assign(bwOptions, initialBounds)
+            const closestDisplay = screen.getDisplayNearestPoint( { x: initialBounds.x, y: initialBounds.y } )
 
-            const [left1, top1, right1, bottom1] = [this.windowBounds.x, this.windowBounds.y, this.windowBounds.x + this.windowBounds.width, this.windowBounds.y + this.windowBounds.height]
+            const [left1, top1, right1, bottom1] = [initialBounds.x, initialBounds.y, initialBounds.x + initialBounds.width, initialBounds.y + initialBounds.height]
             const [left2, top2, right2, bottom2] = [closestDisplay.bounds.x, closestDisplay.bounds.y, closestDisplay.bounds.x + closestDisplay.bounds.width, closestDisplay.bounds.y + closestDisplay.bounds.height]
 
             if ((left2 > right1 || right2 < left1 || top2 > bottom1 || bottom2 < top1) && !maximized) {

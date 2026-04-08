@@ -19,14 +19,14 @@ const iconsClassList = Object.keys(iconsData).map(
 export class EditProfileModalComponent<P extends Profile, PP extends ProfileProvider<P>> {
     @Input('profile') _profile: P
     @Input() profileProvider: PP
-    @Input() settingsComponent: new () => ProfileSettingsComponent<P, PP>
+    @Input() settingsComponent: new () => ProfileSettingsComponent<P>
     @Input() defaultsMode: 'enabled'|'group'|'disabled' = 'disabled'
     @Input() profileGroup: PartialProfileGroup<ProfileGroup> | undefined
     groups: PartialProfileGroup<ProfileGroup>[]
     @ViewChild('placeholder', { read: ViewContainerRef }) placeholder: ViewContainerRef
 
     protected profile: FullyDefined<P> & ConfigProxy<FullyDefined<P>>
-    private settingsComponentInstance?: ProfileSettingsComponent<P, PP>
+    private settingsComponentInstance?: ProfileSettingsComponent<P>
 
     constructor (
         private injector: Injector,

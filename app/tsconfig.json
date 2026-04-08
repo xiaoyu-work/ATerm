@@ -2,6 +2,7 @@
     "compilerOptions": {
         "baseUrl": "./src",
         "module": "commonjs",
+        "moduleResolution": "node",
         "target": "es2022",
         "declaration": false,
         "useDefineForClassFields": false,
@@ -16,6 +17,13 @@
         "noUnusedParameters": true,
         "noUnusedLocals": true,
         "skipLibCheck": true,
+        "paths": {
+            "*": [
+                "*",
+                "../node_modules/*",
+                "../../node_modules/*"
+            ]
+        },
         "lib": [
            "dom",
            "es2022"

@@ -51,7 +51,7 @@ export type PartialProfileGroup<T extends ProfileGroup> = Omit<Omit<{
     name: string
 }
 
-export interface ProfileSettingsComponent<P extends Profile, PP extends ProfileProvider<P>> {
+export interface ProfileSettingsComponent<P extends Profile> {
     profile: FullyDefined<P>
     save?: () => void
 }
@@ -59,20 +59,20 @@ export interface ProfileSettingsComponent<P extends Profile, PP extends ProfileP
 export abstract class ProfileProvider<P extends Profile> {
     id: string
     name: string
-    settingsComponent?: new (...args: any[]) => ProfileSettingsComponent<P, ProfileProvider<P>>
+    settingsComponent?: new (...args: any[]) => ProfileSettingsComponent<P>
     configDefaults: Pick<Profile, 'options'>
 
     abstract getBuiltinProfiles (): Promise<PartialProfile<P>[]>
 
     abstract getNewTabParameters (profile: P): Promise<NewTabParameters<BaseTabComponent>>
 
-    getSuggestedName (profile: PartialProfile<P>): string|null {
+    getSuggestedName (_profile: PartialProfile<P>): string|null {
         return null
     }
 
     abstract getDescription (profile: PartialProfile<P>): string
 
-    deleteProfile (profile: P): void { }
+    deleteProfile (_profile: P): void { }
 }
 
 export abstract class ConnectableProfileProvider<P extends ConnectableProfile> extends ProfileProvider<P> {}

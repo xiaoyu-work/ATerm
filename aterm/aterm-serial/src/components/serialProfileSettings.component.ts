@@ -4,14 +4,13 @@ import { debounceTime, distinctUntilChanged, map } from 'rxjs'
 import { FullyDefined, HostAppService, Platform, ProfileSettingsComponent } from 'aterm-core'
 import { SerialPortInfo, BAUD_RATES, SerialProfile } from '../api'
 import { SerialService } from '../services/serial.service'
-import { SerialProfilesService } from '../profiles'
 
 /** @hidden */
 @Component({
     standalone: false,
     templateUrl: './serialProfileSettings.component.html',
 })
-export class SerialProfileSettingsComponent implements ProfileSettingsComponent<SerialProfile, SerialProfilesService> {
+export class SerialProfileSettingsComponent implements ProfileSettingsComponent<SerialProfile> {
     profile: FullyDefined<SerialProfile>
     foundPorts: SerialPortInfo[]
     Platform = Platform

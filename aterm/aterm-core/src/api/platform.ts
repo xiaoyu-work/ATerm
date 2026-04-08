@@ -212,11 +212,11 @@ export abstract class PlatformService {
         return null
     }
 
-    showItemInFolder (path: string): void {
+    showItemInFolder (_path: string): void {
         throw new Error('Not implemented')
     }
 
-    async isProcessRunning (name: string): Promise<boolean> {
+    async isProcessRunning (_name: string): Promise<boolean> {
         return false
     }
 
@@ -224,7 +224,7 @@ export abstract class PlatformService {
         throw new Error('Not implemented')
     }
 
-    async exec (app: string, argv: string[]): Promise<void> {
+    async exec (_app: string, _argv: string[]): Promise<void> {
         throw new Error('Not implemented')
     }
 
@@ -244,7 +244,7 @@ export abstract class PlatformService {
         throw new Error('Not implemented')
     }
 
-    openPath (path: string): void {
+    openPath (_path: string): void {
         throw new Error('Not implemented')
     }
 

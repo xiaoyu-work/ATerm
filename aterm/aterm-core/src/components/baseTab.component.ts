@@ -155,6 +155,7 @@ export abstract class BaseTabComponent extends BaseComponent {
      *         for your [[TabRecoveryProvider]] to parse
      */
     async getRecoveryToken (options?: GetRecoveryTokenOptions): Promise<RecoveryToken|null> { // eslint-disable-line @typescript-eslint/no-unused-vars
+        void options
         return null
     }
 

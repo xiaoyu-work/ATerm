@@ -1,5 +1,12 @@
 import { Observable, Subject } from 'rxjs'
 
+export interface WindowBounds {
+    x: number
+    y: number
+    width: number
+    height: number
+}
+
 export abstract class HostWindowService {
 
     /**
@@ -26,6 +33,7 @@ export abstract class HostWindowService {
     abstract minimize (): void
     abstract isMaximized (): boolean
     abstract toggleMaximize (): void
+    abstract getBounds (): WindowBounds
     abstract close (): void
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function

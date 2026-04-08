@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { ConfigService, HostWindowService, TranslateService } from 'aterm-core'
+import { ConfigService, HostWindowService, TranslateService, WindowBounds } from 'aterm-core'
 
 @Injectable({ providedIn: 'root' })
 export class WebHostWindow extends HostWindowService {
@@ -50,6 +50,15 @@ export class WebHostWindow extends HostWindowService {
 
     toggleMaximize (): void {
         throw new Error('Unavailable')
+    }
+
+    getBounds (): WindowBounds {
+        return {
+            x: window.screenX,
+            y: window.screenY,
+            width: window.outerWidth,
+            height: window.outerHeight,
+        }
     }
 
     close (): void {

@@ -1,8 +1,8 @@
 import { Injectable, NgZone, Inject } from '@angular/core'
 import type { Display } from 'electron'
-import { ConfigService, DockingService, Screen, PlatformService, BootstrapData, BOOTSTRAP_DATA } from 'aterm-core'
+import { ConfigService, DockingService, Screen, PlatformService, BootstrapData, BOOTSTRAP_DATA, WindowBounds } from 'aterm-core'
 import { ElectronService } from '../services/electron.service'
-import { ElectronHostWindow, Bounds } from './hostWindow.service'
+import { ElectronHostWindow } from './hostWindow.service'
 
 @Injectable()
 export class ElectronDockingService extends DockingService {
@@ -38,7 +38,7 @@ export class ElectronDockingService extends DockingService {
             display = this.getCurrentScreen()
         }
 
-        const newBounds: Bounds = { x: 0, y: 0, width: 0, height: 0 }
+        const newBounds: WindowBounds = { x: 0, y: 0, width: 0, height: 0 }
 
         const fill = this.config.store.appearance.dockFill <= 1 ? this.config.store.appearance.dockFill : 1
         const space = this.config.store.appearance.dockSpace <= 1 ? this.config.store.appearance.dockSpace : 1
