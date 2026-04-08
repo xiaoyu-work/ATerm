@@ -1,17 +1,17 @@
 /**
- * Session-level path approval tracker.
+ * Session-level approval tracker.
  *
- * Tracks whether the user has approved accessing files outside the CWD.
+ * Tracks approvals that should persist only for the current terminal session.
  * Lives on AIMiddleware (per-terminal-session) and is passed to tools
  * via ToolContext.
  *
- * When a tool requests access to a file outside CWD:
- * - If isAllowed() → auto-approve (user previously chose "always")
- * - Otherwise → tool triggers interactive confirmation
- * - If user chooses "always" → approveAll() is called
+ * Current tracked approvals:
+ * - path access outside the CWD
+ * - edit confirmations when the user chose "always"
  */
 export class PathApprovalTracker {
     private _allowAll = false
+    private _allowEdits = false
 
     /** Whether all outside-CWD paths are currently auto-approved */
     isAllowed (): boolean {
@@ -21,5 +21,15 @@ export class PathApprovalTracker {
     /** Mark all outside-CWD paths as approved for this session */
     approveAll (): void {
         this._allowAll = true
+    }
+
+    /** Whether edit confirmations are auto-approved for this session */
+    areEditsAllowed (): boolean {
+        return this._allowEdits
+    }
+
+    /** Mark edits as approved for this session */
+    approveEdits (): void {
+        this._allowEdits = true
     }
 }
