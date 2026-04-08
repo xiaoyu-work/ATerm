@@ -173,6 +173,7 @@ export class Session extends BaseSession {
                 ATERM_AI_DEPLOYMENT: aiConfig.deployment || '',
                 ATERM_AI_API_VERSION: aiConfig.apiVersion || '',
                 ATERM_AI_COLORS: JSON.stringify(aiConfig.colorTheme || {}),
+                ATERM_AI_MCP_SERVERS: JSON.stringify((aiConfig.mcpServers || []).filter((s: any) => s.enabled)),
                 ATERM_AI_CLI_PATH: cliEntryPoint,
                 ATERM_AI_SESSION_FILE: path.join(os.tmpdir(), `aterm-ai-session-${process.pid}-${Date.now()}.json`),
                 ATERM_AI_TMP: os.tmpdir(),

@@ -6,6 +6,7 @@
  */
 
 import { ToolRegistry } from '../toolRegistry'
+import { ToolBuilder } from '../types'
 import { ShellTool } from './shellTool'
 import { ReadFileTool } from './readFileTool'
 import { ReadManyFilesTool } from './readManyFilesTool'
@@ -27,8 +28,9 @@ import { ActivateSkillTool } from './activateSkillTool'
 /**
  * Create a registry with all default tools registered.
  * Called once per AgentLoop instance.
+ * @param extraTools Additional tool builders to register (e.g. MCP tools)
  */
-export function createDefaultRegistry (): ToolRegistry {
+export function createDefaultRegistry (extraTools?: ToolBuilder[]): ToolRegistry {
     const registry = new ToolRegistry()
 
     registry.register(new ShellTool())
@@ -48,6 +50,12 @@ export function createDefaultRegistry (): ToolRegistry {
     registry.register(new WebFetchTool())
     registry.register(new GetInternalDocsTool())
     registry.register(new ActivateSkillTool())
+
+    if (extraTools) {
+        for (const tool of extraTools) {
+            registry.register(tool)
+        }
+    }
 
     return registry
 }

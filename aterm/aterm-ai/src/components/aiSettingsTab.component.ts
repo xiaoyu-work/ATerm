@@ -354,4 +354,32 @@ export class AISettingsTabComponent implements OnInit {
         this.tokenManager.clearToken(provider)
         this.oauthError = ''
     }
+
+    // --- MCP Servers ---
+
+    addMCPServer (): void {
+        if (!this.config.store.ai.mcpServers) {
+            this.config.store.ai.mcpServers = []
+        }
+        this.config.store.ai.mcpServers.push({
+            name: '',
+            transport: 'stdio',
+            command: '',
+            args: [],
+            env: {},
+            url: '',
+            enabled: true,
+        })
+        this.config.save()
+    }
+
+    removeMCPServer (index: number): void {
+        this.config.store.ai.mcpServers.splice(index, 1)
+        this.config.save()
+    }
+
+    onMCPArgsChange (server: any, value: string): void {
+        server.args = value.split(',').map((s: string) => s.trim()).filter((s: string) => s)
+        this.config.save()
+    }
 }

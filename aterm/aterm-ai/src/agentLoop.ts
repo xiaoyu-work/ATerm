@@ -99,8 +99,9 @@ export class AgentLoop {
         private callbacks: AgentCallbacks,
         private signal: AbortSignal,
         private pathApprovals: PathApprovalTracker = new PathApprovalTracker(),
+        extraTools?: import('./tools/types').ToolBuilder[],
     ) {
-        this.registry = createDefaultRegistry()
+        this.registry = createDefaultRegistry(extraTools)
         this.bus = new MessageBus()
         this.scheduler = new Scheduler(this.registry, this.bus)
         this.compressionService = new ChatCompressionService(ai)

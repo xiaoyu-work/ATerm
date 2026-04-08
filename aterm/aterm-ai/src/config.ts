@@ -60,6 +60,28 @@ export class AIConfigProvider extends ConfigProvider {
             maxContextBlocks: 5,
 
             /**
+             * MCP (Model Context Protocol) servers.
+             * Each entry defines an MCP server that provides additional tools to the AI agent.
+             * Tools from MCP servers are registered alongside built-in tools.
+             */
+            mcpServers: [] as Array<{
+                /** Display name for this server */
+                name: string
+                /** Transport type: 'stdio' spawns a local process, 'http' connects via Streamable HTTP */
+                transport: 'stdio' | 'http'
+                /** Command to run (stdio transport only) */
+                command?: string
+                /** Command arguments (stdio transport only) */
+                args?: string[]
+                /** Environment variables for the server process (stdio transport only) */
+                env?: Record<string, string>
+                /** Server URL (http transport only) */
+                url?: string
+                /** Whether this server is enabled */
+                enabled: boolean
+            }>,
+
+            /**
              * AI output color theme.
              * Uses 24-bit true-color ANSI sequences for full color independence.
              * `preset` selects a named theme; individual colors can be overridden.

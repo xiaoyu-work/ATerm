@@ -23,6 +23,8 @@ import { ShellResult } from '../shellExecutor'
 import { PromptProvider } from '../promptProvider'
 import { TokensSummary } from '../streamEvents'
 import { StreamingMarkdownRenderer } from './streamingMarkdown'
+import { MCPClientManager, MCPServerConfig } from '../mcp/mcpClientManager'
+import { createMCPToolBuilders } from '../mcp/mcpToolBridge'
 
 // ─── 24-bit true-color helpers ───────────────────────────────────────
 // Uses \x1b[38;2;R;G;Bm for foreground and \x1b[39m to reset foreground only
@@ -270,6 +272,29 @@ async function main (): Promise<void> {
         abortController.abort()
     })
 
+    // ─── MCP initialization ──────────────────────────────────────────
+    let mcpManager: MCPClientManager | null = null
+    let mcpToolBuilders: import('../tools/types').ToolBuilder[] = []
+
+    const mcpServersJson = process.env.ATERM_AI_MCP_SERVERS
+    if (mcpServersJson) {
+        try {
+            const mcpConfigs: MCPServerConfig[] = JSON.parse(mcpServersJson)
+            if (mcpConfigs.length > 0) {
+                mcpManager = new MCPClientManager()
+                await mcpManager.initialize(mcpConfigs)
+                mcpToolBuilders = createMCPToolBuilders(mcpManager)
+                if (mcpToolBuilders.length > 0) {
+                    process.stderr.write(c.info(
+                        `[MCP] ${mcpManager.connectedCount} server(s), ${mcpToolBuilders.length} tool(s)\n`,
+                    ))
+                }
+            }
+        } catch (err: any) {
+            process.stderr.write(c.dim(`[MCP] Init error: ${err.message}\n`))
+        }
+    }
+
     // Load session history
     const session = loadSession()
 
@@ -290,9 +315,13 @@ async function main (): Promise<void> {
         { role: 'user', content: query },
     ]
 
-    // Create and run agent loop
+    // Create and run agent loop (with MCP tools if available)
     const callbacks = createCallbacks(abortController)
-    const loop = new AgentLoop(ai, collector, callbacks, abortController.signal)
+    const loop = new AgentLoop(
+        ai, collector, callbacks, abortController.signal,
+        undefined, // pathApprovals — use default
+        mcpToolBuilders.length > 0 ? mcpToolBuilders : undefined,
+    )
     const result = await loop.run(messages)
 
     // Accumulate usage
@@ -312,6 +341,11 @@ async function main (): Promise<void> {
     process.stderr.write(c.info(
         `[tokens: ${result.usage.promptTokens.toLocaleString()} in / ${result.usage.completionTokens.toLocaleString()} out]\n`,
     ))
+
+    // Clean up MCP connections
+    if (mcpManager) {
+        await mcpManager.shutdown()
+    }
 }
 
 main().then(() => {

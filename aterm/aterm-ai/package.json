@@ -19,6 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "@github/copilot-sdk": "^0.1.8",
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "ansi-colors": "^4.1.1"
   },
   "peerDependencies": {

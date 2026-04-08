@@ -109,6 +109,7 @@
   "type": "module",
   "private": true,
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.28.0",
     "dotenv": "^16.3.1",
     "marked-terminal": "^7.3.0"
   },
