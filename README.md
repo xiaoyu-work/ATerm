@@ -25,6 +25,17 @@ Type `@` and talk to AI directly from your command line.
 - **Secure & Private** — API keys stay local. Supports any OpenAI-compatible endpoint.
 - **Extensible** — Modular plugin architecture with color schemes, shell integrations, and more.
 
+## macOS Installation Note
+
+If macOS shows **"ATerm is damaged and can't be opened"** after installing, this is because the app is not yet notarized with Apple. Run the following commands in Terminal to fix it:
+
+```bash
+sudo xattr -rd com.apple.quarantine /Applications/ATerm.app
+codesign --force --deep --sign - /Applications/ATerm.app
+```
+
+This is especially common on Apple Silicon (M-series) Macs, which enforce stricter code signature validation.
+
 ## Development
 
 ### Prerequisites
